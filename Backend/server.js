@@ -23,9 +23,10 @@ if (process.env.Node_ENV === 'development') {
 }
 
 // Importing routes
+app.get('/', (req, res) => res.send('OK'));
 
-app.all('*', (req, res, next) => {
-  next(new ApiError(`can't find this route: ${req.originalUrl}`, 400));
+app.all('/{*any}', (req, res, next) => {
+  next(new ApiError(`can't find this route: ${req.originalUrl}`, 404));
 });
 
 // globalErrorHandler
