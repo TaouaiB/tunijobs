@@ -151,3 +151,19 @@ exports.deleteCandidate = asyncHandler(async (req, res, next) => {
     data: null,
   });
 });
+
+// @desc    Delete candidate profile bases on userId
+// @route   DELETE /api/v1/users/:userId/candidate
+// @access  Private
+exports.deleteCandidateByUserId = asyncHandler(async (req, res, next) => {
+  const { userId } = req.params;
+  const candidate = await Candidate.findOneAndDelete(userId);
+
+  if (!candidate) {
+    return next(new ApiError(`No candidate found for user id: ${userId}`, 404));
+  }
+  res.status(204).json({
+    status: 'success',
+    data: null,
+  });
+});

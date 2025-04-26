@@ -6,6 +6,7 @@ const {
   updateCandidateValidator,
   getCandidateByUserIdValidator,
   deleteCandidateValidator,
+  deleteCandidateValidatorByUserId,
 } = require('../utils/validators/candidateValidator');
 const {
   createCandidate,
@@ -13,6 +14,7 @@ const {
   updateCandidate,
   deleteCandidate,
   getCandidateByUserId,
+  deleteCandidateByUserId,
 } = require('../services/candidateService');
 
 router.get('/candidates', getAllCandidates);
@@ -27,6 +29,12 @@ router.delete(
   '/candidate/:candidateId',
   deleteCandidateValidator,
   deleteCandidate
+);
+
+router.delete(
+  '/:userId/candidate',
+  getCandidateByUserIdValidator,
+  deleteCandidateByUserId
 );
 
 module.exports = router;

@@ -164,5 +164,5 @@ exports.updateCandidateValidator = [
 // Get single candidate (by userId) validator
 exports.getCandidateByUserIdValidator = [...exports.validateUserIdParam];
 
-// Delete candidate validator (uses :id)
+// Delete candidate validator (based on candidate Id)
 exports.deleteCandidateValidator = [...exports.validateCandidateIdParam];
