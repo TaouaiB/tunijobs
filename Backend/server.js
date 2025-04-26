@@ -8,6 +8,7 @@ const ApiError = require('./utils/apiError');
 const globalErrorHandler = require('./middlewares/errorMiddleware');
 
 const userRoute = require('./routes/userRoute');
+const candidateRoute = require('./routes/candidateRoute');
 
 // Connect with db
 dbConnection();
@@ -26,6 +27,7 @@ if (process.env.Node_ENV === 'development') {
 
 // Importing routes
 app.use('/api/v1/users', userRoute);
+app.use('/api/v1/users', candidateRoute);
 
 app.all('/{*any}', (req, res, next) => {
   next(new ApiError(`can't find this route: ${req.originalUrl}`, 404));
