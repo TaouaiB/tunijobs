@@ -24,7 +24,7 @@ router.get(
   getCandidateByUserId
 );
 router.delete(
-  '/:userId/candidate',
+  '/candidate/:candidateId',
   deleteCandidateValidator,
   deleteCandidate
 );
