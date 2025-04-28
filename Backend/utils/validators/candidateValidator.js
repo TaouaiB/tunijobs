@@ -4,12 +4,20 @@ const validatorMiddleware = require('../../middlewares/validatorMiddleware');
 // Constants
 const VALID_AVAILABILITY_OPTIONS = [
   'immediate',
-  '1 week',
-  '2 weeks',
+  '1-2 weeks',
   '1 month',
-  '2 months',
-  '3 months',
-  '3+ months',
+  '2-3 months',
+  'flexible',
+];
+
+const VALID_WORK_TYPES = ['remote', 'onsite', 'hybrid'];
+
+const VALID_CONTRACT_TYPES = [
+  'full-time',
+  'part-time',
+  'freelance',
+  'internship',
+  'temporary',
 ];
 
 // Validate :userId param (for user-based operations)
@@ -18,7 +26,7 @@ exports.validateUserIdParam = [
   validatorMiddleware,
 ];
 
-// Validate :id param (for candidate document ID)
+// Validate :candidateId param (for candidate document ID)
 exports.validateCandidateIdParam = [
   param('candidateId').isMongoId().withMessage('Invalid Candidate ID format'),
   validatorMiddleware,
@@ -26,6 +34,14 @@ exports.validateCandidateIdParam = [
 
 // Common fields for create and update
 exports.commonCandidateValidators = [
+  // Professional Details
+  body('headline')
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ max: 120 })
+    .withMessage('Headline must be a string under 120 characters'),
+
   body('education')
     .optional()
     .isString()
@@ -59,6 +75,13 @@ exports.commonCandidateValidators = [
     .isLength({ max: 2000 })
     .withMessage('Bio must be a string under 2000 characters'),
 
+  // Documents & Links
+
+  body('resumeUrl')
+    .optional()
+    .isURL({ protocols: ['http', 'https'] })
+    .withMessage('Resume URL must be valid'),
+
   body('links.github')
     .optional()
     .isURL({ protocols: ['http', 'https'] })
@@ -69,18 +92,18 @@ exports.commonCandidateValidators = [
     .isURL({ protocols: ['http', 'https'] })
     .withMessage('LinkedIn URL must be valid'),
 
-  body('links.other.url')
+  body('links.other.platform')
     .optional()
     .isURL({ protocols: ['http', 'https'] })
     .withMessage('Each link must be a valid URL'),
 
-  body('jobTypePreferences.workType.*')
+  // Job Preferences
+  body('jobPreferences.workType')
     .optional()
-    .isString()
-    .trim()
-    .toLowerCase()
-    .notEmpty()
-    .withMessage('Each work type must be a non-empty string'),
+    .isArray()
+    .withMessage('Work type must be an array')
+    .custom((types) => types.every((type) => VALID_WORK_TYPES.includes(type)))
+    .withMessage(`Work type must be one of: ${VALID_WORK_TYPES.join(', ')}`),
 
   body('jobTypePreferences.availability')
     .optional()
@@ -89,46 +112,36 @@ exports.commonCandidateValidators = [
       `Availability must be one of: ${VALID_AVAILABILITY_OPTIONS.join(', ')}`
     ),
 
-  body('jobTypePreferences.contractType.*')
+  body('jobPreferences.contractTypes')
     .optional()
-    .isString()
-    .toLowerCase()
-    .trim()
-    .notEmpty()
-    .withMessage('Each contract type must be a non-empty string'),
+    .isArray()
+    .withMessage('Contract types must be an array')
+    .custom((types) =>
+      types.every((type) => VALID_CONTRACT_TYPES.includes(type))
+    )
+    .withMessage(
+      `Contract type must be one of: ${VALID_CONTRACT_TYPES.join(', ')}`
+    ),
 
-  body('jobTypePreferences.desiredSalary.min')
+  body('jobPreferences.salaryExpectation.amount')
     .optional()
-    .isFloat({ min: 0 })
-    .withMessage('Minimum salary must be a positive number'),
+    .isNumeric()
+    .withMessage('Salary amount must be a number'),
 
-  body('jobTypePreferences.desiredSalary.max')
+  body('jobPreferences.preferredLocations')
     .optional()
-    .isFloat({ min: 0 })
-    .withMessage('Maximum salary must be a positive number')
-    .custom((max, { req }) => {
-      if (
-        req.body.jobTypePreferences?.desiredSalary?.min &&
-        max < req.body.jobTypePreferences.desiredSalary.min
-      ) {
-        throw new Error('Maximum salary must be greater than minimum salary');
-      }
-      return true;
-    }),
+    .isArray()
+    .withMessage('Preferred locations must be an array')
+    .custom((locs) => locs.every((loc) => typeof loc === 'string'))
+    .withMessage('Each location must be a string'),
 
-  body('preferredJobTitles.*')
+  // Additional Details
+  body('languages')
     .optional()
-    .isString()
-    .trim()
-    .notEmpty()
-    .withMessage('Each job title must be a non-empty string'),
-
-  body('languages.*')
-    .optional()
-    .isString()
-    .trim()
-    .notEmpty()
-    .withMessage('Each language must be a non-empty string'),
+    .isArray()
+    .withMessage('Languages must be an array')
+    .custom((langs) => langs.every((lang) => typeof lang === 'string'))
+    .withMessage('Each language must be a string'),
 ];
 
 // Create candidate validator
@@ -161,7 +174,7 @@ exports.updateCandidateValidator = [
   validatorMiddleware,
 ];
 
-// Get single candidate (by userId) validator
+// Get candidate (by userId) validator
 exports.getCandidateByUserIdValidator = [...exports.validateUserIdParam];
 
 // Delete candidate validator (based on candidate Id)

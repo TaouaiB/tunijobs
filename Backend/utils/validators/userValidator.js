@@ -35,11 +35,8 @@ exports.createUserValidator = [
     .withMessage('Password is required')
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters long'),
-  check('country')
-    .optional()
-    .isString()
-    .withMessage('Country must be a string'),
-  check('profileImg')
+  check('city').optional().isString().withMessage('Country must be a string'),
+  check('avatar')
     .optional()
     .isString()
     .withMessage('Profile image must be a string'),
@@ -79,11 +76,8 @@ exports.updateUserValidator = [
     .optional()
     .isMobilePhone('ar-TN')
     .withMessage('Please provide a Tunisian valid phone number'),
-  check('country')
-    .optional()
-    .isString()
-    .withMessage('Country must be a string'),
-  check('profileImg')
+  check('city').optional().isString().withMessage('Country must be a string'),
+  check('avatar')
     .optional()
     .isString()
     .withMessage('Profile image must be a string'),

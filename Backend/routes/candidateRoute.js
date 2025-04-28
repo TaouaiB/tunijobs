@@ -6,7 +6,6 @@ const {
   updateCandidateValidator,
   getCandidateByUserIdValidator,
   deleteCandidateValidator,
-  deleteCandidateValidatorByUserId,
 } = require('../utils/validators/candidateValidator');
 const {
   createCandidate,

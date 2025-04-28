@@ -2,6 +2,9 @@ const mongoose = require('mongoose');
 
 const candidateSchema = new mongoose.Schema(
   {
+    // ======================
+    // 1. CORE REFERENCE
+    // ======================
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -9,44 +12,55 @@ const candidateSchema = new mongoose.Schema(
       unique: true,
     },
 
+    // ======================
+    // 2. PROFESSIONAL DETAILS
+    // ======================
+    headline: {
+      type: String,
+    },
+    bio: {
+      type: String,
+    },
     education: { type: String },
     experience: { type: String },
-    skills: [{ type: String }],
+    skills: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
 
-    resumeUrl: { type: String }, // Optional CV
-    bio: { type: String }, // Short description
-
+    // ======================
+    // 3. DOCUMENTS & LINKS
+    // ======================
+    resumeUrl: { type: String }, // Plain string without URL validation
     links: {
-      github: { type: String },
-      linkedin: { type: String },
+      github: String,
+      linkedin: String,
       other: [
         {
-          label: { type: String },
-          url: { type: String },
+          platform: String,
         },
       ],
     },
 
-    jobTypePreferences: {
+    // ======================
+    // 4. JOB PREFERENCES (Tunisian context)
+    // ======================
+    jobPreferences: {
       workType: [
         {
           type: String,
           enum: ['remote', 'onsite', 'hybrid'],
+          default: 'onsite',
         },
       ],
       availability: {
         type: String,
-        enum: [
-          'immediate',
-          '1 week',
-          '2 weeks',
-          '1 month',
-          '2 months',
-          '3 months',
-          '3+ months',
-        ],
+        enum: ['immediate', '1-2 weeks', '1 month', '2-3 months', 'flexible'],
+        default: 'flexible',
       },
-      contractType: [
+      contractTypes: [
         {
           type: String,
           enum: [
@@ -58,18 +72,37 @@ const candidateSchema = new mongoose.Schema(
           ],
         },
       ],
-      desiredSalary: {
-        min: { type: Number }, // Optional minimum salary
-        max: { type: Number }, // Optional maximum salary
+      salaryExpectation: {
+        amount: Number, // TND implied, no currency/period fields
       },
+      preferredLocations: [
+        {
+          type: String,
+          trim: true,
+        },
+      ],
     },
 
-    preferredJobTitles: [{ type: String }], // Ex: ['Frontend Developer', 'Fullstack Engineer']
-
-    languages: [{ type: String }], // Languages spoken
+    // ======================
+    // 5. ADDITIONAL DETAILS
+    // ======================
+    languages: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
+
+// ======================
+// INDEXES (for performance)
+// ======================
+candidateSchema.index({ skills: 1 }); // Skill-based searches
+candidateSchema.index({ 'jobPreferences.preferredLocations': 1 }); // Location filters
 
 const Candidate = mongoose.model('Candidate', candidateSchema);
 
