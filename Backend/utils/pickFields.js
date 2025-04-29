@@ -40,9 +40,13 @@ const allowedFields = {
   ],
 };
 
+const ApiError = require('../utils/apiError');
+
 module.exports = function pickFields(data, modelType, strict = false) {
   const fieldList = allowedFields[modelType];
-  if (!fieldList) throw new Error(`Invalid model type: ${modelType}`);
+  if (!fieldList) {
+    throw new ApiError(`Invalid model type provided: ${modelType}`, 500);
+  }
 
   const result = {};
   const invalidFields = [];
@@ -56,11 +60,11 @@ module.exports = function pickFields(data, modelType, strict = false) {
   });
 
   if (strict && invalidFields.length > 0) {
-    throw new Error(
-      `Invalid fields for ${modelType}: ${invalidFields.join(', ')}\n` +
-        `Allowed fields: ${fieldList.join(', ')}`
+    throw new ApiError(
+      `Invalid fields detected for ${modelType}: ${invalidFields.join(', ')}. ` +
+        `Allowed fields: ${fieldList.join(', ')}`,
+      400
     );
   }
-
   return result;
 };
