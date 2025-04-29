@@ -3,8 +3,8 @@ const asyncHandler = require('express-async-handler');
 const ApiError = require('../utils/apiError');
 const pickFields = require('../utils/pickFields');
 
-const Candidate = require('../models/candidateModel');
 const User = require('../models/userModel');
+const Candidate = require('../models/candidateModel');
 
 /*--------------------------------------------------
   Candidate Profile Management (All User-ID Based)
@@ -28,24 +28,9 @@ exports.createCandidate = asyncHandler(async (req, res, next) => {
 
   // 3) Create with filtered fields
   const candidate = await Candidate.create({
-    ...pickFields(req.body, [
-      'education',
-      'experience',
-      'skills',
-      'resumeUrl',
-      'bio',
-      'links',
-      'jobTypePreferences',
-      'preferredJobTitles',
-      'languages',
-    ]),
+    ...pickFields(req.body, 'candidate', true), // Strict mode enabled
     userId,
-  }).then((newCandidate) =>
-    newCandidate.populate({
-      path: 'userId',
-      select: 'name _id',
-    })
-  );
+  }).then((doc) => doc.populate('userId', 'name _id'));
 
   res.status(201).json({
     status: 'success',
@@ -104,26 +89,11 @@ exports.getCandidateByUserId = asyncHandler(async (req, res, next) => {
 // @route   PUT /api/v1/users/:userId/candidate
 // @access  Private
 exports.updateCandidate = asyncHandler(async (req, res, next) => {
-  const { userId } = req.params;
-
   const candidate = await Candidate.findOneAndUpdate(
-    { userId },
-    pickFields(req.body, [
-      'education',
-      'experience',
-      'skills',
-      'resumeUrl',
-      'bio',
-      'links',
-      'jobTypePreferences',
-      'preferredJobTitles',
-      'languages',
-    ]),
+    { userId: req.params.userId },
+    pickFields(req.body, 'candidate', true), // Strict mode
     { new: true }
-  ).populate({
-    path: 'userId',
-    select: 'name _id',
-  });
+  ).populate('userId', 'name _id');
 
   if (!candidate) {
     return next(new ApiError(`No candidate found for user id: ${userId}`, 404));

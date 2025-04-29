@@ -1,12 +1,18 @@
 const asyncHandler = require('express-async-handler');
+
 const ApiError = require('../utils/apiError');
+const pickFields = require('../utils/pickFields');
+
 const User = require('../models/userModel');
 
 // @desc   Create a new user
 // @route  POST /api/v1/users
 // @access Public
 exports.createUser = asyncHandler(async (req, res, next) => {
-  const newUser = await User.create(req.body);
+  const newUser = await User.create(
+    pickFields(req.body, 'user', true) // Strict mode
+  );
+
   res.status(201).json({
     status: 'success',
     data: {
@@ -49,9 +55,11 @@ exports.getUserById = asyncHandler(async (req, res, next) => {
 // @route  PUT /api/v1/users/:id
 // @access Public
 exports.updateUser = asyncHandler(async (req, res, next) => {
-  const user = await User.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-  });
+  const user = await User.findByIdAndUpdate(
+    req.params.id,
+    pickFields(req.body, 'user', true), // Strict mode
+    { new: true }
+  );
   if (!user) {
     return next(new ApiError(`No user found with id: ${req.params.id}`, 404));
   }
@@ -86,7 +94,6 @@ exports.blockUser = asyncHandler(async (req, res, next) => {
   if (!user) {
     return next(new ApiError(`No user found with id: ${req.params.id}`, 404));
   }
-  console.log(user.isBlocked);
   if (user.isBlocked) {
     return next(
       new ApiError(`User with id: ${req.params.id} is already blocked`, 400)
