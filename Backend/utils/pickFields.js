@@ -5,6 +5,7 @@ const allowedFields = {
     'password',
     'phone',
     'city',
+    'role',
     'avatar',
     'slug',
     'isVerified',
@@ -24,6 +25,18 @@ const allowedFields = {
     'languages',
     'jobTypePreferences',
     'preferredJobTitles',
+  ],
+  company: [
+    'companyName',
+    'slug',
+    'industry',
+    'description',
+    'website',
+    'offices',
+    'socialMedia',
+    'verificationStatus',
+    'logo', // Virtual field, might not be part of MongoDB storage but useful for client-side
+    'email', // Virtual field, proxy to user email
   ],
 };
 

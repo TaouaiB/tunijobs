@@ -9,6 +9,7 @@ const globalErrorHandler = require('./middlewares/errorMiddleware');
 
 const userRoute = require('./routes/userRoute');
 const candidateRoute = require('./routes/candidateRoute');
+const companyRoute = require('./routes/companyRoute');
 
 // Connect with db
 dbConnection();
@@ -26,6 +27,7 @@ if (process.env.Node_ENV === 'development') {
 }
 
 // Importing routes
+app.use('/api/v1/users', companyRoute);
 app.use('/api/v1/users', candidateRoute);
 app.use('/api/v1/users', userRoute);
 

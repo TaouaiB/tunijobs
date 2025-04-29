@@ -164,41 +164,6 @@ candidateSchema.pre('save', async function (next) {
  * @param {Object} updates - Field/value pairs to update
  * @throws {Error} If invalid fields are provided or validation fails
  */
-candidateSchema.methods.safeUpdate = async function (updates) {
-  // 1. Define allowed fields that can be updated
-  const allowedUpdates = [
-    'headline',
-    'bio',
-    'education',
-    'experience',
-    'skills',
-    'resumeUrl',
-    'links',
-    'jobPreferences',
-    'languages',
-  ];
-
-  // 2. Check for invalid fields
-  const invalidUpdates = Object.keys(updates).filter(
-    (field) => !allowedUpdates.includes(field)
-  );
-
-  // 3. Throw error if invalid fields found
-  if (invalidUpdates.length > 0) {
-    throw new Error(
-      `Attempted to update non-allowed fields: ${invalidUpdates.join(', ')}. ` +
-        `Allowed fields are: ${allowedUpdates.join(', ')}`
-    );
-  }
-
-  // 4. Apply valid updates
-  Object.keys(updates).forEach((field) => {
-    this[field] = updates[field];
-  });
-
-  // 5. Save with validation
-  return this.save();
-};
 
 const Candidate = mongoose.model('Candidate', candidateSchema);
 

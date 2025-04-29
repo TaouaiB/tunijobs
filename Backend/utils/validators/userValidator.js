@@ -40,7 +40,7 @@ exports.createUserValidator = [
     .optional()
     .isString()
     .withMessage('Profile image must be a string'),
-  check('role').optional().isIn(['user', 'admin']),
+  check('role').optional().isIn(['jobSeeker', 'company', 'manager', 'admin']),
 
   validatorMiddleware,
 ];
@@ -85,7 +85,7 @@ exports.updateUserValidator = [
     .optional()
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters long'),
-  body('role').optional().isIn(['user', 'admin']),
+  body('role').optional().isIn(['jobSeeker', 'company', 'manager', 'admin']),
 
   validatorMiddleware,
 ];

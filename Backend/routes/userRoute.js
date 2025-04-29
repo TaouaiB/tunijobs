@@ -1,5 +1,4 @@
-const express = require('express');
-const router = express.Router();
+const router = require('express').Router();
 
 const {
   createUser,
@@ -27,14 +26,14 @@ const {
 router.route('/').post(createUserValidator, createUser).get(getAllUsers);
 
 router
-  .route('/:id')
+  .route('/:userId')
   .get(getUserValidator, getUserById)
   .put(updateUserValidator, updateUser)
   .delete(getUserValidator, deleteUser);
 
-router.patch('/:id/block', blockUserValidator, blockUser);
-router.patch('/:id/unblock', unblockUserValidator, unblockUser);
-router.patch('/:id/deactivate', deactivateUserValidator, deactivateUser);
-router.patch('/:id/activate', activateUserValidator, reactivateUser);
+router.patch('/:userId/block', blockUserValidator, blockUser);
+router.patch('/:userId/unblock', unblockUserValidator, unblockUser);
+router.patch('/:userId/deactivate', deactivateUserValidator, deactivateUser);
+router.patch('/:userId/activate', activateUserValidator, reactivateUser);
 
 module.exports = router;
