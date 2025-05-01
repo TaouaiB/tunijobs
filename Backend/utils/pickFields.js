@@ -38,6 +38,25 @@ const allowedFields = {
     'logo', // Virtual field, might not be part of MongoDB storage but useful for client-side
     'email', // Virtual field, proxy to user email
   ],
+  job: [
+    'title',
+    'description',
+    'jobType',
+    'locationType',
+    'primaryLocation',
+    'skillsRequired',
+    'experienceLevel',
+    'applicationDeadline',
+    'referralBonus',
+    'isActive',
+    'isFeatured',
+    'isConfidential',
+    'benefits',
+    'meta',
+    'slug',
+    'locationKeywords',
+    'deadlineWarning',
+  ],
 };
 
 const ApiError = require('../utils/apiError');

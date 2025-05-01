@@ -73,9 +73,10 @@ exports.getFeaturedJobs = asyncHandler(async (req, res, next) => {
 // @route   GET /api/v1/jobs/:id
 // @access  Public
 exports.getJob = asyncHandler(async (req, res, next) => {
-  const job = await Job.findById(req.params.id)
-    .populate('company', 'companyName logo industry')
-    .populate('applications');
+  const job = await Job.findById(req.params.id).populate(
+    'company',
+    'companyName logo industry'
+  );
 
   if (!job) {
     return next(new ApiError(`No job found with id: ${req.params.id}`, 404));
@@ -129,6 +130,10 @@ exports.toggleJobStatus = asyncHandler(async (req, res, next) => {
 
   job.isActive = !job.isActive;
   if (!job.isActive) job.isFeatured = false; // Can't feature inactive jobs
+
+  if (!job.isActive && job.isFeatured) {
+    return next(new ApiError('You must activate the Job to Feature it', 400));
+  }
 
   await job.save();
 

@@ -10,6 +10,7 @@ const globalErrorHandler = require('./middlewares/errorMiddleware');
 const userRoute = require('./routes/userRoute');
 const candidateRoute = require('./routes/candidateRoute');
 const companyRoute = require('./routes/companyRoute');
+const jobRoute = require('./routes/jobRoute');
 
 // Connect with db
 dbConnection();
@@ -30,6 +31,8 @@ if (process.env.Node_ENV === 'development') {
 app.use('/api/v1/users', companyRoute);
 app.use('/api/v1/users', candidateRoute);
 app.use('/api/v1/users', userRoute);
+app.use('/api/v1/jobs', jobRoute);
+app.use('/api/v1/companies', jobRoute);
 
 app.all('/{*any}', (req, res, next) => {
   next(new ApiError(`can't find this route: ${req.originalUrl}`, 404));
