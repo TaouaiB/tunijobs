@@ -44,9 +44,32 @@ const applicationSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    documents: [
+      {
+        name: String,
+        url: String,
+        type: String,
+      },
+    ],
 
     // ======================
-    // 3. APPLICATION STATUS
+    // 3. APPLICATION SCORING
+    // ======================
+    score: {
+      type: Number,
+      min: 0,
+      max: 100,
+      default: 50,
+    },
+    scoringDetails: {
+      resumeScore: { type: Number, default: 0 },
+      coverLetterScore: { type: Number, default: 0 },
+      interviewScore: { type: Number, default: 0 },
+      bonusPoints: { type: Number, default: 0 },
+    },
+
+    // ======================
+    // 4. APPLICATION STATUS
     // ======================
     status: {
       type: String,
@@ -70,17 +93,19 @@ const applicationSchema = new mongoose.Schema(
           default: Date.now,
         },
         changedBy: {
-          // Track who modified status (user or system)
           type: mongoose.Schema.Types.ObjectId,
           ref: 'User',
-          optional: true,
         },
         notes: String,
+        metadata: {
+          aiSuggestions: [String],
+          confirmed: Boolean,
+        },
       },
     ],
 
     // ======================
-    // 4. INTERVIEW DETAILS
+    // 5. INTERVIEW DETAILS
     // ======================
     interviews: [
       {
@@ -101,21 +126,57 @@ const applicationSchema = new mongoose.Schema(
         ],
         feedback: String,
         result: {
-          //
           type: String,
           enum: ['pass', 'fail', 'pending'],
           default: 'pending',
         },
+        template: String,
+        notes: String,
       },
     ],
 
     // ======================
-    // 5. OPTIMIZATION & SAFETY
+    // 6. METADATA & ANALYTICS
+    // ======================
+    metadata: {
+      aiAnalysis: {
+        score: Number,
+        keywords: [String],
+        sentiment: String,
+      },
+      ipAddress: String,
+      userAgent: String,
+      applicationSource: String,
+    },
+    analytics: {
+      viewCount: { type: Number, default: 0 },
+      lastViewed: Date,
+      statusChangeDates: {
+        submitted: Date,
+        under_review: Date,
+        shortlisted: Date,
+        interviewing: Date,
+        offer_pending: Date,
+        hired: Date,
+        rejected: Date,
+        withdrawn: Date,
+      },
+    },
+
+    // ======================
+    // 7. OPTIMIZATION & SAFETY
     // ======================
     isArchived: {
-      // Soft delete support
       type: Boolean,
       default: false,
+    },
+    deletedAt: {
+      type: Date,
+      default: null,
+    },
+    version: {
+      type: Number,
+      default: 1,
     },
   },
   {
@@ -123,8 +184,10 @@ const applicationSchema = new mongoose.Schema(
     toJSON: {
       virtuals: true,
       transform: function (doc, ret) {
-        // Hide internal fields (but keep statusHistory if requested)
+        // Hide internal fields
         delete ret.__v;
+        delete ret.deletedAt;
+        delete ret.version;
         if (!this.includeHistory) delete ret.statusHistory;
         return ret;
       },
@@ -134,9 +197,13 @@ const applicationSchema = new mongoose.Schema(
 );
 
 // ======================
-// INDEXES (Prevent Duplicates)
+// INDEXES
 // ======================
 applicationSchema.index({ jobId: 1, candidateId: 1 }, { unique: true });
+applicationSchema.index({ status: 1 });
+applicationSchema.index({ score: -1 });
+applicationSchema.index({ companyId: 1, status: 1 });
+applicationSchema.index({ 'interviews.scheduledAt': 1 });
 
 // ======================
 // VIRTUAL PROPERTIES
@@ -149,7 +216,7 @@ applicationSchema.virtual('candidate', {
 });
 
 applicationSchema.virtual('resumeUrl').get(function () {
-  return this.populated('candidateId')?.resumeUrl; // Safer population check
+  return this.populated('candidateId')?.resumeUrl;
 });
 
 applicationSchema.virtual('job', {
@@ -167,7 +234,7 @@ applicationSchema.virtual('company', {
 });
 
 // ======================
-// PRE-SAVE HOOKS (Status Validation)
+// PRE-SAVE HOOKS
 // ======================
 applicationSchema.pre('save', function (next) {
   if (this.isModified('status')) {
@@ -179,12 +246,29 @@ applicationSchema.pre('save', function (next) {
         400
       );
     }
+
+    // Update status change dates
+    this.analytics.statusChangeDates[this.status] = new Date();
+
     // Auto-add to history
     this.statusHistory.push({
       status: this.status,
+      changedBy: this.statusHistory.slice(-1)[0]?.changedBy || this.candidateId,
       notes: `Status changed from ${previousStatus}`,
     });
   }
+
+  // Update total score
+  if (this.isModified('scoringDetails')) {
+    this.score = Math.min(
+      100,
+      (this.scoringDetails.resumeScore || 0) +
+        (this.scoringDetails.coverLetterScore || 0) +
+        (this.scoringDetails.interviewScore || 0) +
+        (this.scoringDetails.bonusPoints || 0)
+    );
+  }
+
   next();
 });
 
@@ -200,8 +284,25 @@ applicationSchema.query.byJob = function (jobId) {
 };
 
 applicationSchema.query.includeHistory = function () {
-  this.options.includeHistory = true; // For toJSON transform
+  this.options.includeHistory = true;
   return this;
+};
+
+applicationSchema.query.active = function () {
+  return this.where({ deletedAt: null });
+};
+
+// ======================
+// INSTANCE METHODS
+// ======================
+applicationSchema.methods.logView = function () {
+  this.analytics.viewCount += 1;
+  this.analytics.lastViewed = new Date();
+  return this.save();
+};
+
+applicationSchema.methods.getTimeline = function () {
+  return this.statusHistory.sort((a, b) => b.changedAt - a.changedAt);
 };
 
 const Application = mongoose.model('Application', applicationSchema);

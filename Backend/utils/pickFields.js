@@ -57,6 +57,18 @@ const allowedFields = {
     'locationKeywords',
     'deadlineWarning',
   ],
+  application: [
+    'candidateId',
+    'coverLetter',
+    'status',
+    'notes',
+    'scheduledAt',
+    'interviewType',
+    'location',
+    'attendees',
+    'feedback',
+    'result',
+  ],
 };
 
 const ApiError = require('../utils/apiError');

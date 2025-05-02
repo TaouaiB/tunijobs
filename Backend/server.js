@@ -11,6 +11,7 @@ const userRoute = require('./routes/userRoute');
 const candidateRoute = require('./routes/candidateRoute');
 const companyRoute = require('./routes/companyRoute');
 const jobRoute = require('./routes/jobRoute');
+const applicationRoutes = require('./routes/applicationRoute');
 
 // Connect with db
 dbConnection();
@@ -27,12 +28,14 @@ if (process.env.Node_ENV === 'development') {
   console.log(`mode: ${process.env.Node_ENV}`);
 }
 
-// Importing routes
+// Import routes
 app.use('/api/v1/users', companyRoute);
 app.use('/api/v1/users', candidateRoute);
 app.use('/api/v1/users', userRoute);
 app.use('/api/v1/jobs', jobRoute);
+app.post('/jobs', applicationRoutes);
 app.use('/api/v1/companies', jobRoute);
+app.use('/api/v1/applications', applicationRoutes);
 
 app.all('/{*any}', (req, res, next) => {
   next(new ApiError(`can't find this route: ${req.originalUrl}`, 404));
