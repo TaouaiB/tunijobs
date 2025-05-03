@@ -15,10 +15,11 @@ const {
 
 const {
   submitApplicationValidator,
-  updateApplicationValidator, // This is what we should use instead
+  updateApplicationValidator,
   scheduleInterviewValidator,
   getApplicationValidator,
   getApplicationsByJobValidator,
+  getApplicationsByCandidateValidator,
   deleteApplicationValidator,
   searchApplicationsValidator,
 } = require('../utils/validators/applicationValidator');
@@ -27,24 +28,24 @@ const {
 //               PUBLIC ROUTES
 // =============================================
 
+// This route is for the admin dashboard to search applications
+// and is not protected by authentication or authorization YET
+router.get('/dashboard', searchApplicationsValidator, getApplicationDashboard);
+
 router.get('/:id', getApplicationValidator, getApplicationById);
 
 // =============================================
 //            CANDIDATE PROTECTED ROUTES
 // =============================================
 
-router.post(
-  '/:jobId/apply',
-  submitApplicationValidator,
-  submitApplication
-);
+router.post('/:jobId/apply', submitApplicationValidator, submitApplication);
 
 router.get(
   '/candidate/:candidateId',
+  getApplicationsByCandidateValidator,
   getApplicationsByCandidate
 );
 
-// Changed to use updateApplicationValidator instead
 router.put('/:id/withdraw', updateApplicationValidator, withdrawApplication);
 
 // =============================================
@@ -56,13 +57,11 @@ router.get('/jobs/:jobId', getApplicationsByJobValidator, getApplicationsByJob);
 // Changed to use updateApplicationValidator
 router.put('/:id/status', updateApplicationValidator, updateApplicationStatus);
 
-router.post('/:id/interviews', scheduleInterviewValidator, scheduleInterview);
+router.patch('/:id/interviews', scheduleInterviewValidator, scheduleInterview);
 
 // =============================================
 //               ADMIN ROUTES
 // =============================================
-
-router.get('/', searchApplicationsValidator, getApplicationDashboard);
 
 router.delete('/:id', deleteApplicationValidator, deleteApplication);
 

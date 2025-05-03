@@ -1,6 +1,10 @@
 const { body, param, query } = require('express-validator');
 const validatorMiddleware = require('../../middlewares/validatorMiddleware');
 const Application = require('../../models/applicationModel');
+const { get } = require('mongoose');
+const {
+  getApplicationsByCandidate,
+} = require('../../services/applicationService');
 
 // Constants with enhanced metadata
 const APPLICATION_METADATA = {
@@ -151,6 +155,19 @@ exports.getApplicationValidator = [validateApplicationId, validatorMiddleware];
 
 exports.getApplicationsByJobValidator = [
   validateJobId,
+  query('status')
+    .optional()
+    .isIn(APPLICATION_METADATA.STATUSES.values)
+    .withMessage('Invalid status filter'),
+  query(['limit', 'page'])
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('Must be a positive integer'),
+  validatorMiddleware,
+];
+
+exports.getApplicationsByCandidateValidator = [
+  validateCandidateId,
   query('status')
     .optional()
     .isIn(APPLICATION_METADATA.STATUSES.values)

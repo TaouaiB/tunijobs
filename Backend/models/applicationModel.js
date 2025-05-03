@@ -238,27 +238,40 @@ applicationSchema.virtual('company', {
 // ======================
 applicationSchema.pre('save', function (next) {
   if (this.isModified('status')) {
-    const previousStatus =
-      this.statusHistory.slice(-1)[0]?.status || 'submitted';
-    if (!STATUS_TRANSITIONS[previousStatus].includes(this.status)) {
+    // 1. Get the ACTUAL current status (from document or history)
+    const currentStatus = this.status;
+    const lastHistoryEntry = this.statusHistory.slice(-1)[0];
+
+    // 2. Determine the true previous status (prior to this change)
+    const previousStatus = lastHistoryEntry?.status || 'submitted';
+
+    // 3. Skip validation if this is a redundant update
+    if (currentStatus === previousStatus) {
+      return next();
+    }
+
+    // 4. Validate the transition
+    if (!STATUS_TRANSITIONS[previousStatus]?.includes(currentStatus)) {
       throw new ApiError(
-        `Invalid status transition: ${previousStatus} → ${this.status}`,
+        `Invalid status transition: ${previousStatus} → ${currentStatus}`,
         400
       );
     }
 
-    // Update status change dates
-    this.analytics.statusChangeDates[this.status] = new Date();
+    // 5. Update analytics and history ONLY if status actually changed
+    if (currentStatus !== previousStatus) {
+      this.analytics.statusChangeDates[currentStatus] = new Date();
 
-    // Auto-add to history
-    this.statusHistory.push({
-      status: this.status,
-      changedBy: this.statusHistory.slice(-1)[0]?.changedBy || this.candidateId,
-      notes: `Status changed from ${previousStatus}`,
-    });
+      this.statusHistory.push({
+        status: currentStatus,
+        changedBy: lastHistoryEntry?.changedBy || this.candidateId,
+        notes: `Status changed from ${previousStatus}`,
+        timestamp: new Date(),
+      });
+    }
   }
 
-  // Update total score
+  // Keep your existing scoring logic
   if (this.isModified('scoringDetails')) {
     this.score = Math.min(
       100,
@@ -271,7 +284,6 @@ applicationSchema.pre('save', function (next) {
 
   next();
 });
-
 // ======================
 // QUERY HELPERS
 // ======================

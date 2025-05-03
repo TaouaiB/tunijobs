@@ -185,16 +185,21 @@ exports.updateApplicationStatus = asyncHandler(async (req, res) => {
 // @access  Candidate
 exports.withdrawApplication = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { userId, reason } = req.body;
+  const { userId, reason } = req.body; // Get user ID and reason from request body
+  const application = await Application.findById(id).populate({
+    path: 'candidateId',
+    select: 'userId',
+  });
 
-  const application = await Application.findById(id);
   if (!application) throw new ApiError('Application not found', 404);
 
-  if (!application.candidateId.equals(userId)) {
-    throw new ApiError(
-      'You are not authorized to withdraw this application',
-      403
-    );
+  // 2. Compare the user references
+  if (application.candidateId.userId.toString() !== userId.toString()) {
+    console.log({
+      authUserId: userId,
+      appCandidateUserId: application.candidateId.userId?.toString(),
+    });
+    throw new ApiError('Unauthorized', 403);
   }
 
   application.status = 'withdrawn';
@@ -211,10 +216,14 @@ exports.withdrawApplication = asyncHandler(async (req, res) => {
     `Candidate withdrew application for job ${application.jobId}`
   );
 
-  res.json({
+  res.status(200).json({
     status: 'success',
-    message: 'Application withdrawn',
-    application,
+    message: 'Application withdrawn successfully',
+    data: {
+      applicationId: application._id,
+      jobId: application.jobId,
+      newStatus: application.status,
+    },
   });
 });
 
@@ -248,6 +257,8 @@ exports.getApplicationById = asyncHandler(async (req, res) => {
 // @access  Candidate
 exports.getApplicationsByCandidate = asyncHandler(async (req, res) => {
   const { candidateId } = req.params;
+  const candidate = await Candidate.findById(candidateId);
+  if (!candidate) throw new ApiError('Candidate not found', 404);
   const applications = await Application.find({ candidateId }).populate(
     'jobId'
   );
@@ -277,12 +288,15 @@ exports.getApplicationsByJob = asyncHandler(async (req, res) => {
 // @route   GET /api/v1/applications/dashboard
 // @access  Employer/Admin
 exports.getApplicationDashboard = asyncHandler(async (req, res) => {
-  const { companyId } = req.user;
-  const { status, minScore, page = 1, limit = 20 } = req.query;
+  const { companyId, status, minScore, page = 1, limit = 20 } = req.query;
+  if (!companyId) {
+    throw new ApiError('Company ID is required', 400);
+  }
 
   const filter = { companyId };
   if (status) filter.status = status;
   if (minScore) filter.score = { $gte: Number(minScore) };
+  console.log(filter);
 
   const applications = await Application.find(filter)
     .populate({
@@ -327,29 +341,58 @@ exports.deleteApplication = asyncHandler(async (req, res) => {
 });
 
 // @desc    Schedule interview for an application
-// @route   POST /api/v1/applications/:id/schedule
+// @route   PATCH /api/v1/applications/:id/schedule
 // @access  Employer
 exports.scheduleInterview = asyncHandler(async (req, res) => {
+  const interviewTemplates = {
+    phone: 'Standard phone screening questions',
+    video: 'Video conference link will be shared',
+    onsite: 'Bring your ID and portfolio',
+    technical_test: 'Coding challenge will be provided',
+  };
+
   const { id } = req.params;
-  const { interviewer, date, type } = req.body;
+  const { scheduledAt, interviewType, location, attendees } = req.body;
+
+  if (!interviewType || !scheduledAt) {
+    throw new ApiError('Interview type and date are required', 400);
+  }
+
+  if (!attendees || attendees.length === 0) {
+    throw new ApiError('At least one attendee is required', 400);
+  }
 
   const application = await Application.findById(id);
   if (!application) throw new ApiError('Application not found', 404);
 
   const interview = {
-    type,
-    interviewer,
-    scheduledAt: new Date(date),
-    template: getInterviewTemplate(type),
+    interviewType,
+    scheduledAt: new Date(scheduledAt),
+    template:
+      interviewTemplates[interviewType] || 'General interview questions',
+    result: 'pending',
+    location: location || 'To be determined',
+    attendees: attendees.map((attendee) => ({
+      userId: attendee.userId,
+      role: attendee.role || 'Interviewer',
+    })),
   };
 
+  // Add and save the interview
   application.interviews.push(interview);
   await application.save();
 
+  // Get primary interviewer for notification
+  const primaryInterviewer =
+    attendees[0].role ?
+      `${attendees[0].role} (${attendees[0].userId})`
+    : attendees[0].userId;
+
   NotificationService.send(
     application.candidateId,
-    `You have an interview scheduled on ${date}`
+    `You have a ${interviewType} interview scheduled on ${new Date(scheduledAt).toLocaleString()} with ${primaryInterviewer}`
   );
+
   res.json({ status: 'success', data: { interview } });
 });
 
