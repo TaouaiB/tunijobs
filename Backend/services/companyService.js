@@ -13,15 +13,16 @@ exports.createCompanyProfile = asyncHandler(async (req, res, next) => {
   const { userId } = req.params;
 
   // Validate user exists and has correct role
-  const user = await User.findById(userId);
+  const [user, existingCompany] = await Promise.all([
+    User.findById(userId),
+    Company.findOne({ userId }),
+  ]);
+
   if (!user) throw new ApiError('User not found', 404);
   if (user.role !== 'company')
     throw new ApiError('User must have company role', 400);
-
-  // Check for existing profile
-  if (await Company.exists({ userId })) {
+  if (existingCompany)
     throw new ApiError('Company profile already exists', 409);
-  }
 
   const company = await Company.create({
     ...pickFields(req.body, 'company', true), // Strict field validation
@@ -60,6 +61,12 @@ exports.getCompanyProfile = asyncHandler(async (req, res, next) => {
 // @route   PUT /api/v1/users/:userId/company
 // @access  Private
 exports.updateCompanyProfile = asyncHandler(async (req, res, next) => {
+    
+  const user = await User.findById(req.params.userId);
+
+  if (user?.role !== 'company')
+    throw new ApiError('User must have company role', 400);
+
   const updatedCompany = await Company.findOneAndUpdate(
     { userId: req.params.userId },
     pickFields(req.body, 'company', true), // Strict field validation
@@ -84,7 +91,7 @@ exports.deleteCompanyProfile = asyncHandler(async (req, res, next) => {
 
   if (!deletedCompany) throw new ApiError('Company profile not found', 404);
 
-  res.status(204).json({
+  res.status(200).json({
     status: 'success',
     data: null,
   });

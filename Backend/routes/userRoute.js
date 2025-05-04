@@ -26,14 +26,14 @@ const {
 router.route('/').post(createUserValidator, createUser).get(getAllUsers);
 
 router
-  .route('/:userId')
+  .route('/:id')
   .get(getUserValidator, getUserById)
   .put(updateUserValidator, updateUser)
   .delete(getUserValidator, deleteUser);
 
-router.patch('/:userId/block', blockUserValidator, blockUser);
-router.patch('/:userId/unblock', unblockUserValidator, unblockUser);
-router.patch('/:userId/deactivate', deactivateUserValidator, deactivateUser);
-router.patch('/:userId/activate', activateUserValidator, reactivateUser);
+router.patch('/:id/block', blockUserValidator, blockUser);
+router.patch('/:id/unblock', unblockUserValidator, unblockUser);
+router.patch('/:id/deactivate', deactivateUserValidator, deactivateUser);
+router.patch('/:id/activate', activateUserValidator, reactivateUser);
 
 module.exports = router;

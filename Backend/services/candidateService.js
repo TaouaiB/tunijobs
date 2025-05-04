@@ -60,28 +60,19 @@ exports.getAllCandidates = asyncHandler(async (req, res, next) => {
 // @route   GET /api/v1/users/:userId/candidate
 // @access  Public
 exports.getCandidateByUserId = asyncHandler(async (req, res, next) => {
-  const { userId } = req.params;
-  const user = await User.findById(userId);
-  if (!user) {
-    return next(new ApiError(`No user found with id: ${userId}`, 404));
-  }
-
   const candidate = await Candidate.findOne({
-    userId,
-  }).populate({
-    path: 'userId',
-    select: 'name _id',
-  });
+    userId: req.params.userId,
+  }).populate('userId', 'name _id');
 
   if (!candidate) {
-    return next(new ApiError(`No candidate found for user id: ${userId}`, 404));
+    return next(
+      new ApiError(`No candidate found for user id: ${req.params.userId}`, 404)
+    );
   }
 
   res.status(200).json({
     status: 'success',
-    data: {
-      candidate,
-    },
+    data: { candidate },
   });
 });
 

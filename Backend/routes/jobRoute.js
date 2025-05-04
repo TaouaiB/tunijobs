@@ -7,7 +7,7 @@ const {
   getFeaturedJobs,
   getJob,
   updateJob,
-  toggleJobStatus,
+  setJobActiveStatus,
   deleteJob,
   getJobsByCompany,
 } = require('../services/jobService');
@@ -33,7 +33,7 @@ router.get('/:companyId/jobs', getJobsByCompany);
 ---------------------------------------------------*/
 router.post('/:companyId/jobs', createJobValidator, createJob);
 router.put('/:id', updateJobValidator, updateJob);
-router.patch('/:id/toggle-status', toggleJobStatus);
+router.patch('/:id/set-active', setJobActiveStatus);
 router.delete('/:id', deleteJobValidator, deleteJob);
 
 module.exports = router;

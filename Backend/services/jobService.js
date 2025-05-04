@@ -118,30 +118,43 @@ exports.updateJob = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc    Toggle job status (active/inactive)
-// @route   PATCH /api/v1/jobs/:id/toggle-status
+// @desc    Activate/Deactivate a job (with auto-unfeature)
+// @route   PATCH /api/v1/jobs/:id/set-active
 // @access  Private (Company Admin)
-exports.toggleJobStatus = asyncHandler(async (req, res, next) => {
-  const job = await Job.findById(req.params.id);
+exports.setJobActiveStatus = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const { isActive } = req.body; // Expects { isActive: true/false }
 
+  // 1) Find job
+  const job = await Job.findById(id);
   if (!job) {
-    return next(new ApiError(`No job found with id: ${req.params.id}`, 404));
+    return next(new ApiError(`No job found with id: ${id}`, 404));
   }
 
-  job.isActive = !job.isActive;
-  if (!job.isActive) job.isFeatured = false; // Can't feature inactive jobs
-
-  if (!job.isActive && job.isFeatured) {
-    return next(new ApiError('You must activate the Job to Feature it', 400));
+  // 2) Update status (skip if already in desired state)
+  if (job.isActive === isActive) {
+    return res.status(200).json({
+      status: 'success',
+      message: `Job is already ${isActive ? 'active' : 'inactive'}`,
+      data: { job },
+    });
   }
 
+  // 3) Apply changes
+  job.isActive = isActive;
+
+  // 4) Business Rule: Deactivated jobs can't be featured
+  if (!isActive && job.isFeatured) {
+    job.isFeatured = false;
+  }
+
+  // 5) Save and return
   await job.save();
 
   res.status(200).json({
     status: 'success',
-    data: {
-      job,
-    },
+    message: `Job ${isActive ? 'activated' : 'deactivated'}`,
+    data: { job },
   });
 });
 
@@ -155,7 +168,7 @@ exports.deleteJob = asyncHandler(async (req, res, next) => {
     return next(new ApiError(`No job found with id: ${req.params.id}`, 404));
   }
 
-  res.status(204).json({
+  res.status(200).json({
     status: 'success',
     data: null,
   });

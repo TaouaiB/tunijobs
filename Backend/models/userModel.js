@@ -105,6 +105,12 @@ userSchema.virtual('isActive').get(function () {
   return !(this.isBlocked || this.isDeactivated);
 });
 
+userSchema.virtual('profileStatus').get(function () {
+  if (this.role === 'jobSeeker' && !this.candidateProfile) return 'incomplete';
+  if (this.role === 'company' && !this.companyProfile) return 'incomplete';
+  return 'complete';
+});
+
 // ======================
 // DATABASE INDEXES
 // ======================
