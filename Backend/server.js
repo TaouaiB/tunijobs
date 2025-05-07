@@ -3,15 +3,15 @@ const morgan = require('morgan');
 const dotenv = require('dotenv');
 
 dotenv.config({ path: 'config.env' });
-const dbConnection = require('./config/database');
-const ApiError = require('./utils/apiError');
-const globalErrorHandler = require('./middlewares/errorMiddleware');
+const dbConnection = require('./core/config/database');
+const ApiError = require('./core/utils/apiError');
+const globalErrorHandler = require('./core/middlewares/errorMiddleware');
 
-const userRoute = require('./routes/userRoute');
-const candidateRoute = require('./routes/candidateRoute');
-const companyRoute = require('./routes/companyRoute');
-const jobRoute = require('./routes/jobRoute');
-const applicationRoutes = require('./routes/applicationRoute');
+const userRoute = require('./modules/user/routes/userRoute');
+const candidateRoute = require('./modules/candidate/routes/candidateRoute');
+const companyRoute = require('./modules/company/routes/companyRoute');
+const jobRoute = require('./modules/job/routes/jobRoute');
+const applicationRoutes = require('./modules/application/routes/applicationRoute');
 
 // Connect with db
 dbConnection();
