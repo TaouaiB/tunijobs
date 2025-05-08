@@ -3,7 +3,7 @@
 const asyncHandler = require('express-async-handler');
 const mongoose = require('mongoose');
 
-const ApiError = require('../../../core/utils/apiError');
+const ApiError = require('../../../core/utils/ApiError');
 const pickFields = require('../../../core/utils/pickFields');
 
 const Application = require('../models/applicationModel');
@@ -228,7 +228,7 @@ exports.withdrawApplication = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Get application by ID
+// @desc    Get application by Application ID
 // @route   GET /api/v1/applications/:id
 // @access  Authenticated
 exports.getApplicationById = asyncHandler(async (req, res) => {
