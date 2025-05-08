@@ -1,12 +1,34 @@
-const { body, param, query } = require('express-validator');
-const validatorMiddleware = require('../../../core/middlewares/validatorMiddleware');
-const Application = require('../models/applicationModel');
-const { get } = require('mongoose');
-const {
-  getApplicationsByCandidate,
-} = require('../controllers/applicationController');
+/**
+ * @file Application validators for handling application-related request validation
+ * @module validators/applicationValidator
+ * @requires express-validator
+ * @requires ../models/applicationModel
+ * @requires ../../../core/validators/commonValidators
+ */
 
-// Constants with enhanced metadata
+const { body, param, query } = require('express-validator');
+const Application = require('../models/applicationModel');
+const {
+  validateId,
+  validateRequiredStringField,
+  validateOptionalStringField,
+  validateEnumField,
+  validatorMiddleware,
+} = require('../../../core/utils/validatorOrchestrator');
+
+/**
+ * Application metadata constants
+ * @namespace APPLICATION_METADATA
+ * @property {Object} STATUSES - Application status options
+ * @property {string[]} STATUSES.values - Allowed status values
+ * @property {string} STATUSES.description - Status field description
+ * @property {Object} INTERVIEW_TYPES - Interview type options
+ * @property {string[]} INTERVIEW_TYPES.values - Allowed interview types
+ * @property {string} INTERVIEW_TYPES.description - Interview type description
+ * @property {Object} INTERVIEW_RESULTS - Interview result options
+ * @property {string[]} INTERVIEW_RESULTS.values - Allowed interview results
+ * @property {string} INTERVIEW_RESULTS.description - Interview result description
+ */
 const APPLICATION_METADATA = {
   STATUSES: {
     values: [
@@ -31,33 +53,39 @@ const APPLICATION_METADATA = {
   },
 };
 
-// Reusable validator components
-const validateId = (field, entity) =>
-  param(field)
-    .isMongoId()
-    .withMessage(`Invalid ${entity} ID format (must be MongoDB ObjectId)`);
+/**
+ * Validates application ID parameter
+ * @type {import('express-validator').ValidationChain}
+ */
+const validateApplicationId = validateId('id', 'application');
 
-const validateApplicationId = validateId('id', 'Application');
-const validateJobId = validateId('jobId', 'Job');
-const validateCandidateId = validateId('candidateId', 'Candidate');
+/**
+ * Validates job ID parameter
+ * @type {import('express-validator').ValidationChain}
+ */
+const validateJobId = validateId('jobId', 'job');
 
-const createEnumValidator = (field, meta) =>
-  body(field)
-    .isIn(meta.values)
-    .withMessage(
-      `Invalid ${field}. Valid options: ${meta.values.join(', ')} (${meta.description})`
-    );
+/**
+ * Validates candidate ID parameter
+ * @type {import('express-validator').ValidationChain}
+ */
+const validateCandidateId = validateId('candidateId', 'candidate');
 
-// Field-specific validators
-const validateCoverLetter = body('coverLetter')
-  .optional()
-  .trim()
-  .isLength({ max: 5000 })
-  .withMessage('Cover letter must be 5,000 characters or less')
-  .customSanitizer((value) =>
-    value.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-  );
+/**
+ * Validates and sanitizes cover letter field
+ * @type {import('express-validator').ValidationChain}
+ */
+const validateCoverLetter = validateOptionalStringField(
+  'coverLetter',
+  5000
+).customSanitizer((value) =>
+  value.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+);
 
+/**
+ * Validates candidate reference and checks for duplicate applications
+ * @type {import('express-validator').ValidationChain}
+ */
 const validateCandidateReference = body('candidateId')
   .isMongoId()
   .withMessage('Valid candidate ID required')
@@ -70,6 +98,10 @@ const validateCandidateReference = body('candidateId')
     return true;
   });
 
+/**
+ * Validates interview-related fields
+ * @type {import('express-validator').ValidationChain[]}
+ */
 const validateInterview = [
   body('scheduledAt')
     .isISO8601()
@@ -79,59 +111,45 @@ const validateInterview = [
         throw new Error('Interview time must be in the future');
       return true;
     }),
-  createEnumValidator('interviewType', APPLICATION_METADATA.INTERVIEW_TYPES),
-  body('location')
-    .optional()
-    .trim()
-    .isLength({ max: 200 })
-    .withMessage('Location must be 200 characters or less'),
+  validateEnumField('interviewType', APPLICATION_METADATA.INTERVIEW_TYPES),
+  validateOptionalStringField('location', 200),
   body('attendees')
     .isArray({ min: 1, max: 5 })
     .withMessage('Must have between 1-5 attendees'),
   body('attendees.*.userId')
     .isMongoId()
     .withMessage('Attendee ID must be a valid MongoDB ObjectId'),
-  body('attendees.*.role')
-    .trim()
-    .notEmpty()
-    .withMessage('Attendee role is required')
-    .isLength({ max: 50 })
-    .withMessage('Attendee role must be 50 characters or less'),
-  body('feedback')
-    .optional()
-    .trim()
-    .isLength({ max: 2000 })
-    .withMessage('Feedback must be 2,000 characters or less'),
-  createEnumValidator('result', APPLICATION_METADATA.INTERVIEW_RESULTS),
+  validateRequiredStringField('attendees.*.role', 50),
+  validateOptionalStringField('feedback', 2000),
+  validateEnumField('result', APPLICATION_METADATA.INTERVIEW_RESULTS),
 ];
 
-// Validation pipelines
+/**
+ * Creates application validation pipeline
+ * @param {Object} options - Validation options
+ * @param {boolean} [options.isUpdate=false] - Whether this is for an update operation
+ * @param {boolean} [options.includeInterview=false] - Whether to include interview validation
+ * @returns {import('express-validator').ValidationChain[]} Validation chain array
+ */
 const createApplicationValidationPipeline = (options = {}) => {
   const { isUpdate = false, includeInterview = false } = options;
   const pipeline = [
     isUpdate ? validateApplicationId : validateJobId,
-
-    // Core application fields
-    isUpdate ? validateCoverLetter.optional() : validateCoverLetter,
+    isUpdate ? validateCoverLetter : validateCoverLetter.optional(),
     isUpdate ?
-      createEnumValidator('status', APPLICATION_METADATA.STATUSES).optional()
+      validateEnumField('status', APPLICATION_METADATA.STATUSES).optional()
     : validateCandidateReference,
-
-    // Conditionally include interview validation
     ...(includeInterview ? validateInterview : []),
-
-    // Common fields
-    body('notes')
-      .optional()
-      .trim()
-      .isLength({ max: 2000 })
-      .withMessage('Notes must be 2,000 characters or less'),
+    validateOptionalStringField('notes', 2000),
   ];
 
-  return pipeline.concat(validatorMiddleware);
+  return pipeline;
 };
 
-// Exported validators
+/**
+ * Validator for submitting a new application
+ * @type {import('express').RequestHandler[]}
+ */
 exports.submitApplicationValidator = [
   ...createApplicationValidationPipeline(),
   body().custom((data, { req }) => {
@@ -141,18 +159,40 @@ exports.submitApplicationValidator = [
       throw new Error(`Invalid fields for submission: ${invalid.join(', ')}`);
     return true;
   }),
+  validatorMiddleware,
 ];
 
-exports.updateApplicationValidator = createApplicationValidationPipeline({
-  isUpdate: true,
-});
-exports.scheduleInterviewValidator = createApplicationValidationPipeline({
-  isUpdate: true,
-  includeInterview: true,
-});
+/**
+ * Validator for updating an application
+ * @type {import('express').RequestHandler[]}
+ */
+exports.updateApplicationValidator = [
+  ...createApplicationValidationPipeline({ isUpdate: true }),
+  validatorMiddleware,
+];
 
+/**
+ * Validator for scheduling an interview
+ * @type {import('express').RequestHandler[]}
+ */
+exports.scheduleInterviewValidator = [
+  ...createApplicationValidationPipeline({
+    isUpdate: true,
+    includeInterview: true,
+  }),
+  validatorMiddleware,
+];
+
+/**
+ * Validator for getting a single application
+ * @type {import('express').RequestHandler[]}
+ */
 exports.getApplicationValidator = [validateApplicationId, validatorMiddleware];
 
+/**
+ * Validator for getting applications by job
+ * @type {import('express').RequestHandler[]}
+ */
 exports.getApplicationsByJobValidator = [
   validateJobId,
   query('status')
@@ -166,6 +206,10 @@ exports.getApplicationsByJobValidator = [
   validatorMiddleware,
 ];
 
+/**
+ * Validator for getting applications by candidate
+ * @type {import('express').RequestHandler[]}
+ */
 exports.getApplicationsByCandidateValidator = [
   validateCandidateId,
   query('status')
@@ -179,30 +223,27 @@ exports.getApplicationsByCandidateValidator = [
   validatorMiddleware,
 ];
 
+/**
+ * Validator for deleting an application
+ * @type {import('express').RequestHandler[]}
+ */
 exports.deleteApplicationValidator = [
   validateApplicationId,
-  body('reason')
-    .optional()
-    .trim()
-    .isLength({ max: 500 })
-    .withMessage('Reason must be 500 characters or less'),
+  validateOptionalStringField('reason', 500),
   validatorMiddleware,
 ];
 
+/**
+ * Validator for searching applications
+ * @type {import('express').RequestHandler[]}
+ */
 exports.searchApplicationsValidator = [
-  query('q')
-    .optional()
-    .trim()
-    .isLength({ min: 2, max: 100 })
-    .withMessage('Search query must be between 2-100 characters'),
+  validateOptionalStringField('q', 100),
   query(['jobId', 'candidateId'])
     .optional()
     .isMongoId()
     .withMessage('Must be a valid MongoDB ObjectId'),
-  query('status')
-    .optional()
-    .isIn(APPLICATION_METADATA.STATUSES.values)
-    .withMessage('Invalid status value'),
+  validateEnumField('status', APPLICATION_METADATA.STATUSES),
   query(['limit', 'page'])
     .optional()
     .isInt({ min: 1 })

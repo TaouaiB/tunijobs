@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const ApiError = require('../../../core/utils/apiError');
+const ApiError = require('../../../core/utils/ApiError');
 
 // Define status transitions (for validation)
 const STATUS_TRANSITIONS = {
