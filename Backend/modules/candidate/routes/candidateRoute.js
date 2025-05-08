@@ -13,7 +13,7 @@ const {
   deleteCandidate,
   getCandidateByUserId,
   deleteCandidateByUserId,
-} = require('../controllers/CandidateController');
+} = require('../controllers/candidateController');
 
 router.get('/candidates', getAllCandidates);
 router.post('/:userId/candidate', createCandidateValidator, createCandidate);

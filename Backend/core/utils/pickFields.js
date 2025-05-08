@@ -71,7 +71,7 @@ const allowedFields = {
   ],
 };
 
-const ApiError = require('./apiError');
+const ApiError = require('./ApiError');
 
 module.exports = function pickFields(data, modelType, strict = false) {
   const fieldList = allowedFields[modelType];

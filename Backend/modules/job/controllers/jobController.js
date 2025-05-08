@@ -1,6 +1,6 @@
 const asyncHandler = require('express-async-handler');
 
-const ApiError = require('../../../core/utils/apiError');
+const ApiError = require('../../../core/utils/ApiError');
 const pickFields = require('../../../core/utils/pickFields');
 
 const Job = require('../models/jobModel');
