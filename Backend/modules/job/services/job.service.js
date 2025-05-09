@@ -81,32 +81,28 @@ exports.updateJob = async (id, updateData) => {
 };
 
 /**
- * @desc    Set job active status
+ * @desc    Toggle job active status
  * @param   {string} id - Job ID
- * @param   {boolean} isActive - New active status
  * @return  {Promise<Object>} Object containing job and message
  * @memberof JobService
  */
-exports.setJobActiveStatus = async (id, isActive) => {
+exports.toggleJobActiveStatus = async (id) => {
   const job = await Job.findById(id);
-  if (!job) return { job: null, message: '' };
+  if (!job) return { job: null, message: 'Job not found' };
 
-  if (job.isActive === isActive) {
-    return {
-      job,
-      message: `Job is already ${isActive ? 'active' : 'inactive'}`,
-    };
-  }
+  // Toggle the isActive status
+  job.isActive = !job.isActive;
 
-  job.isActive = isActive;
-  if (!isActive && job.isFeatured) {
+  // If deactivating, also unfeature the job
+  if (!job.isActive && job.isFeatured) {
     job.isFeatured = false;
   }
 
   await job.save();
+
   return {
     job,
-    message: `Job ${isActive ? 'activated' : 'deactivated'}`,
+    message: `Job ${job.isActive ? 'activated' : 'deactivated'}`,
   };
 };
 

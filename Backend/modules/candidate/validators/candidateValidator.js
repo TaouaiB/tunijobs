@@ -1,181 +1,160 @@
 const { body, param } = require('express-validator');
-const validatorMiddleware = require('../../../core/middlewares/validatorMiddleware');
+const {
+  validateId,
+  validateOptionalId,
+  validateOptionalStringField,
+  validateRequiredStringField,
+  validateUrlField,
+  validateEnumField,
+  validatorMiddleware,
+} = require('../../../core/utils/validatorOrchestrator');
 
 // Constants
-const VALID_AVAILABILITY_OPTIONS = [
-  'immediate',
-  '1-2 weeks',
-  '1 month',
-  '2-3 months',
-  'flexible',
+const CANDIDATE_CONSTANTS = {
+  AVAILABILITY_OPTIONS: {
+    values: ['immediate', '1-2 weeks', '1 month', '2-3 months', 'flexible'],
+    description: 'Candidate availability status',
+  },
+  WORK_TYPES: {
+    values: ['remote', 'onsite', 'hybrid'],
+    description: 'Preferred work arrangement',
+  },
+  CONTRACT_TYPES: {
+    values: ['full-time', 'part-time', 'freelance', 'internship', 'temporary'],
+    description: 'Preferred contract type',
+  },
+};
+
+// ID Validators
+const validateCandidateIdParam = validateId('candidateId', 'Candidate');
+const validateUserIdParam = validateId('userId', 'User');
+
+// Field Validators
+const validateHeadline = validateOptionalStringField('headline', 120);
+const validateEducation = validateRequiredStringField('education');
+const validateExperience = validateRequiredStringField('experience');
+const validateBio = validateOptionalStringField('bio', 2000);
+
+const validateResumeUrl = validateUrlField('resumeUrl');
+const validateGithubUrl = validateUrlField('links.github');
+const validateLinkedinUrl = validateUrlField('links.linkedin');
+const validateOtherUrl = validateUrlField('links.other.platform');
+
+const validateSkills = body('skills')
+  .optional()
+  .isArray({ min: 1 })
+  .withMessage('Skills must be a non-empty array')
+  .custom(
+    (skills) =>
+      Array.isArray(skills) && skills.every((s) => typeof s === 'string')
+  )
+  .withMessage('All skills must be strings');
+
+const validateWorkTypes = body('jobPreferences.workType')
+  .optional()
+  .isArray()
+  .withMessage('Work types must be an array')
+  .custom(
+    (types) =>
+      Array.isArray(types) &&
+      types.every((type) =>
+        CANDIDATE_CONSTANTS.WORK_TYPES.values.includes(type)
+      )
+  )
+  .withMessage(
+    `Work types must be one of: ${CANDIDATE_CONSTANTS.WORK_TYPES.values.join(', ')}`
+  );
+
+const validateAvailability = validateEnumField(
+  'jobPreferences.availability',
+  CANDIDATE_CONSTANTS.AVAILABILITY_OPTIONS
+);
+
+const validateContractTypes = body('jobPreferences.contractTypes')
+  .optional()
+  .isArray()
+  .withMessage('Contract types must be an array')
+  .custom(
+    (types) =>
+      Array.isArray(types) &&
+      types.every((type) =>
+        CANDIDATE_CONSTANTS.CONTRACT_TYPES.values.includes(type)
+      )
+  )
+  .withMessage(
+    `Contract types must be one of: ${CANDIDATE_CONSTANTS.CONTRACT_TYPES.values.join(', ')}`
+  );
+
+const validateSalary = body('jobPreferences.salaryExpectation.amount')
+  .optional()
+  .isNumeric()
+  .withMessage('Salary amount must be a number');
+
+const validateLocations = body('jobPreferences.preferredLocations')
+  .optional()
+  .isArray()
+  .withMessage('Preferred locations must be an array')
+  .custom(
+    (locs) =>
+      Array.isArray(locs) && locs.every((loc) => typeof loc === 'string')
+  )
+  .withMessage('Each location must be a string');
+
+const validateLanguages = body('languages')
+  .optional()
+  .isArray()
+  .withMessage('Languages must be an array')
+  .custom(
+    (langs) =>
+      Array.isArray(langs) && langs.every((lang) => typeof lang === 'string')
+  )
+  .withMessage('Each language must be a string');
+
+// Common Validators
+const commonCandidateValidators = [
+  validateHeadline,
+  validateEducation,
+  validateExperience,
+  validateBio,
+  validateResumeUrl,
+  validateGithubUrl,
+  validateLinkedinUrl,
+  validateOtherUrl,
+  validateSkills,
+  validateWorkTypes,
+  validateAvailability,
+  validateContractTypes,
+  validateSalary,
+  validateLocations,
+  validateLanguages,
 ];
 
-const VALID_WORK_TYPES = ['remote', 'onsite', 'hybrid'];
-
-const VALID_CONTRACT_TYPES = [
-  'full-time',
-  'part-time',
-  'freelance',
-  'internship',
-  'temporary',
-];
-
-// Validate :userId param (for user-based operations)
-exports.validateUserIdParam = [
-  param('userId').isMongoId().withMessage('Invalid User ID format'),
-  validatorMiddleware,
-];
-
-// Validate :candidateId param (for candidate document ID)
-exports.validateCandidateIdParam = [
-  param('candidateId').isMongoId().withMessage('Invalid Candidate ID format'),
-  validatorMiddleware,
-];
-
-// Common fields for create and update
-exports.commonCandidateValidators = [
-  // Professional Details
-  body('headline')
-    .optional()
-    .isString()
-    .trim()
-    .isLength({ max: 120 })
-    .withMessage('Headline must be a string under 120 characters'),
-
-  body('education')
-    .optional()
-    .isString()
-    .trim()
-    .notEmpty()
-    .withMessage('Education must be a non-empty string'),
-
-  body('experience')
-    .optional()
-    .isString()
-    .trim()
-    .notEmpty()
-    .withMessage('Experience must be a non-empty string'),
-
-  body('skills')
-    .optional()
-    .isArray({ min: 1 })
-    .withMessage('Skills must be a non-empty array')
-    .custom((skills) => skills.every((skill) => typeof skill === 'string'))
-    .withMessage('All skills must be strings'),
-
-  body('resumeUrl')
-    .optional()
-    .isURL({ protocols: ['http', 'https'] })
-    .withMessage('Resume must be a valid HTTP/HTTPS URL'),
-
-  body('bio')
-    .optional()
-    .isString()
-    .trim()
-    .isLength({ max: 2000 })
-    .withMessage('Bio must be a string under 2000 characters'),
-
-  // Documents & Links
-
-  body('resumeUrl')
-    .optional()
-    .isURL({ protocols: ['http', 'https'] })
-    .withMessage('Resume URL must be valid'),
-
-  body('links.github')
-    .optional()
-    .isURL({ protocols: ['http', 'https'] })
-    .withMessage('GitHub URL must be valid'),
-
-  body('links.linkedin')
-    .optional()
-    .isURL({ protocols: ['http', 'https'] })
-    .withMessage('LinkedIn URL must be valid'),
-
-  body('links.other.platform')
-    .optional()
-    .isURL({ protocols: ['http', 'https'] })
-    .withMessage('Each link must be a valid URL'),
-
-  // Job Preferences
-  body('jobPreferences.workType')
-    .optional()
-    .isArray()
-    .withMessage('Work type must be an array')
-    .custom((types) => types.every((type) => VALID_WORK_TYPES.includes(type)))
-    .withMessage(`Work type must be one of: ${VALID_WORK_TYPES.join(', ')}`),
-
-  body('jobTypePreferences.availability')
-    .optional()
-    .isIn(VALID_AVAILABILITY_OPTIONS)
-    .withMessage(
-      `Availability must be one of: ${VALID_AVAILABILITY_OPTIONS.join(', ')}`
-    ),
-
-  body('jobPreferences.contractTypes')
-    .optional()
-    .isArray()
-    .withMessage('Contract types must be an array')
-    .custom((types) =>
-      types.every((type) => VALID_CONTRACT_TYPES.includes(type))
-    )
-    .withMessage(
-      `Contract type must be one of: ${VALID_CONTRACT_TYPES.join(', ')}`
-    ),
-
-  body('jobPreferences.salaryExpectation.amount')
-    .optional()
-    .isNumeric()
-    .withMessage('Salary amount must be a number'),
-
-  body('jobPreferences.preferredLocations')
-    .optional()
-    .isArray()
-    .withMessage('Preferred locations must be an array')
-    .custom((locs) => locs.every((loc) => typeof loc === 'string'))
-    .withMessage('Each location must be a string'),
-
-  // Additional Details
-  body('languages')
-    .optional()
-    .isArray()
-    .withMessage('Languages must be an array')
-    .custom((langs) => langs.every((lang) => typeof lang === 'string'))
-    .withMessage('Each language must be a string'),
-];
-
-// Create candidate validator
+// Validator Pipelines
 exports.createCandidateValidator = [
-  ...exports.validateUserIdParam,
-  ...exports.commonCandidateValidators,
-  body('education')
-    .exists()
-    .withMessage('Education is required')
-    .isString()
-    .trim()
-    .notEmpty()
-    .withMessage('Education must be a non-empty string'),
-
-  body('experience')
-    .exists()
-    .withMessage('Experience is required')
-    .isString()
-    .trim()
-    .notEmpty()
-    .withMessage('Experience must be a non-empty string'),
-
+  validateUserIdParam,
+  ...commonCandidateValidators,
   validatorMiddleware,
 ];
 
-// Update candidate validator
 exports.updateCandidateValidator = [
-  ...exports.validateUserIdParam,
-  ...exports.commonCandidateValidators,
+  validateUserIdParam,
+  ...commonCandidateValidators.map(
+    (validator) => (validator.optional && validator.optional()) || validator
+  ),
   validatorMiddleware,
 ];
 
-// Get candidate (by userId) validator
-exports.getCandidateByUserIdValidator = [...exports.validateUserIdParam];
+exports.getCandidateByUserIdValidator = [
+  validateUserIdParam,
+  validatorMiddleware,
+];
 
-// Delete candidate validator (based on candidate Id)
-exports.deleteCandidateValidator = [...exports.validateCandidateIdParam];
+exports.getCandidateByIdValidator = [
+  validateCandidateIdParam,
+  validatorMiddleware,
+];
+
+exports.deleteCandidateValidator = [
+  validateCandidateIdParam,
+  validatorMiddleware,
+];

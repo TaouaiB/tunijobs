@@ -1,9 +1,17 @@
 const { body, param, query } = require('express-validator');
-const slugify = require('slugify');
-const validatorMiddleware = require('../../../core/middlewares/validatorMiddleware');
+const {
+  validateId,
+  validateNameField,
+  validateOptionalNameField,
+  validateRequiredStringField,
+  validateOptionalStringField,
+  validateEnumField,
+  validateUrlField,
+  validatorMiddleware,
+} = require('../../../core/utils/validatorOrchestrator');
 
-// Constants with enhanced metadata
-const JOB_METADATA = {
+// Constants
+const JOB_CONSTANTS = {
   TYPES: {
     values: [
       'full-time',
@@ -23,206 +31,169 @@ const JOB_METADATA = {
     values: ['entry', 'mid', 'senior', 'lead'],
     description: 'Required experience level',
   },
+  LIMITS: {
+    TITLE_MAX: 100,
+    DESCRIPTION_MAX: 10000,
+    CITY_MAX: 50,
+    ADDRESS_MAX: 200,
+    SKILL_MAX: 50,
+    BENEFIT_MAX: 100,
+    META_DESC_MAX: 160,
+  },
 };
 
-// Dynamic enum validator generator
-const createEnumValidator = (field, meta) =>
-  body(field)
-    .isIn(meta.values)
-    .withMessage(
-      `Invalid ${field}. Valid options: ${meta.values.join(', ')} (${meta.description})`
-    );
-
-// ID Validators with enhanced messages
-const validateId = (field, entity) =>
-  param(field)
-    .isMongoId()
-    .withMessage(`Invalid ${entity} ID format (must be MongoDB ObjectId)`);
-
+// Field validators
 const validateJobId = validateId('id', 'Job');
 const validateCompanyId = validateId('companyId', 'Company');
 
-// Enhanced title validator with SEO-friendly slug
-const validateTitle = body('title')
-  .trim()
-  .notEmpty()
-  .withMessage('Job title is required')
-  .isLength({ max: 100 })
-  .withMessage('Title must be 100 characters or less')
-  .customSanitizer((value, { req }) => {
-    const slug = slugify(value, {
-      lower: true,
-      strict: true,
-      remove: /[*+~.()'"!:@]/g,
-    });
+const validateTitle = validateNameField(
+  'title',
+  1,
+  JOB_CONSTANTS.LIMITS.TITLE_MAX
+);
+const validateOptionalTitle = validateOptionalNameField(
+  'title',
+  1,
+  JOB_CONSTANTS.LIMITS.TITLE_MAX
+);
 
-    req.body.slug = slug; // Directly assign the slug
-    return value;
-  });
+const validateDescription = validateRequiredStringField(
+  'description',
+  JOB_CONSTANTS.LIMITS.DESCRIPTION_MAX
+);
+const validateJobType = validateEnumField('jobType', JOB_CONSTANTS.TYPES);
+const validateLocationType = validateEnumField(
+  'locationType',
+  JOB_CONSTANTS.LOCATIONS
+);
+const validateExperienceLevel = validateEnumField(
+  'experienceLevel',
+  JOB_CONSTANTS.LEVELS
+);
 
-// Rich text validator with HTML sanitization
-const validateDescription = body('description')
-  .trim()
-  .notEmpty()
-  .withMessage('Job description is required')
-  .isLength({ max: 10000 })
-  .withMessage('Description must be 10,000 characters or less')
-  .customSanitizer((value) => {
-    // Basic HTML sanitization - would use DOMPurify or similar in production
-    return value.replace(
-      /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
-      ''
-    );
-  });
-
-// Location validator with geocoding hint
 const validatePrimaryLocation = [
-  body('primaryLocation.city')
-    .trim()
-    .notEmpty()
-    .withMessage('City is required for job location')
-    .isLength({ max: 50 })
-    .withMessage('City name must be 50 characters or less')
-    .custom((value, { req }) => {
-      // Hint for potential geocoding integration
-      req.body.locationKeywords = [
-        value.toLowerCase(),
-        ...(req.body.primaryLocation.address || '').toLowerCase().split(/\s+/),
-      ].filter(Boolean);
-      return true;
-    }),
-
-  body('primaryLocation.address')
-    .optional()
-    .trim()
-    .isLength({ max: 200 })
-    .withMessage('Address must be 200 characters or less')
-    .customSanitizer((value) => value.replace(/\s+/g, ' ')), // Normalize whitespace
+  body('primaryLocation')
+    .isObject()
+    .withMessage('primaryLocation must be an object'),
+  validateRequiredStringField(
+    'primaryLocation.city',
+    JOB_CONSTANTS.LIMITS.CITY_MAX
+  ),
+  validateOptionalStringField(
+    'primaryLocation.address',
+    JOB_CONSTANTS.LIMITS.ADDRESS_MAX
+  ),
 ];
 
-// Skills validator with deduplication
-const validateSkillsRequired = [
+const validateSkills = [
   body('skillsRequired')
     .optional()
-    .isArray({ max: 20 })
-    .withMessage('Skills must be an array (max 20 skills)'),
-
+    .isArray()
+    .withMessage('Skills must be an array'),
   body('skillsRequired.*.name')
     .trim()
     .notEmpty()
     .withMessage('Skill name cannot be empty')
-    .isLength({ max: 50 })
-    .withMessage('Skill name must be 50 characters or less')
-    .custom((value, { req }) => {
-      // Deduplicate skills case-insensitively
-      if (req.body.skillsRequired) {
-        const skillsLower = req.body.skillsRequired.map((s) =>
-          s.name.toLowerCase()
-        );
-        if (
-          skillsLower.indexOf(value.toLowerCase()) !==
-          skillsLower.lastIndexOf(value.toLowerCase())
-        ) {
-          throw new Error(`Duplicate skill detected: ${value}`);
-        }
-      }
-      return true;
-    }),
+    .isLength({ max: JOB_CONSTANTS.LIMITS.SKILL_MAX })
+    .withMessage(
+      `Skill name must be ${JOB_CONSTANTS.LIMITS.SKILL_MAX} characters or less`
+    ),
 ];
 
-// Enhanced deadline validator with timezone consideration
 const validateApplicationDeadline = body('applicationDeadline')
   .optional()
   .isISO8601()
-  .withMessage(
-    'Deadline must be in ISO8601 format (e.g., YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)'
-  )
-  .custom((value, { req }) => {
-    const deadline = new Date(value);
-    const now = new Date();
-
-    if (deadline < now) {
+  .withMessage('Deadline must be in ISO8601 format')
+  .custom((value) => {
+    if (new Date(value) < new Date()) {
       throw new Error('Application deadline must be in the future');
     }
-
-    // Warn if deadline is more than 6 months away
-    const sixMonthsFromNow = new Date();
-    sixMonthsFromNow.setMonth(now.getMonth() + 6);
-
-    if (deadline > sixMonthsFromNow) {
-      req.body.deadlineWarning =
-        'Consider setting a deadline within 6 months for better candidate response';
-    }
-
     return true;
   });
 
-// Unified validation pipeline
-const createValidationPipeline = (isUpdate = false) => {
+const validateReferralBonus = body('referralBonus.amount')
+  .optional()
+  .isFloat({ min: 0 })
+  .withMessage('Referral bonus must be a positive number');
+
+const validateBenefits = body('benefits')
+  .optional()
+  .isArray()
+  .withMessage('Benefits must be an array')
+  .custom((benefits) => {
+    return benefits.every(
+      (b) =>
+        typeof b === 'string' && b.length <= JOB_CONSTANTS.LIMITS.BENEFIT_MAX
+    );
+  })
+  .withMessage(
+    `Each benefit must be a string under ${JOB_CONSTANTS.LIMITS.BENEFIT_MAX} characters`
+  );
+
+const validateStatusFlags = [
+  body('isActive')
+    .optional()
+    .isBoolean()
+    .withMessage('isActive must be boolean'),
+  body('isFeatured')
+    .optional()
+    .isBoolean()
+    .withMessage('isFeatured must be boolean'),
+  body('isConfidential')
+    .optional()
+    .isBoolean()
+    .withMessage('isConfidential must be boolean'),
+];
+
+const validateMetaData = [
+  body('meta.keywords')
+    .optional()
+    .isArray()
+    .withMessage('Keywords must be an array'),
+  validateOptionalStringField(
+    'meta.description',
+    JOB_CONSTANTS.LIMITS.META_DESC_MAX
+  ),
+];
+
+// Validation pipelines
+const createJobValidationPipeline = (isUpdate = false) => {
   const pipeline = [
     isUpdate ? validateJobId : validateCompanyId,
-
-    // Core fields
-    isUpdate ? validateTitle.optional() : validateTitle,
+    isUpdate ? validateOptionalTitle : validateTitle,
     isUpdate ? validateDescription.optional() : validateDescription,
-    createEnumValidator('jobType', JOB_METADATA.TYPES).optional(isUpdate),
-    createEnumValidator('locationType', JOB_METADATA.LOCATIONS).optional(
-      isUpdate
-    ),
+    isUpdate ? validateJobType.optional() : validateJobType,
+    isUpdate ? validateLocationType.optional() : validateLocationType,
     ...validatePrimaryLocation.map((v) => (isUpdate ? v.optional() : v)),
-    ...validateSkillsRequired.map((v) => (isUpdate ? v.optional() : v)),
-    createEnumValidator('experienceLevel', JOB_METADATA.LEVELS).optional(
-      isUpdate
-    ),
+    ...validateSkills.map((v) => (isUpdate ? v.optional() : v)),
+    isUpdate ? validateExperienceLevel.optional() : validateExperienceLevel,
     validateApplicationDeadline,
-
-    // Optional fields
-    body('referralBonus.amount')
-      .optional()
-      .isFloat({ min: 0 })
-      .withMessage('Referral bonus must be a positive number'),
-
-    body('benefits.*')
-      .optional()
-      .trim()
-      .isLength({ max: 100 })
-      .withMessage('Benefit must be 100 characters or less'),
-
-    body(['isActive', 'isFeatured', 'isConfidential'])
-      .optional()
-      .isBoolean()
-      .withMessage('Status flags must be boolean values'),
-
-    // SEO metadata
-    body('meta.keywords')
-      .optional()
-      .isArray({ max: 10 })
-      .withMessage('SEO keywords must be an array (max 10 items)'),
-
-    body('meta.description')
-      .optional()
-      .isLength({ max: 160 })
-      .withMessage('Meta description must be 160 characters or less'),
+    validateReferralBonus,
+    validateBenefits,
+    ...validateStatusFlags,
+    ...validateMetaData.map((v) => v.optional()),
   ];
 
   return pipeline.concat(validatorMiddleware);
 };
 
-// Export creative validators
-exports.createJobValidator = createValidationPipeline(false);
-exports.updateJobValidator = createValidationPipeline(true);
+// Exported validators
+exports.createJobValidator = createJobValidationPipeline(false);
+exports.updateJobValidator = createJobValidationPipeline(true);
+
 exports.patchJobValidator = [
   validateJobId,
   body().isObject().notEmpty().withMessage('Update data cannot be empty'),
-  ...createValidationPipeline(true),
+  ...createJobValidationPipeline(true),
 ];
 
 exports.getJobValidator = [
   validateJobId,
-  query(['populate', 'fields'])
+  query('populate')
     .optional()
     .isString()
-    .withMessage('Query params must be strings'),
+    .withMessage('Populate must be a string'),
+  query('fields').optional().isString().withMessage('Fields must be a string'),
   validatorMiddleware,
 ];
 
@@ -235,24 +206,20 @@ exports.deleteJobValidator = [
   validatorMiddleware,
 ];
 
-// Bonus: Job search validator
 exports.searchJobsValidator = [
   query('q')
     .optional()
     .trim()
     .isLength({ min: 2, max: 100 })
-    .withMessage('Search query must be between 2-100 characters'),
-
+    .withMessage('Search query must be between 2–100 characters'),
   query('location')
     .optional()
     .trim()
     .isLength({ max: 50 })
     .withMessage('Location filter must be 50 characters or less'),
-
   query('remote')
     .optional()
     .isBoolean()
     .withMessage('Remote filter must be boolean'),
-
   validatorMiddleware,
 ];

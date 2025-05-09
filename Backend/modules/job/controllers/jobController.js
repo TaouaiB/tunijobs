@@ -92,7 +92,7 @@ exports.updateJob = asyncHandler(async (req, res, next) => {
  * @memberof JobController
  */
 exports.setJobActiveStatus = asyncHandler(async (req, res, next) => {
-  const result = await jobService.setJobActiveStatus(
+  const result = await jobService.toggleJobActiveStatus(
     req.params.id,
     req.body.isActive
   );
