@@ -3,6 +3,7 @@ const { processImage, cleanupFiles } = require('../utils/imageProcessor');
 const ApiError = require('../utils/ApiError');
 const path = require('path');
 const fs = require('fs');
+const { v4: uuidv4 } = require('uuid');
 
 // Avatar-specific upload configuration
 const uploadAvatar = createUploader({
@@ -17,16 +18,17 @@ const processAvatar = async (req, res, next) => {
 
   try {
     const outputPath = path.join(__dirname, '../../uploads/avatars');
-    const filename = `avatar_${req.params.id}_${Date.now()}.webp`;
+    // Replace manual naming with UUID + original extension
+    const originalExt = path.extname(req.file.originalname); // .jpg, .png etc.
+    const filename = `avatar_${uuidv4()}${originalExt}`; // Format: "avatar_uuid.ext"
 
     const { path: filePath, url } = await processImage(
       req.file.buffer,
-      filename,
+      filename, // Now "avatar_f47ac10b-58cc-4372-a567-0e02b2c3d479.jpg"
       outputPath
     );
 
     req.avatarInfo = {
-      // Standardized property name
       path: filePath,
       url: `/uploads/avatars/${filename}`,
       filename: filename,
@@ -37,5 +39,4 @@ const processAvatar = async (req, res, next) => {
     next(new ApiError('Avatar processing failed: ' + err.message, 500));
   }
 };
-
 exports.handleAvatarUpload = [uploadAvatar, processAvatar];
