@@ -107,15 +107,26 @@ const validateInterview = [
     .isISO8601()
     .withMessage('Interview time must be in ISO8601 format')
     .custom((value) => {
-      if (new Date(value) < new Date())
+      if (!value.endsWith('Z') && !/[+-]\d{2}:\d{2}$/.test(value)) {
+        throw new Error('Timezone offset or Zulu time (Z) required');
+      }
+      if (new Date(value) < new Date()) {
         throw new Error('Interview time must be in the future');
+      }
       return true;
     }),
   validateEnumField('interviewType', APPLICATION_METADATA.INTERVIEW_TYPES),
   validateOptionalStringField('location', 200),
   body('attendees')
     .isArray({ min: 1, max: 5 })
-    .withMessage('Must have between 1-5 attendees'),
+    .withMessage('Must have between 1-5 attendees')
+    .custom((attendees) => {
+      const userIds = attendees.map((a) => a.userId);
+      if (new Set(userIds).size !== userIds.length) {
+        throw new Error('Duplicate attendees not allowed');
+      }
+      return true;
+    }),
   body('attendees.*.userId')
     .isMongoId()
     .withMessage('Attendee ID must be a valid MongoDB ObjectId'),
@@ -239,6 +250,13 @@ exports.deleteApplicationValidator = [
  */
 exports.searchApplicationsValidator = [
   validateOptionalStringField('q', 100),
+  query().custom((query) => {
+    const { jobId, candidateId } = query;
+    if (!jobId && !candidateId) {
+      throw new Error('At least one search parameter ( jobId, candidateId) is required');
+    }
+    return true;
+  }),
   query(['jobId', 'candidateId'])
     .optional()
     .isMongoId()

@@ -22,9 +22,9 @@ const allowedFields = {
     'resumeUrl',
     'links',
     'jobPreferences',
-    'languages',
-    'jobTypePreferences',
+    'jobTypePreferences', 
     'preferredJobTitles',
+    'languages',
   ],
   company: [
     'companyName',

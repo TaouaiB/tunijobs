@@ -9,6 +9,8 @@ const {
   validatorMiddleware,
 } = require('../../../core/utils/validatorOrchestrator');
 
+const VALIDATION = require('../../../core/constants/validation');
+
 // Constants
 const CANDIDATE_CONSTANTS = {
   AVAILABILITY_OPTIONS: {
@@ -38,11 +40,21 @@ const validateBio = validateOptionalStringField('bio', 2000);
 const validateResumeUrl = validateUrlField('resumeUrl');
 const validateGithubUrl = validateUrlField('links.github');
 const validateLinkedinUrl = validateUrlField('links.linkedin');
-const validateOtherUrl = validateUrlField('links.other.platform');
+
+const validateOtherUrl = body('links.other')
+  .optional()
+  .isArray({ max: 3 })
+  .withMessage('Maximum 3 additional links allowed')
+  .custom((links) =>
+    links.every((l) => validateUrlField().run({ body: { value: l.platform } }))
+  );
 
 const validateSkills = body('skills')
   .optional()
-  .isArray({ min: 1 })
+  .isArray({
+    min: 1,
+    max: VALIDATION.ARRAY_MAX_LIMITS.SKILLS,
+  })
   .withMessage('Skills must be a non-empty array')
   .custom(
     (skills) =>
@@ -50,7 +62,7 @@ const validateSkills = body('skills')
   )
   .withMessage('All skills must be strings');
 
-const validateWorkTypes = body('jobPreferences.workType')
+const validateWorkTypes = body('jobTypePreferences.workType')
   .optional()
   .isArray()
   .withMessage('Work types must be an array')
@@ -70,7 +82,7 @@ const validateAvailability = validateEnumField(
   CANDIDATE_CONSTANTS.AVAILABILITY_OPTIONS
 );
 
-const validateContractTypes = body('jobPreferences.contractTypes')
+const validateContractType = body('jobTypePreferences.contractType')
   .optional()
   .isArray()
   .withMessage('Contract types must be an array')
@@ -85,11 +97,64 @@ const validateContractTypes = body('jobPreferences.contractTypes')
     `Contract types must be one of: ${CANDIDATE_CONSTANTS.CONTRACT_TYPES.values.join(', ')}`
   );
 
-const validateSalary = body('jobPreferences.salaryExpectation.amount')
-  .optional()
-  .isNumeric()
-  .withMessage('Salary amount must be a number');
+/**
+ * Validates salary range with orchestrated constraints
+ * @returns {import('express-validator').ValidationChain[]}
+ */
+const validateSalaryRange = () => {
+  const salaryField = 'jobTypePreferences.desiredSalary';
+  const minField = `${salaryField}.min`;
+  const maxField = `${salaryField}.max`;
 
+  return [
+    // Min salary validation
+    body(minField)
+      .optional()
+      .isFloat({
+        min: VALIDATION.SALARY.MIN,
+        max: VALIDATION.SALARY.MAX,
+      })
+      .withMessage(
+        `Minimum salary must be between ${VALIDATION.SALARY.MIN} and ${VALIDATION.SALARY.MAX}`
+      )
+      .bail()
+      .custom((min, { req }) => {
+        const max = req.body.jobTypePreferences?.desiredSalary?.max;
+        return max === undefined || min <= max;
+      })
+      .withMessage('Minimum salary cannot exceed maximum salary'),
+
+    // Max salary validation
+    body(maxField)
+      .optional()
+      .isFloat({
+        min: VALIDATION.SALARY.MIN,
+        max: VALIDATION.SALARY.MAX,
+      })
+      .withMessage(
+        `Maximum salary must be between ${VALIDATION.SALARY.MIN} and ${VALIDATION.SALARY.MAX}`
+      )
+      .bail()
+      .custom((max, { req }) => {
+        const min = req.body.jobTypePreferences?.desiredSalary?.min;
+        return min === undefined || max >= min;
+      })
+      .withMessage('Maximum salary cannot be less than minimum salary'),
+  ];
+};
+
+const validateJobTitles = body('preferredJobTitles')
+  .optional()
+  .isArray({ max: VALIDATION.ARRAY_MAX_LIMITS.JOB_TITLES || 5 })
+  .withMessage('Maximum 5 preferred job titles allowed');
+
+const validateCurrency = validateEnumField(
+  'jobPreferences.salaryExpectation.currency',
+  {
+    values: VALIDATION.SALARY.CURRENCIES,
+    description: 'Allowed currency codes',
+  }
+);
 const validateLocations = body('jobPreferences.preferredLocations')
   .optional()
   .isArray()
@@ -123,8 +188,8 @@ const commonCandidateValidators = [
   validateSkills,
   validateWorkTypes,
   validateAvailability,
-  validateContractTypes,
-  validateSalary,
+  validateCurrency,
+  validateJobTitles,
   validateLocations,
   validateLanguages,
 ];
@@ -133,6 +198,7 @@ const commonCandidateValidators = [
 exports.createCandidateValidator = [
   validateUserIdParam,
   ...commonCandidateValidators,
+  ...validateSalaryRange(),
   validatorMiddleware,
 ];
 
@@ -141,6 +207,7 @@ exports.updateCandidateValidator = [
   ...commonCandidateValidators.map(
     (validator) => (validator.optional && validator.optional()) || validator
   ),
+  ...validateSalaryRange(),
   validatorMiddleware,
 ];
 

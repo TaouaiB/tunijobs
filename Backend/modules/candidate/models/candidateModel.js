@@ -58,7 +58,8 @@ const candidateSchema = new mongoose.Schema(
     // ======================
     // 4. JOB PREFERENCES (Tunisian context)
     // ======================
-    jobPreferences: {
+    jobTypePreferences: {
+      // Rename from jobPreferences
       workType: [
         {
           type: String,
@@ -66,13 +67,9 @@ const candidateSchema = new mongoose.Schema(
           default: 'onsite',
         },
       ],
-      availability: {
-        type: String,
-        enum: ['immediate', '1-2 weeks', '1 month', '2-3 months', 'flexible'],
-        default: 'flexible',
-      },
-      contractTypes: [
+      contractType: [
         {
+          // Keep singular (more natural)
           type: String,
           enum: [
             'full-time',
@@ -83,19 +80,24 @@ const candidateSchema = new mongoose.Schema(
           ],
         },
       ],
-      salaryExpectation: {
-        amount: {
-          type: Number,
-          min: [0, 'Salary cannot be negative'],
-        },
+      desiredSalary: {
+        // More useful than single amount
+        min: { type: Number, min: 0 },
+        max: { type: Number, min: 0 },
       },
-      preferredLocations: [
-        {
-          type: String,
-          trim: true,
-        },
-      ],
+      availability: {
+        type: String,
+        enum: ['immediate', '1-2 weeks', '1 month', '2-3 months', 'flexible'],
+        default: 'flexible',
+      },
     },
+    preferredJobTitles: [
+      {
+        // Add as top-level field
+        type: String,
+        trim: true,
+      },
+    ],
 
     // ======================
     // 5. ADDITIONAL DETAILS

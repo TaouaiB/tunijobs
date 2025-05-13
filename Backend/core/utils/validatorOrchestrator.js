@@ -1,22 +1,7 @@
 const { body, param } = require('express-validator');
 const slugify = require('slugify');
 const validatorMiddleware = require('../middlewares/validatorMiddleware');
-
-/**
- * Common validation constants and defaults
- */
-const VALIDATION_CONSTANTS = {
-  ID_REGEX: /^[0-9a-fA-F]{24}$/,
-  DEFAULTS: {
-    MIN_NAME_LENGTH: 3,
-    MAX_NAME_LENGTH: 32,
-    MAX_STRING_LENGTH: 255,
-    PASSWORD_MIN_LENGTH: 6,
-    PHONE_LOCALE: 'ar-TN',
-    URL_PROTOCOLS: ['http', 'https'],
-    SLUGIFY_OPTIONS: { lower: true, strict: true },
-  },
-};
+const VALIDATION = require('../constants/validation');
 
 // ==============================================
 // Core Field Validators
@@ -53,8 +38,8 @@ const validateOptionalId = (field, entity) =>
  */
 const validateNameField = (
   field,
-  min = VALIDATION_CONSTANTS.DEFAULTS.MIN_NAME_LENGTH,
-  max = VALIDATION_CONSTANTS.DEFAULTS.MAX_NAME_LENGTH
+  min = VALIDATION.NAME_MIN_LENGTH,
+  max = VALIDATION.NAME_MAX_LENGTH
 ) =>
   body(field)
     .trim()
@@ -65,12 +50,7 @@ const validateNameField = (
     .isLength({ max })
     .withMessage(`${field} must be at most ${max} characters`)
     .custom((value, { req }) => {
-      if (field === 'name' || field === 'companyName') {
-        req.body.slug = slugify(
-          value,
-          VALIDATION_CONSTANTS.DEFAULTS.SLUGIFY_OPTIONS
-        );
-      }
+      req.body.slug = slugify(value, VALIDATION.SLUGIFY_OPTIONS);
       return true;
     });
 
@@ -83,8 +63,8 @@ const validateNameField = (
  */
 const validateOptionalNameField = (
   field,
-  min = VALIDATION_CONSTANTS.DEFAULTS.MIN_NAME_LENGTH,
-  max = VALIDATION_CONSTANTS.DEFAULTS.MAX_NAME_LENGTH
+  min = VALIDATION.NAME_MIN_LENGTH,
+  max = VALIDATION.NAME_MAX_LENGTH
 ) =>
   body(field)
     .optional()
@@ -95,11 +75,8 @@ const validateOptionalNameField = (
     .isLength({ max })
     .withMessage(`${field} must be at most ${max} characters`)
     .custom((value, { req }) => {
-      if ((field === 'name' || field === 'companyName') && value) {
-        req.body.slug = slugify(
-          value,
-          VALIDATION_CONSTANTS.DEFAULTS.SLUGIFY_OPTIONS
-        );
+      if (value) {
+        req.body.slug = slugify(value, VALIDATION.SLUGIFY_OPTIONS);
       }
       return true;
     });
@@ -140,7 +117,7 @@ const validateOptionalEmailField = (field = 'email') =>
  */
 const validatePasswordField = (
   field = 'password',
-  min = VALIDATION_CONSTANTS.DEFAULTS.PASSWORD_MIN_LENGTH
+  min = VALIDATION.PASSWORD_MIN_LENGTH
 ) =>
   body(field)
     .notEmpty()
@@ -156,7 +133,7 @@ const validatePasswordField = (
  */
 const validateOptionalPasswordField = (
   field = 'password',
-  min = VALIDATION_CONSTANTS.DEFAULTS.PASSWORD_MIN_LENGTH
+  min = VALIDATION.PASSWORD_MIN_LENGTH
 ) =>
   body(field)
     .optional()
@@ -172,7 +149,7 @@ const validateOptionalPasswordField = (
  */
 const validatePhoneField = (
   field = 'phone',
-  locale = VALIDATION_CONSTANTS.DEFAULTS.PHONE_LOCALE
+  locale = VALIDATION.PHONE_LOCALE
 ) =>
   body(field)
     .optional()
@@ -181,22 +158,44 @@ const validatePhoneField = (
     .withMessage(`Please provide a valid ${locale} phone number`);
 
 /**
- * Validate an optional URL field
- * @param {string} field - Field name
- * @param {string[]} protocols - Allowed protocols
+ * Validates a URL field with protocol checking
+ * @param {string} field - Field name to validate
+ * @param {string[]|object} [protocols=['http', 'https']] - Either:
+ *   - Array of allowed protocols (e.g., ['https'])
+ *   - Configuration object { protocols: string[], require_protocol: boolean }
  * @returns {import('express-validator').ValidationChain}
  */
 const validateUrlField = (
   field,
-  protocols = VALIDATION_CONSTANTS.DEFAULTS.URL_PROTOCOLS
-) =>
-  body(field)
+  protocols = VALIDATION.URL?.PROTOCOLS || ['http', 'https']
+) => {
+  // Handle both array and object configurations
+  const protocolConfig =
+    Array.isArray(protocols) ?
+      { protocols, require_protocol: VALIDATION.URL?.REQUIRE_PROTOCOL ?? true }
+    : {
+        protocols: protocols.protocols || ['http', 'https'],
+        require_protocol:
+          protocols.require_protocol ??
+          VALIDATION.URL?.REQUIRE_PROTOCOL ??
+          true,
+      };
+
+  // Validate protocols
+  if (!Array.isArray(protocolConfig.protocols)) {
+    throw new Error('URL protocols must be an array');
+  }
+
+  return body(field)
     .optional()
     .bail()
     .trim()
-    .isURL({ protocols })
-    .withMessage(`Invalid URL (must include ${protocols.join(' or ')})`);
-
+    .isURL(protocolConfig)
+    .withMessage(
+      `Invalid URL - must use ${protocolConfig.protocols.join(' or ')} ` +
+        `protocol${protocolConfig.protocols.length > 1 ? 's' : ''}`
+    );
+};
 /**
  * Validate an optional string field with max length
  * @param {string} field - Field name
@@ -205,7 +204,7 @@ const validateUrlField = (
  */
 const validateOptionalStringField = (
   field,
-  max = VALIDATION_CONSTANTS.DEFAULTS.MAX_STRING_LENGTH
+  max = VALIDATION.DEFAULT_MAX_LENGTH
 ) =>
   body(field)
     .optional()
@@ -222,7 +221,7 @@ const validateOptionalStringField = (
  */
 const validateRequiredStringField = (
   field,
-  max = VALIDATION_CONSTANTS.DEFAULTS.MAX_STRING_LENGTH
+  max = VALIDATION.DEFAULT_MAX_LENGTH
 ) =>
   body(field)
     .trim()
@@ -304,9 +303,6 @@ const deleteEntityValidator = () => [
 ];
 
 module.exports = {
-  // Constants
-  VALIDATION_CONSTANTS,
-
   // Field validators
   validateId,
   validateOptionalId,
