@@ -1,5 +1,42 @@
 const asyncHandler = require('express-async-handler');
 const UserService = require('../services/user.service');
+const {
+  handleAvatarUpload,
+} = require('../../../core/middlewares/upload.middleware');
+
+/**
+ * @desc    Update user avatar
+ * @route   PUT /api/v1/users/me/avatar
+ * @access  Private
+ * @param   {Object} req.file - Uploaded file from middleware
+ * @param   {string} req.file.path - Path to the uploaded file
+ * @param   {string} req.file.filename - Filename of the uploaded file
+ * @param   {string} req.file.mimetype - MIME type of the uploaded file
+ * @param   {string} req.file.size - Size of the uploaded file
+ * @returns {Object} Updated user data with new avatar URL
+ */
+exports.updateAvatar = [
+  handleAvatarUpload,
+  asyncHandler(async (req, res) => {
+    const result = await UserService.updateAvatar(
+      req.params.id,
+      req.avatarInfo // From middleware
+    );
+
+    res.status(200).json({
+      status: 'success',
+      data: result,
+    });
+  }),
+];
+
+exports.resetAvatar = asyncHandler(async (req, res) => {
+  await UserService.resetAvatar(req.params.id);
+  res.status(200).json({
+    status: 'success',
+    data: { avatarUrl: '/uploads/avatars/default_avatar.jpg' },
+  });
+});
 
 /**
  * @desc    Create a new user
@@ -10,9 +47,9 @@ const UserService = require('../services/user.service');
  */
 exports.createUser = asyncHandler(async (req, res, next) => {
   const user = await UserService.createUser(req.body);
-  res.status(201).json({ 
-    status: 'success', 
-    data: { user } 
+  res.status(201).json({
+    status: 'success',
+    data: { user },
   });
 });
 
@@ -24,10 +61,10 @@ exports.createUser = asyncHandler(async (req, res, next) => {
  */
 exports.getAllUsers = asyncHandler(async (req, res, next) => {
   const users = await UserService.getAllUsers();
-  res.status(200).json({ 
-    status: 'success', 
-    results: users.length, 
-    data: { users } 
+  res.status(200).json({
+    status: 'success',
+    results: users.length,
+    data: { users },
   });
 });
 
@@ -40,9 +77,9 @@ exports.getAllUsers = asyncHandler(async (req, res, next) => {
  */
 exports.getUserById = asyncHandler(async (req, res, next) => {
   const user = await UserService.getUserById(req.params.id);
-  res.status(200).json({ 
-    status: 'success', 
-    data: { user } 
+  res.status(200).json({
+    status: 'success',
+    data: { user },
   });
 });
 
@@ -56,9 +93,9 @@ exports.getUserById = asyncHandler(async (req, res, next) => {
  */
 exports.updateUser = asyncHandler(async (req, res, next) => {
   const user = await UserService.updateUser(req.params.id, req.body);
-  res.status(200).json({ 
-    status: 'success', 
-    data: { user } 
+  res.status(200).json({
+    status: 'success',
+    data: { user },
   });
 });
 
@@ -83,9 +120,9 @@ exports.deleteUser = asyncHandler(async (req, res, next) => {
  */
 exports.blockUser = asyncHandler(async (req, res, next) => {
   const user = await UserService.blockUser(req.params.id);
-  res.status(200).json({ 
-    status: 'success', 
-    data: { user } 
+  res.status(200).json({
+    status: 'success',
+    data: { user },
   });
 });
 
@@ -98,9 +135,9 @@ exports.blockUser = asyncHandler(async (req, res, next) => {
  */
 exports.unblockUser = asyncHandler(async (req, res, next) => {
   const user = await UserService.unblockUser(req.params.id);
-  res.status(200).json({ 
-    status: 'success', 
-    data: { user } 
+  res.status(200).json({
+    status: 'success',
+    data: { user },
   });
 });
 
@@ -113,9 +150,9 @@ exports.unblockUser = asyncHandler(async (req, res, next) => {
  */
 exports.deactivateUser = asyncHandler(async (req, res, next) => {
   const user = await UserService.deactivateUser(req.params.id);
-  res.status(200).json({ 
-    status: 'success', 
-    data: { user } 
+  res.status(200).json({
+    status: 'success',
+    data: { user },
   });
 });
 
@@ -128,8 +165,8 @@ exports.deactivateUser = asyncHandler(async (req, res, next) => {
  */
 exports.reactivateUser = asyncHandler(async (req, res, next) => {
   const user = await UserService.reactivateUser(req.params.id);
-  res.status(200).json({ 
-    status: 'success', 
-    data: { user } 
+  res.status(200).json({
+    status: 'success',
+    data: { user },
   });
 });

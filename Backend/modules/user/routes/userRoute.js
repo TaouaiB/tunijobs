@@ -10,6 +10,8 @@ const {
   unblockUser,
   deactivateUser,
   reactivateUser,
+  updateAvatar,
+  resetAvatar,
 } = require('../controllers/userController');
 const {
   createUserValidator,
@@ -35,5 +37,8 @@ router.patch('/:id/block', blockUserValidator, blockUser);
 router.patch('/:id/unblock', unblockUserValidator, unblockUser);
 router.patch('/:id/deactivate', deactivateUserValidator, deactivateUser);
 router.patch('/:id/activate', activateUserValidator, reactivateUser);
+
+router.patch('/:id/avatar', updateAvatar);
+router.patch('/:id/reset-avatar', resetAvatar);
 
 module.exports = router;

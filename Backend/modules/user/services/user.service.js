@@ -2,6 +2,12 @@ const ApiError = require('../../../core/utils/ApiError');
 const pickFields = require('../../../core/utils/pickFields');
 const User = require('../models/userModel');
 
+const {
+  processImage,
+  cleanupFiles,
+} = require('../../../core/utils/imageProcessor');
+const path = require('path');
+
 /**
  * Service layer for user-related operations
  */
@@ -14,6 +20,66 @@ class UserService {
    */
   static async createUser(userData) {
     return await User.create(pickFields(userData, 'user', true));
+  }
+
+  /**
+   * Update user avatar (with critical cleanup)
+   * @param {string} id - User ID
+   * @param {Object} avatarInfo - { filename: string, url: string }
+   * @returns {Promise<{ avatarUrl: string, filename: string }>}
+   * @throws {ApiError} If any step fails
+   */
+  static async updateAvatar(id, avatarInfo) {
+    // 1) VALIDATE INPUT
+    if (!id) throw new ApiError('User ID is required', 400);
+    if (!avatarInfo?.filename)
+      throw new ApiError('Avatar filename is required', 400);
+
+    // 2) GET OLD AVATAR PATH BEFORE UPDATING
+    const user = await User.findById(id).select('avatar');
+    if (!user) throw new ApiError(`No user found with id: ${id}`, 404);
+    const oldAvatarPath =
+      user.avatar !== 'default_avatar.jpg' ?
+        path.join(process.cwd(), 'uploads', 'avatars', user.avatar)
+      : null;
+
+    // 3) UPDATE USER
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { avatar: avatarInfo.filename },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    // 4) CRITICAL CLEANUP (throws on failure)
+    if (oldAvatarPath) {
+      await cleanupFiles([oldAvatarPath]); // Let it throw naturally
+    }
+
+    return {
+      avatarUrl: avatarInfo.url,
+      filename: avatarInfo.filename,
+    };
+  }
+
+  /**
+   * Reset avatar to default
+   * @param {string} id - User ID
+   */
+  static async resetAvatar(id) {
+    const user = await User.findById(id);
+    if (!user) throw new ApiError('User not found', 404);
+
+    if (user.avatar !== 'default_avatar.jpg') {
+      const oldPath = path.join(
+        __dirname,
+        '../../../uploads/avatars',
+        user.avatar
+      );
+      cleanupFiles([oldPath]);
+
+      user.avatar = 'default_avatar.jpg';
+      await user.save();
+    }
   }
 
   /**
