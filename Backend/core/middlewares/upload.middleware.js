@@ -1,42 +1,61 @@
-const { createUploader } = require('../config/multer.config');
-const { processImage, cleanupFiles } = require('../utils/imageProcessor');
-const ApiError = require('../utils/ApiError');
+// uploadMiddleware.js
 const path = require('path');
-const fs = require('fs');
+const ApiError = require('../utils/ApiError');
 const { v4: uuidv4 } = require('uuid');
+const { createUploader } = require('../config/multer.config');
+const { processAvatar, cleanupFiles } = require('../utils/imageProcessor');
 
-// Avatar-specific upload configuration
-const uploadAvatar = createUploader({
-  fieldName: 'avatar',
-  allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
-  maxSize: 3 * 1024 * 1024, // 3MB
-});
+exports.avatarUploadHandler = (req, res, next) => {
+  const upload = createUploader({
+    fieldName: 'avatar',
+    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
+    maxSize: 3 * 1024 * 1024,
+  });
 
-// Avatar processing middleware
-const processAvatar = async (req, res, next) => {
-  if (!req.file) return next();
+  upload(req, res, async (err) => {
+    if (err) {
+      return next(
+        new ApiError(
+          err.code === 'LIMIT_FILE_SIZE' ?
+            'File too large (max 3MB)'
+          : 'Invalid file type',
+          400
+        )
+      );
+    }
 
-  try {
-    const outputPath = path.join(__dirname, '../../uploads/avatars');
-    // Replace manual naming with UUID + original extension
-    const originalExt = path.extname(req.file.originalname); // .jpg, .png etc.
-    const filename = `avatar_${uuidv4()}${originalExt}`; // Format: "avatar_uuid.ext"
+    if (!req.file) {
+      return next(new ApiError('No avatar file provided', 400));
+    }
 
-    const { path: filePath, url } = await processImage(
-      req.file.buffer,
-      filename, // Now "avatar_f47ac10b-58cc-4372-a567-0e02b2c3d479.jpg"
-      outputPath
-    );
+    try {
+      const outputDir = path.join(__dirname, '../../uploads/avatars');
+      const filename = `avt_${uuidv4().slice(0, 8)}${path.extname(req.file.originalname)}`;
 
-    req.avatarInfo = {
-      path: filePath,
-      url: `/uploads/avatars/${filename}`,
-      filename: filename,
-    };
-    next();
-  } catch (err) {
-    cleanupFiles([req.file.path]);
-    next(new ApiError('Avatar processing failed: ' + err.message, 500));
-  }
+      // Define your image variants (customize as needed)
+      const variants = [
+        { width: 100, height: 100, suffix: '_thumb' },
+        { width: 300, height: 300, suffix: '_medium' },
+      ];
+
+      // Process image WITH variants using safeWrite
+      const result = await processAvatar(
+        req.file.buffer,
+        filename,
+        outputDir,
+        variants
+      );
+
+      req.avatarInfo = {
+        filename, // or set to null if unused
+        url: result.url,
+        variants: result.variants,
+      };
+
+      next();
+    } catch (error) {
+      await cleanupFiles([req.file.path]).catch(console.error);
+      next(new ApiError('Avatar processing failed: ' + error.message, 500));
+    }
+  });
 };
-exports.handleAvatarUpload = [uploadAvatar, processAvatar];

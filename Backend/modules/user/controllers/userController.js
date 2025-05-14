@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const UserService = require('../services/user.service');
 const {
-  handleAvatarUpload,
+  avatarUploadHandler,
 } = require('../../../core/middlewares/upload.middleware');
 
 /**
@@ -16,7 +16,7 @@ const {
  * @returns {Object} Updated user data with new avatar URL
  */
 exports.updateAvatar = [
-  handleAvatarUpload,
+  avatarUploadHandler,
   asyncHandler(async (req, res) => {
     const result = await UserService.updateAvatar(
       req.params.id,

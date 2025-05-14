@@ -23,13 +23,15 @@ class CompanyService {
     ]);
 
     if (!user) throw new ApiError('User not found', 404);
-    if (user.role !== 'company') throw new ApiError('User must have company role', 400);
-    if (existingCompany) throw new ApiError('Company profile already exists', 409);
+    if (user.role !== 'company')
+      throw new ApiError('User must have company role', 400);
+    if (existingCompany)
+      throw new ApiError('Company profile already exists', 409);
 
     return await Company.create({
       ...pickFields(companyData, 'company', true),
       userId,
-    }).then(doc => doc.populate('userId', 'name _id'));
+    }).then((doc) => doc.populate('userId', 'name _id'));
   }
 
   /**
@@ -43,8 +45,10 @@ class CompanyService {
     const user = await User.findById(userId);
     if (!user) throw new ApiError('User not found', 404);
 
-    const company = await Company.findOne({ userId })
-      .populate('userId', 'name _id');
+    const company = await Company.findOne({ userId }).populate(
+      'userId',
+      'name _id'
+    );
 
     if (!company) throw new ApiError('Company profile not found', 404);
     return company;
@@ -60,7 +64,8 @@ class CompanyService {
    */
   static async updateCompanyProfile(userId, updateData) {
     const user = await User.findById(userId);
-    if (user?.role !== 'company') throw new ApiError('User must have company role', 400);
+    if (user?.role !== 'company')
+      throw new ApiError('User must have company role', 400);
 
     const updatedCompany = await Company.findOneAndUpdate(
       { userId },
@@ -105,8 +110,10 @@ class CompanyService {
    * @throws {ApiError} If profile not found (404)
    */
   static async getCompanyById(companyId) {
-    const company = await Company.findById(companyId)
-      .populate('userId', 'name _id');
+    const company = await Company.findById(companyId).populate(
+      'userId',
+      'name _id'
+    );
 
     if (!company) throw new ApiError('Company not found', 404);
     return company;

@@ -1,12 +1,12 @@
 const ApiError = require('../../../core/utils/ApiError');
+const path = require('path');
 const pickFields = require('../../../core/utils/pickFields');
 const User = require('../models/userModel');
 
 const {
-  processImage,
+  processAvatar,
   cleanupFiles,
 } = require('../../../core/utils/imageProcessor');
-const path = require('path');
 
 /**
  * Service layer for user-related operations
@@ -30,37 +30,45 @@ class UserService {
    * @throws {ApiError} If any step fails
    */
   static async updateAvatar(id, avatarInfo) {
-    // 1) VALIDATE INPUT
-    if (!id) throw new ApiError('User ID is required', 400);
-    if (!avatarInfo?.filename)
-      throw new ApiError('Avatar filename is required', 400);
-
-    // 2) GET OLD AVATAR PATH BEFORE UPDATING
-    const user = await User.findById(id).select('avatar');
-    if (!user) throw new ApiError(`No user found with id: ${id}`, 404);
-    const oldAvatarPath =
-      user.avatar !== 'default_avatar.jpg' ?
-        path.join(process.cwd(), 'uploads', 'avatars', user.avatar)
-      : null;
-
-    // 3) UPDATE USER
-    const updatedUser = await User.findByIdAndUpdate(
-      id,
-      { avatar: avatarInfo.filename },
-      { new: true, runValidators: true }
-    ).select('-password');
-
-    // 4) CRITICAL CLEANUP (throws on failure)
-    if (oldAvatarPath) {
-      await cleanupFiles([oldAvatarPath]); // Let it throw naturally
+    if (!id) throw new ApiError('User ID required', 400);
+    if (!avatarInfo || !avatarInfo.filename) {
+      throw new ApiError('Invalid avatar data', 400);
     }
-
-    return {
-      avatarUrl: avatarInfo.url,
-      filename: avatarInfo.filename,
-    };
+  
+    const user = await User.findById(id).select('avatar');
+    if (!user) throw new ApiError('User not found', 404);
+  
+    const outputDir = path.join(process.cwd(), 'uploads/avatars');
+  
+    const filesToDelete = [];
+    if (user.avatar && user.avatar !== 'default_avatar.jpg') {
+      const oldBase = path.basename(user.avatar, '.webp');
+      filesToDelete.push(
+        path.join(outputDir, user.avatar),
+        path.join(outputDir, `${oldBase}_thumb.webp`),
+        path.join(outputDir, `${oldBase}_medium.webp`)
+      );
+    }
+  
+    try {
+      await User.findByIdAndUpdate(id, { avatar: avatarInfo.filename });
+  
+      if (filesToDelete.length > 0) {
+        await cleanupFiles(filesToDelete);
+      }
+  
+      return {
+        avatarUrl: avatarInfo.url,
+        variants: avatarInfo.variants,
+      };
+    } catch (error) {
+      await cleanupFiles([
+        path.join(outputDir, avatarInfo.filename),
+        ...avatarInfo.variants.map((v) => v.path),
+      ]);
+      throw error;
+    }
   }
-
   /**
    * Reset avatar to default
    * @param {string} id - User ID
