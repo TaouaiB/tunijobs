@@ -1,12 +1,9 @@
 const ApiError = require('../../../core/utils/ApiError');
+const fs = require('fs/promises');
 const path = require('path');
 const pickFields = require('../../../core/utils/pickFields');
 const User = require('../models/userModel');
-
-const {
-  processAvatar,
-  cleanupFiles,
-} = require('../../../core/utils/imageProcessor');
+const cleanupFiles = require('../../../core/utils/cleanupFiles');
 
 /**
  * Service layer for user-related operations
@@ -29,46 +26,31 @@ class UserService {
    * @returns {Promise<{ avatarUrl: string, filename: string }>}
    * @throws {ApiError} If any step fails
    */
-  static async updateAvatar(id, avatarInfo) {
-    if (!id) throw new ApiError('User ID required', 400);
-    if (!avatarInfo || !avatarInfo.filename) {
-      throw new ApiError('Invalid avatar data', 400);
-    }
-
-    const user = await User.findById(id).select('avatar');
+  static async storeImage(id, imageInfo) {
+    const user = await User.findById(id);
     if (!user) throw new ApiError('User not found', 404);
 
-    const outputDir = path.join(process.cwd(), 'uploads/avatars');
+    if (imageInfo.variants && Array.isArray(imageInfo.variants)) {
+      const mediumObj = imageInfo.variants.find((v) => v.suffix === '-md');
+      const thumbnailObj = imageInfo.variants.find(
+        (v) => v.suffix === '-thumb'
+      ); // <-- here
 
-    const filesToDelete = [];
-    if (user.avatar && user.avatar !== 'default_avatar.jpg') {
-      const oldBase = path.basename(user.avatar, '.webp');
-      filesToDelete.push(
-        path.join(outputDir, user.avatar),
-        path.join(outputDir, `${oldBase}_thumb.webp`),
-        path.join(outputDir, `${oldBase}_medium.webp`)
-      );
-    }
-
-    try {
-      await User.findByIdAndUpdate(id, { avatar: avatarInfo.filename });
-
-      if (filesToDelete.length > 0) {
-        await cleanupFiles(filesToDelete);
+      if (!mediumObj || !thumbnailObj) {
+        throw new ApiError('Images not found', 400);
       }
 
-      return {
-        avatarUrl: avatarInfo.url,
-        variants: avatarInfo.variants,
-      };
-    } catch (error) {
-      await cleanupFiles([
-        path.join(outputDir, avatarInfo.filename),
-        ...avatarInfo.variants.map((v) => v.path),
-      ]);
-      throw error;
+      user.avatar.medium = mediumObj.url;
+      user.avatar.thumbnail = thumbnailObj.url;
+
+      await user.save();
+
+      return user;
     }
+
+    throw new ApiError('Images not found', 400);
   }
+
   /**
    * Reset avatar to default
    * @param {string} id - User ID
@@ -77,16 +59,46 @@ class UserService {
     const user = await User.findById(id);
     if (!user) throw new ApiError('User not found', 404);
 
-    if (user.avatar !== 'default_avatar.jpg') {
-      const oldPath = path.join(
-        __dirname,
-        '../../../uploads/avatars',
-        user.avatar
-      );
-      cleanupFiles([oldPath]);
+    // Check if user.avatar.medium is set and not default
+    if (
+      user.avatar &&
+      typeof user.avatar.medium === 'string' &&
+      user.avatar.medium !== 'default_avatar-md.jpg'
+    ) {
+      // Extract filename only, no folder path
+      const avatarFilename = path.basename(user.avatar.medium);
 
-      user.avatar = 'default_avatar.jpg';
+      // Remove suffix (-md or -thumb) and extension to get baseName
+      const baseName = avatarFilename.replace(/(-md|-thumb)?\.webp$/, '');
+
+      const avatarDir = path.join(__dirname, '../../../uploads/avatars');
+
+      const pathsToRemove = [
+        path.join(avatarDir, `${baseName}-md.webp`),
+        path.join(avatarDir, `${baseName}-thumb.webp`),
+      ];
+
+      // Delete avatar files
+      await cleanupFiles(pathsToRemove);
+
+      // Reset avatar fields to defaults
+      user.avatar.medium = 'default_avatar-md.jpg';
+      user.avatar.thumbnail = 'default_avatar-thumb.jpg';
       await user.save();
+
+      return {
+        status: 'success',
+        message: 'Avatar reset to default successfully.',
+        avatarUrl: `/uploads/avatars/${user.avatar.medium}`,
+        avatarThumbnailUrl: `/uploads/avatars/${user.avatar.thumbnail}`,
+      };
+    } else {
+      return {
+        status: 'success',
+        message: 'No custom avatar to reset.',
+        avatarUrl: `/uploads/avatars/${user.avatar.medium || 'default_avatar-md.jpg'}`,
+        avatarThumbnailUrl: `/uploads/avatars/${user.avatar.thumbnail || 'default_avatar-thumb.jpg'}`,
+      };
     }
   }
 

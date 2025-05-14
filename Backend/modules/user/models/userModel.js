@@ -28,8 +28,14 @@ const userSchema = new mongoose.Schema(
     phone: String,
     city: String, // Tunisian-focused (no country needed)
     avatar: {
-      type: String,
-      default: 'default_avatar.jpg', // Fallback image
+      medium: {
+        type: String,
+        default: 'default_avatar-md.jpg',
+      },
+      thumbnail: {
+        type: String,
+        default: 'default_avatar-thumb.jpg',
+      },
     },
     slug: {
       type: String,

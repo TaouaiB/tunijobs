@@ -1,8 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const UserService = require('../services/user.service');
-const {
-  avatarUploadHandler,
-} = require('../../../core/middlewares/upload.middleware');
+const imageUploadHandler = require('../../../core/middlewares/multer/imageUploadHandler');
 
 /**
  * @desc    Update user avatar
@@ -16,14 +14,13 @@ const {
  * @returns {Object} Updated user data with new avatar URL
  */
 exports.updateAvatar = [
-  avatarUploadHandler,
+  imageUploadHandler,
   asyncHandler(async (req, res) => {
-    const result = await UserService.updateAvatar(
-      req.params.id,
-      req.avatarInfo // From middleware
-    );
+    const userId = req.params.id; // get user id from URL params
 
-    res.status(200).json({
+    const result = await UserService.storeImage(userId, req.imageInfo);
+
+    res.status(201).json({
       status: 'success',
       data: result,
     });
@@ -31,10 +28,14 @@ exports.updateAvatar = [
 ];
 
 exports.resetAvatar = asyncHandler(async (req, res) => {
-  await UserService.resetAvatar(req.params.id);
+  const result = await UserService.resetAvatar(req.params.id);
   res.status(200).json({
     status: 'success',
-    data: { avatarUrl: '/uploads/avatars/default_avatar.jpg' },
+    message: result.message,
+    data: {
+      avatarUrl: '/uploads/avatars/default_avatar-md.jpg',
+      avatarThumbnailUrl: '/uploads/avatars/default_avatar-thumb.jpg',
+    },
   });
 });
 
