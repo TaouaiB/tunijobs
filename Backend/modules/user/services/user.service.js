@@ -34,12 +34,12 @@ class UserService {
     if (!avatarInfo || !avatarInfo.filename) {
       throw new ApiError('Invalid avatar data', 400);
     }
-  
+
     const user = await User.findById(id).select('avatar');
     if (!user) throw new ApiError('User not found', 404);
-  
+
     const outputDir = path.join(process.cwd(), 'uploads/avatars');
-  
+
     const filesToDelete = [];
     if (user.avatar && user.avatar !== 'default_avatar.jpg') {
       const oldBase = path.basename(user.avatar, '.webp');
@@ -49,14 +49,14 @@ class UserService {
         path.join(outputDir, `${oldBase}_medium.webp`)
       );
     }
-  
+
     try {
       await User.findByIdAndUpdate(id, { avatar: avatarInfo.filename });
-  
+
       if (filesToDelete.length > 0) {
         await cleanupFiles(filesToDelete);
       }
-  
+
       return {
         avatarUrl: avatarInfo.url,
         variants: avatarInfo.variants,

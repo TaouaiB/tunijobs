@@ -3,6 +3,14 @@ const fs = require('fs-extra');
 const path = require('path');
 const ApiError = require('../utils/ApiError');
 
+// WebP configuration (optimized for avatars)
+const WEBP_CONFIG = {
+  quality: 85, // Balanced quality/size
+  alphaQuality: 90, // Preserves transparency
+  lossless: false, // Faster than lossless
+  effort: 4, // Optimal compression
+};
+
 // Generate multiple image variants (thumbnails)
 exports.generateVariants = async (buffer, baseName, outputDir, variants) => {
   await fs.ensureDir(outputDir);
@@ -16,8 +24,10 @@ exports.generateVariants = async (buffer, baseName, outputDir, variants) => {
         .resize(width, height, {
           fit: 'cover',
           position: sharp.strategy.entropy,
+          withoutEnlargement: true,
         })
-        .webp({ quality: 80, alphaQuality: 90 })
+        .sharpen({ sigma: 1.2 })
+        .webp(WEBP_CONFIG)
         .toFile(outputPath);
 
       return {
@@ -53,11 +63,13 @@ exports.processAvatar = async (buffer, filename, outputDir) => {
   const originalPath = path.join(outputDir, filename);
 
   // // 1. Save original (atomically)
-  // await exports.safeWrite(buffer, originalPath);
+  // await exports.safeWrite(buffer, originalPath); (uncomment if needed)
 
-  // 1. Generate variants
+  // Generate variants (example: thumbnail + medium size)
   const variants = await exports.generateVariants(buffer, filename, outputDir, [
-    { width: 100, height: 100, suffix: '_thumb' },
+    { width: 100, height: 100, suffix: '_thumb' }, // Thumbnail
+    { width: 400, height: 400, suffix: '_medium' }, // Medium (optional)
+    // { width: 800, height: 800, suffix: '_large' }, // Retina/2x (uncomment if needed)
   ]);
 
   return {
