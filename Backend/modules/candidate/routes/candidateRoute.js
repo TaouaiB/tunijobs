@@ -13,11 +13,13 @@ const {
   deleteCandidate,
   getCandidateByUserId,
   deleteCandidateByUserId,
+  updateResume,
 } = require('../controllers/candidateController');
 
 router.get('/candidates', getAllCandidates);
 router.post('/:userId/candidate', createCandidateValidator, createCandidate);
 router.put('/:userId/candidate', updateCandidateValidator, updateCandidate);
+router.patch('/:userId/candidate/resume', updateResume);
 router.get(
   '/:userId/candidate',
   getCandidateByUserIdValidator,

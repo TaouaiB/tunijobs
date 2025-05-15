@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const CandidateService = require('../services/candidate.service');
+const documentUploadHandler = require('../../../core/middlewares/multer/documentUploadHandler');
 
 /**
  * @desc    Create candidate profile
@@ -16,6 +17,28 @@ exports.createCandidate = asyncHandler(async (req, res) => {
     data: { candidate },
   });
 });
+
+/**
+ * @desc    Upload and update candidate resume
+ * @route   POST /api/v1/users/:userId/candidate/resume
+ * @access  Private
+ */
+exports.updateResume = [
+  documentUploadHandler,
+  asyncHandler(async (req, res) => {
+    const userId = req.params.userId;
+
+    const candidate = await CandidateService.storeResume(
+      userId,
+      req.documentInfo
+    );
+
+    res.status(200).json({
+      status: 'success',
+      data: { candidate },
+    });
+  }),
+];
 
 /**
  * @desc    Get all candidates

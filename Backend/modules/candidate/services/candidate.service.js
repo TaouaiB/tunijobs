@@ -33,6 +33,30 @@ class CandidateService {
   }
 
   /**
+   * Store resume URL for a candidate (like avatar storage for images)
+   * @param {string} userId
+   * @param {Object} documentInfo - { path, url, originalName, mimetype, size }
+   * @returns {Promise<Object>} Updated candidate document
+   * @throws {ApiError} If candidate not found
+   */
+  static async storeResume(userId, documentInfo) {
+    const candidate = await Candidate.findOne({ userId });
+    if (!candidate) {
+      throw new ApiError(`Candidate profile for user ${userId} not found`, 404);
+    }
+
+    candidate.resumeUrl = documentInfo.url; // store relative URL
+    candidate.resumeOriginalName = documentInfo.originalName;
+    candidate.resumeMimeType = documentInfo.mimetype;
+    candidate.resumeSize = documentInfo.size;
+    candidate.updatedAt = new Date();
+
+    await candidate.save();
+
+    return candidate;
+  }
+
+  /**
    * Get all candidate profiles with optional filtering
    * @async
    * @param {Object} [filters={}] - MongoDB filter criteria
