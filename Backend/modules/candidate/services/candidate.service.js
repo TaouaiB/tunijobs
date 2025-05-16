@@ -1,7 +1,10 @@
+const path = require('path');
+
 const ApiError = require('../../../core/utils/ApiError');
 const pickFields = require('../../../core/utils/pickFields');
 const Candidate = require('../models/candidateModel');
 const User = require('../../user/models/userModel');
+const cleanupFiles = require('../../../core/utils/cleanupFiles');
 
 /**
  * Service layer for candidate profile operations
@@ -45,13 +48,40 @@ class CandidateService {
       throw new ApiError(`Candidate profile for user ${userId} not found`, 404);
     }
 
-    candidate.resumeUrl = documentInfo.url; // store relative URL
+    candidate.resumeUrl = documentInfo.url;
     candidate.resumeOriginalName = documentInfo.originalName;
     candidate.resumeMimeType = documentInfo.mimetype;
     candidate.resumeSize = documentInfo.size;
     candidate.updatedAt = new Date();
 
     await candidate.save();
+
+    return candidate;
+  }
+
+  /**
+   * Remove resume file from disk and clear resumeUrl in DB
+   * @param {string} userId - User ID linked to the candidate
+   * @returns {Promise<Object>} Updated candidate document
+   * @throws {ApiError} If candidate not found
+   */
+  static async removeResume(userId) {
+    const candidate = await Candidate.findOne({ userId });
+
+    if (!candidate) {
+      throw new ApiError(`Candidate profile for user ${userId} not found`, 404);
+    }
+
+    if (candidate.resumeUrl) {
+      const absolutePath = path.join(process.cwd(), candidate.resumeUrl);
+
+      // Delete resume file using your utility
+      await cleanupFiles([absolutePath]);
+
+      // Clear the resumeUrl field
+      candidate.resumeUrl = undefined;
+      await candidate.save();
+    }
 
     return candidate;
   }

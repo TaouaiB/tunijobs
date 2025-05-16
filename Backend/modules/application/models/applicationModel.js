@@ -46,10 +46,12 @@ const applicationSchema = new mongoose.Schema(
     },
     documents: [
       {
-        name: String,
-        url: String,
-        type: String,
-      },
+        name: { type: String, required: true },
+        url: { type: String, required: true },
+        type: { type: String, required: true },
+        size: { type: Number, required: true },
+        uploadedAt: { type: Date, default: Date.now }
+      }
     ],
 
     // ======================

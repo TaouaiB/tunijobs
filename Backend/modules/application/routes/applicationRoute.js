@@ -11,6 +11,8 @@ const {
   getApplicationDashboard,
   deleteApplication,
   scheduleInterview,
+  uploadDocument,
+  removeDocument,
 } = require('../controllers/applicationController');
 
 const {
@@ -23,6 +25,7 @@ const {
   deleteApplicationValidator,
   searchApplicationsValidator,
 } = require('../validators/applicationValidator');
+const normalizeUploadFields = require('../../../core/middlewares/multer/normalizeUploads');
 
 // =============================================
 //               PUBLIC ROUTES
@@ -47,6 +50,19 @@ router.get(
 );
 
 router.put('/:id/withdraw', updateApplicationValidator, withdrawApplication);
+
+router.post(
+  '/:id/documents',
+  updateApplicationValidator,
+  normalizeUploadFields,
+  uploadDocument
+);
+
+router.delete(
+  '/:id/remove-document',
+  updateApplicationValidator,
+  removeDocument
+);
 
 // =============================================
 //            COMPANY PROTECTED ROUTES

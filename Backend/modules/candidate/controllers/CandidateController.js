@@ -41,6 +41,22 @@ exports.updateResume = [
 ];
 
 /**
+ * @desc    Remove candidate resume
+ * @route   PATCH /api/v1/users/:userId/candidate/remove-resume
+ * @access  Private
+ */
+exports.removeResume = asyncHandler(async (req, res) => {
+  const userId = req.params.userId;
+
+  const updatedCandidate = await CandidateService.removeResume(userId);
+
+  res.status(200).json({
+    status: 'success',
+    data: { candidate: updatedCandidate },
+  });
+});
+
+/**
  * @desc    Get all candidates
  * @route   GET /api/v1/candidates
  * @access  Public

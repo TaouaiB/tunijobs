@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 const pickFields = require('../../../core/utils/pickFields');
 const ApiError = require('../../../core/utils/ApiError');
@@ -7,16 +6,119 @@ const Application = require('../models/applicationModel');
 const Job = require('../../job/models/jobModel');
 const Candidate = require('../../candidate/models/candidateModel');
 
-// Mock services (would be imported in production)
-const AIService = require('./aiService');
-const NotificationService = require('./notificationService');
-const AnalyticsService = require('./analyticsService');
+const cleanupFiles = require('../../../core/utils/cleanupFiles');
+const path = require('path');
 
 /**
  * @namespace ApplicationService
  * @description Business logic for job applications
  */
-module.exports = {
+class ApplicationService {
+  /**
+   * Upload and store a document in the application
+   * @param {string} applicationId
+   * @param {Object} documentInfo - { path, url, originalName, mimetype, size }
+   * @returns {Promise<Object>} Updated application document
+   * @throws {ApiError} If application not found
+   */
+  static async storeDocument(id, uploadedFiles) {
+    const application = await Application.findById(id);
+
+    if (!application) {
+      throw new ApiError(`Application with ID ${id} not found`, 404);
+    }
+
+    // Validate we have files to process
+    if (
+      !uploadedFiles ||
+      (!uploadedFiles.resume &&
+        !uploadedFiles.coverLetter &&
+        !uploadedFiles.documents?.length)
+    ) {
+      throw new ApiError('No valid files to store', 400);
+    }
+
+    // Handle resume upload
+    if (uploadedFiles.resume) {
+      if (!uploadedFiles.resume.url || !uploadedFiles.resume.name) {
+        throw new ApiError('Resume file is missing required fields', 400);
+      }
+      application.resumeUrl = uploadedFiles.resume.url;
+    }
+
+    // Handle cover letter upload
+    if (uploadedFiles.coverLetter) {
+      if (!uploadedFiles.coverLetter.url || !uploadedFiles.coverLetter.name) {
+        throw new ApiError('Cover letter is missing required fields', 400);
+      }
+      application.coverLetter = uploadedFiles.coverLetter.url;
+    }
+
+    // Handle additional documents
+    if (uploadedFiles.documents?.length > 0) {
+      for (const doc of uploadedFiles.documents) {
+        if (!doc.name || !doc.url || !doc.type || !doc.size) {
+          console.error('Invalid document format:', doc);
+          continue; // Skip invalid documents or throw error if you prefer
+        }
+
+        application.documents.push({
+          name: doc.name,
+          url: doc.url,
+          type: doc.type,
+          size: doc.size,
+          uploadedAt: new Date(),
+        });
+      }
+    }
+
+    await application.save();
+    return application;
+  }
+
+  /**
+   * Remove a document from the application and delete file from disk
+   * @param {string} applicationId
+   * @param {string} documentUrl - Relative path of the document to remove
+   * @returns {Promise<Object>} Updated application document
+   * @throws {ApiError} If document or application not found
+   */
+  static async removeAllDocumentsAndCoverLetter(id) {
+    const application = await Application.findById(id);
+    if (!application) {
+      throw new ApiError(`Application with ID ${id} not found`, 404);
+    }
+
+    const filesToDelete = [];
+
+    if (application.coverLetter) {
+      console.log('Deleting cover letter:', application.coverLetter);
+      const coverLetterPath = path.join(
+        process.cwd(),
+        application.coverLetter.replace(/^\/+/, '')
+      );
+      filesToDelete.push(coverLetterPath);
+      application.coverLetter = undefined;
+    }
+
+    if (application.documents && application.documents.length) {
+      application.documents.forEach((doc) => {
+        console.log('Deleting document:', doc.url);
+        const docPath = path.join(process.cwd(), doc.url.replace(/^\/+/, ''));
+        filesToDelete.push(docPath);
+      });
+      application.documents = [];
+    }
+
+    console.log('Files to delete:', filesToDelete);
+
+    await cleanupFiles(filesToDelete);
+
+    await application.save();
+
+    return application;
+  }
+
   /**
    * Submit a new job application
    * @param {string} jobId - The job ID to apply for
@@ -25,7 +127,7 @@ module.exports = {
    * @param {string} userAgent - Applicant's user agent
    * @returns {Promise<Object>} Created application with insights
    */
-  async submitApplication(jobId, applicationData, ipAddress, userAgent) {
+  static async submitApplication(jobId, applicationData, ipAddress, userAgent) {
     const filteredBody = pickFields(applicationData, 'application', true);
     const { candidateId, coverLetter } = filteredBody;
 
@@ -37,7 +139,6 @@ module.exports = {
     if (!job?.isActive) throw new ApiError('Job not available', 404);
     if (!candidate) throw new ApiError('Candidate not found', 400);
 
-    const aiAnalysis = coverLetter ? AIService.analyzeCoverLetter(coverLetter) : null;
     const score = this.calculateApplicationScore({
       resumeUrl: candidate.resumeUrl,
       coverLetterLength: coverLetter?.length,
@@ -50,49 +151,28 @@ module.exports = {
       ...filteredBody,
       score,
       metadata: {
-        aiAnalysis,
         ipAddress,
         userAgent,
       },
-      statusHistory: [{
-        status: 'submitted',
-        changedBy: candidateId,
-        notes: `Application submitted${aiAnalysis ? ` | AI Score: ${aiAnalysis.score}` : ''}`,
-      }],
-    });
-
-    NotificationService.send(
-      job.companyId,
-      `New application for ${job.title}`
-    );
-
-    AnalyticsService.track('application_submitted', {
-      applicationId: application._id,
-      jobId,
-      candidateId: candidate._id,
-      aiScore: aiAnalysis?.score,
+      statusHistory: [
+        {
+          status: 'submitted',
+          changedBy: candidateId,
+        },
+      ],
     });
 
     return {
       status: 'success',
       data: {
         application,
-        insights: {
-          score,
-          ...(aiAnalysis && {
-            aiFeedback: {
-              strength: aiAnalysis.score > 70 ? 'strong' : 'average',
-              keywords: aiAnalysis.keywords,
-            },
-          }),
-        },
         nextSteps: [
           !candidate.resumeUrl && 'Upload your resume',
           'Complete your profile',
         ].filter(Boolean),
       },
     };
-  },
+  }
 
   /**
    * Update application status
@@ -101,12 +181,15 @@ module.exports = {
    * @returns {Promise<Object>} Updated application with suggestions
    */
   async updateStatus(id, updateData) {
-    const { status, userId, notes } = pickFields(updateData, 'application', true);
+    const { status, userId, notes } = pickFields(
+      updateData,
+      'application',
+      true
+    );
     const application = await Application.findById(id);
     if (!application) throw new ApiError('Application not found', 404);
 
     const previousStatus = application.status;
-    const aiSuggestions = AIService.suggestStatusChange(previousStatus);
 
     application.status = status;
     application.statusHistory.push({
@@ -114,29 +197,17 @@ module.exports = {
       changedBy: userId,
       notes: notes || `Status updated to ${status}`,
       metadata: {
-        aiSuggestions,
         confirmed: !['rejected', 'withdrawn'].includes(status),
       },
     });
 
     await application.save();
 
-    NotificationService.send(
-      application.candidateId,
-      `Status changed to ${status}`
-    );
-
-    AnalyticsService.track('status_updated', {
-      applicationId: application._id,
-      from: previousStatus,
-      to: status,
-    });
-
     return {
       status: 'success',
-      data: { application, nextSteps: aiSuggestions },
+      data: { application },
     };
-  },
+  }
 
   /**
    * Withdraw an application
@@ -179,7 +250,7 @@ module.exports = {
         newStatus: application.status,
       },
     };
-  },
+  }
 
   /**
    * Get application by ID
@@ -203,7 +274,7 @@ module.exports = {
 
     if (!application) throw new ApiError('Application not found', 404);
     return { status: 'success', data: { application } };
-  },
+  }
 
   /**
    * Get applications by candidate
@@ -214,13 +285,15 @@ module.exports = {
     const candidate = await Candidate.findById(candidateId);
     if (!candidate) throw new ApiError('Candidate not found', 404);
 
-    const applications = await Application.find({ candidateId }).populate('jobId');
+    const applications = await Application.find({ candidateId }).populate(
+      'jobId'
+    );
     return {
       status: 'success',
       results: applications.length,
       data: applications,
     };
-  },
+  }
 
   /**
    * Get applications by job
@@ -228,13 +301,15 @@ module.exports = {
    * @returns {Promise<Object>} List of applications
    */
   async getApplicationsByJob(jobId) {
-    const applications = await Application.find({ jobId }).populate('candidateId');
+    const applications = await Application.find({ jobId }).populate(
+      'candidateId'
+    );
     return {
       status: 'success',
       results: applications.length,
       data: applications,
     };
-  },
+  }
 
   /**
    * Get applications dashboard
@@ -280,7 +355,7 @@ module.exports = {
         },
       },
     };
-  },
+  }
 
   /**
    * Delete an application
@@ -290,7 +365,7 @@ module.exports = {
   async deleteApplication(id) {
     const application = await Application.findByIdAndDelete(id);
     if (!application) throw new ApiError('Application not found', 404);
-  },
+  }
 
   /**
    * Schedule an interview
@@ -317,7 +392,7 @@ module.exports = {
       template: this.getInterviewTemplate(interviewType),
       result: 'pending',
       location: location || 'To be determined',
-      attendees: attendees.map(attendee => ({
+      attendees: attendees.map((attendee) => ({
         userId: attendee.userId,
         role: attendee.role || 'Interviewer',
       })),
@@ -332,7 +407,7 @@ module.exports = {
     );
 
     return { status: 'success', data: { interview } };
-  },
+  }
 
   /**
    * Recalculate application score
@@ -354,7 +429,7 @@ module.exports = {
     await application.save();
 
     return { status: 'success', data: { score } };
-  },
+  }
 
   /**
    * Calculate application score (0-100)
@@ -374,7 +449,7 @@ module.exports = {
     if (status === 'shortlisted') score += 20;
     score += interviewsCount * 5;
     return Math.min(score, 100);
-  },
+  }
 
   /**
    * Get interview template by type
@@ -390,5 +465,7 @@ module.exports = {
       technical_test: 'Coding challenge will be provided',
     };
     return templates[type] || 'General interview questions';
-  },
-};
+  }
+}
+
+module.exports = ApplicationService;

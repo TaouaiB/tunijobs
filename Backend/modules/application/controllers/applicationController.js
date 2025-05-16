@@ -10,6 +10,8 @@ const Application = require('../models/applicationModel');
 const Job = require('../../job/models/jobModel');
 const Candidate = require('../../candidate/models/candidateModel');
 const Company = require('../../company/models/companyModel');
+const documentUploadHandler = require('../../../core/middlewares/multer/documentUploadHandler');
+const ApplicationService = require('../services/application.service');
 
 // Mocked AI & Utility Services (to be replaced later)
 const AIService = {
@@ -51,6 +53,48 @@ const calculateApplicationScore = ({
   score += interviewsCount * 5;
   return Math.min(score, 100);
 };
+
+/**
+ * @desc    Upload a document to an application
+ * @route   POST /api/v1/applications/:applicationId/documents
+ * @access  Private
+ */
+exports.uploadDocument = [
+  documentUploadHandler,
+  asyncHandler(async (req, res) => {
+    if (!req.uploadedFiles) {
+      throw new ApiError('No files were processed', 400);
+    }
+
+    const application = await ApplicationService.storeDocument(
+      req.params.id,
+      req.uploadedFiles
+    );
+
+    res.status(200).json({
+      status: 'success',
+      data: application,
+    });
+  }),
+];
+
+/**
+ * @desc    Remove a document from an application
+ * @route   PATCH /api/v1/applications/:applicationId/remove-document
+ * @access  Private
+ */
+exports.removeDocument = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const updatedApplication =
+    await ApplicationService.removeAllDocumentsAndCoverLetter(id);
+
+  res.json({
+    status: 'success',
+    message: 'Cover letter and all documents removed successfully',
+    data: { application: updatedApplication },
+  });
+});
 
 // @desc    Submit a new application for a job
 // @route   POST /api/v1/jobs/:jobId/apply

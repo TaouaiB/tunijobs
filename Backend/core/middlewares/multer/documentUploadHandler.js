@@ -4,15 +4,20 @@ const fs = require('fs-extra');
 
 const { documentUpload } = require('../../config/multer/documents.config');
 const { storeDocument } = require('../../utils/processors/documents/storage');
-
 const ApiError = require('../../utils/ApiError');
 
-const upload = multer(documentUpload()).single('resumeUrl');
+const upload = multer(documentUpload());
+
+const uploadCandidateDocuments = upload.fields([
+  { name: 'resumeUrl', maxCount: 1 },
+  { name: 'coverLetter', maxCount: 1 },
+  { name: 'documents', maxCount: 5 },
+]);
 
 const outputDir = path.join(process.cwd(), 'uploads/documents');
 
 const documentUploadHandler = (req, res, next) => {
-  upload(req, res, async (err) => {
+  uploadCandidateDocuments(req, res, async (err) => {
     if (err) {
       let statusCode = 400;
       if (typeof err.code === 'string') {
@@ -28,22 +33,74 @@ const documentUploadHandler = (req, res, next) => {
       return next(new ApiError(err.message, statusCode));
     }
 
-    if (!req.file) return next(new ApiError('No document uploaded', 400));
-
     try {
-      const { buffer, originalname, mimetype, size } = req.file;
-      const saved = await storeDocument(buffer, originalname, outputDir);
+      const uploadedFiles = {};
 
-      req.documentInfo = {
-        ...saved, // path, url, originalName
-        mimetype,
-        size,
-      };
+      // Resume
+      if (req.files?.resumeUrl?.[0]) {
+        const file = req.files.resumeUrl[0];
+        const saved = await storeDocument(
+          file.buffer,
+          file.originalname,
+          outputDir
+        );
+        uploadedFiles.resume = {
+          name: saved.originalName,
+          url: saved.url,
+          type: file.mimetype,
+          size: file.size,
+        };
+      }
 
+      // Cover Letter
+      if (req.files?.coverLetter?.[0]) {
+        const file = req.files.coverLetter[0];
+        const saved = await storeDocument(
+          file.buffer,
+          file.originalname,
+          outputDir
+        );
+        uploadedFiles.coverLetter = {
+          name: saved.originalName,
+          url: saved.url,
+          type: file.mimetype,
+          size: file.size,
+        };
+      }
+
+      // Documents
+      if (req.files?.documents) {
+        uploadedFiles.documents = [];
+        for (const file of req.files.documents) {
+          const saved = await storeDocument(
+            file.buffer,
+            file.originalname,
+            outputDir
+          );
+          uploadedFiles.documents.push({
+            name: saved.originalName,
+            url: saved.url,
+            type: file.mimetype,
+            size: file.size,
+          });
+        }
+      }
+
+      // Verify we have at least one file
+      if (
+        !uploadedFiles.resume &&
+        !uploadedFiles.coverLetter &&
+        !uploadedFiles.documents?.length
+      ) {
+        return next(new ApiError('No valid files were uploaded', 400));
+      }
+
+      req.uploadedFiles = uploadedFiles;
       next();
     } catch (error) {
       next(error);
     }
   });
 };
+
 module.exports = documentUploadHandler;
