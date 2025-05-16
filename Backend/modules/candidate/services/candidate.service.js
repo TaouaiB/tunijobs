@@ -48,6 +48,16 @@ class CandidateService {
       throw new ApiError(`Candidate profile for user ${userId} not found`, 404);
     }
 
+    // Delete previous resume file from local storage
+    if (candidate.resumeUrl) {
+      const oldPath = path.join(
+        process.cwd(),
+        candidate.resumeUrl.replace(/^\/+/, '')
+      );
+      await cleanupFiles([oldPath]);
+    }
+
+    // Save new resume info
     candidate.resumeUrl = documentInfo.url;
     candidate.resumeOriginalName = documentInfo.originalName;
     candidate.resumeMimeType = documentInfo.mimetype;

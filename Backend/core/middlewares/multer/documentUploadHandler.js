@@ -44,14 +44,17 @@ const documentUploadHandler = (req, res, next) => {
           file.originalname,
           outputDir
         );
+      
         uploadedFiles.resume = {
-          name: saved.originalName,
+          originalName: saved.originalName,   // ✅ Use what's returned from storeDocument
           url: saved.url,
-          type: file.mimetype,
+          mimetype: file.mimetype,
           size: file.size,
         };
+      
+        req.documentInfo = uploadedFiles.resume; // ✅ Required for storeResume
       }
-
+      
       // Cover Letter
       if (req.files?.coverLetter?.[0]) {
         const file = req.files.coverLetter[0];
