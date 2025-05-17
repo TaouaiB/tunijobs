@@ -20,17 +20,28 @@ const documentUploadHandler = (req, res, next) => {
   uploadCandidateDocuments(req, res, async (err) => {
     if (err) {
       let statusCode = 400;
+      let message = err.message;
+
       if (typeof err.code === 'string') {
         switch (err.code) {
-          case 'LIMIT_FILE_SIZE':
           case 'LIMIT_UNEXPECTED_FILE':
-            statusCode = 400;
+            if (err.field === 'coverLetter') {
+              message = 'Only 1 cover letter allowed.';
+            } else if (err.field === 'resumeUrl') {
+              message = 'Only 1 resume file allowed.';
+            } else if (err.field === 'documents') {
+              message = 'Too many files uploaded. Max 5 documents allowed.';
+            } else {
+              message = `Unexpected field: ${err.field}`;
+            }
             break;
           default:
             statusCode = 500;
+            message = 'Upload failed due to a server error.';
         }
       }
-      return next(new ApiError(err.message, statusCode));
+
+      return next(new ApiError(message, statusCode));
     }
 
     try {
@@ -44,17 +55,17 @@ const documentUploadHandler = (req, res, next) => {
           file.originalname,
           outputDir
         );
-      
+
         uploadedFiles.resume = {
-          originalName: saved.originalName,   // ✅ Use what's returned from storeDocument
+          originalName: saved.originalName, // ✅ Use what's returned from storeDocument
           url: saved.url,
           mimetype: file.mimetype,
           size: file.size,
         };
-      
+
         req.documentInfo = uploadedFiles.resume; // ✅ Required for storeResume
       }
-      
+
       // Cover Letter
       if (req.files?.coverLetter?.[0]) {
         const file = req.files.coverLetter[0];

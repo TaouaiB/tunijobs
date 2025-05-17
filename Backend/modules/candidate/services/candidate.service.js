@@ -4,7 +4,8 @@ const ApiError = require('../../../core/utils/ApiError');
 const pickFields = require('../../../core/utils/pickFields');
 const Candidate = require('../models/candidateModel');
 const User = require('../../user/models/userModel');
-const cleanupFiles = require('../../../core/utils/cleanupFiles');
+const resumeStorage = require('./documents/storage.service');
+
 
 /**
  * Service layer for candidate profile operations
@@ -36,64 +37,22 @@ class CandidateService {
   }
 
   /**
-   * Store resume URL for a candidate (like avatar storage for images)
+   * Store resume (delegates to storage service)
    * @param {string} userId
-   * @param {Object} documentInfo - { path, url, originalName, mimetype, size }
-   * @returns {Promise<Object>} Updated candidate document
-   * @throws {ApiError} If candidate not found
+   * @param {Object} fileInfo
+   * @returns {Promise<Candidate>}
    */
   static async storeResume(userId, documentInfo) {
-    const candidate = await Candidate.findOne({ userId });
-    if (!candidate) {
-      throw new ApiError(`Candidate profile for user ${userId} not found`, 404);
-    }
-
-    // Delete previous resume file from local storage
-    if (candidate.resumeUrl) {
-      const oldPath = path.join(
-        process.cwd(),
-        candidate.resumeUrl.replace(/^\/+/, '')
-      );
-      await cleanupFiles([oldPath]);
-    }
-
-    // Save new resume info
-    candidate.resumeUrl = documentInfo.url;
-    candidate.resumeOriginalName = documentInfo.originalName;
-    candidate.resumeMimeType = documentInfo.mimetype;
-    candidate.resumeSize = documentInfo.size;
-    candidate.updatedAt = new Date();
-
-    await candidate.save();
-
-    return candidate;
+    return resumeStorage.storeResume(userId, documentInfo);
   }
 
   /**
-   * Remove resume file from disk and clear resumeUrl in DB
-   * @param {string} userId - User ID linked to the candidate
-   * @returns {Promise<Object>} Updated candidate document
-   * @throws {ApiError} If candidate not found
+   * Remove resume (delegates to storage service)
+   * @param {string} userId
+   * @returns {Promise<Candidate>}
    */
   static async removeResume(userId) {
-    const candidate = await Candidate.findOne({ userId });
-
-    if (!candidate) {
-      throw new ApiError(`Candidate profile for user ${userId} not found`, 404);
-    }
-
-    if (candidate.resumeUrl) {
-      const absolutePath = path.join(process.cwd(), candidate.resumeUrl);
-
-      // Delete resume file using your utility
-      await cleanupFiles([absolutePath]);
-
-      // Clear the resumeUrl field
-      candidate.resumeUrl = undefined;
-      await candidate.save();
-    }
-
-    return candidate;
+    return resumeStorage.removeResume(userId);
   }
 
   /**
