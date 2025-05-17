@@ -3,7 +3,7 @@ const fs = require('fs/promises');
 const path = require('path');
 const pickFields = require('../../../core/utils/pickFields');
 const User = require('../models/userModel');
-const cleanupFiles = require('../../../core/utils/cleanupFiles');
+const avatarStorage = require('./documents/storage.service');
 
 /**
  * Service layer for user-related operations
@@ -27,119 +27,15 @@ class UserService {
    * @throws {ApiError} If any step fails
    */
   static async storeImage(id, imageInfo) {
-    // Configuration constants
-    const REQUIRED_VARIANTS = {
-      medium: '-md',
-      thumbnail: '-thumb',
-    };
-
-    // Validate input structure
-    if (!imageInfo?.variants || !Array.isArray(imageInfo.variants)) {
-      throw new ApiError('Invalid image variants format', 400);
-    }
-
-    // Find required variants in one pass
-    const variantMap = imageInfo.variants.reduce((acc, variant) => {
-      if (variant?.suffix && variant?.url) {
-        Object.entries(REQUIRED_VARIANTS).forEach(([key, suffix]) => {
-          if (variant.suffix === suffix) acc[key] = variant.url;
-        });
-      }
-      return acc;
-    }, {});
-
-    // Check all required variants exist
-    if (
-      Object.keys(variantMap).length !== Object.keys(REQUIRED_VARIANTS).length
-    ) {
-      throw new ApiError('Missing required image variants', 400);
-    }
-
-    // Database operations
-    const user = await User.findById(id);
-    if (!user) throw new ApiError('User not found', 404);
-
-    // Update avatar with atomic operation
-    const updatedUser = await User.findByIdAndUpdate(
-      id,
-      {
-        $set: {
-          'avatar.medium': variantMap.medium,
-          'avatar.thumbnail': variantMap.thumbnail,
-          updatedAt: new Date(),
-        },
-      },
-      { new: true, runValidators: true }
-    );
-
-    return {
-      user: updatedUser,
-      avatar: {
-        medium: variantMap.medium,
-        thumbnail: variantMap.thumbnail,
-      },
-    };
+    return avatarStorage.storeImage(id, imageInfo);
   }
+
   /**
    * Reset avatar to default
    * @param {string} id - User ID
    */
   static async resetAvatar(id) {
-    const DEFAULT_AVATARS = {
-      medium: 'default_avatar-md.jpg',
-      thumbnail: 'default_avatar-thumb.jpg',
-    };
-    const AVATAR_DIR = path.join(__dirname, '../../../uploads/avatars');
-    const AVATAR_URL_PREFIX = '/uploads/avatars';
-
-    const user = await User.findById(id).orFail(() => {
-      throw new ApiError('User not found', 404);
-    });
-
-    const hasCustomAvatar = () => {
-      const { avatar } = user;
-      return (
-        avatar?.medium &&
-        avatar.medium !== DEFAULT_AVATARS.medium &&
-        typeof avatar.medium === 'string'
-      );
-    };
-
-    if (!hasCustomAvatar()) {
-      return {
-        status: 'success',
-        message: 'No custom avatar to reset.',
-        avatarUrl: `${AVATAR_URL_PREFIX}/${user.avatar?.medium || DEFAULT_AVATARS.medium}`,
-        avatarThumbnailUrl: `${AVATAR_URL_PREFIX}/${user.avatar?.thumbnail || DEFAULT_AVATARS.thumbnail}`,
-      };
-    }
-
-    // Process custom avatar removal
-    const extractBaseName = (filename) =>
-      path.basename(filename).replace(/(-md|-thumb)?\.webp$/, '');
-
-    const baseName = extractBaseName(user.avatar.medium);
-    const avatarVariants = ['-md.webp', '-thumb.webp'];
-    const filesToRemove = avatarVariants.map((variant) =>
-      path.join(AVATAR_DIR, `${baseName}${variant}`)
-    );
-
-    try {
-      await cleanupFiles(filesToRemove);
-
-      // Update user with default avatars
-      user.avatar = { ...DEFAULT_AVATARS };
-      await user.save();
-
-      return {
-        status: 'success',
-        message: 'Avatar reset to default successfully.',
-        avatarUrl: `${AVATAR_URL_PREFIX}/${DEFAULT_AVATARS.medium}`,
-        avatarThumbnailUrl: `${AVATAR_URL_PREFIX}/${DEFAULT_AVATARS.thumbnail}`,
-      };
-    } catch (error) {
-      throw new ApiError(`Failed to reset avatar: ${error.message}`, 500);
-    }
+    return avatarStorage.resetAvatar(id);
   }
 
   /**
