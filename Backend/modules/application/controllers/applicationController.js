@@ -87,7 +87,7 @@ exports.removeDocument = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   const updatedApplication =
-    await ApplicationService.removeAllDocumentsAndCoverLetter(id);
+    await ApplicationService.removeAllDocuments(id);
 
   res.json({
     status: 'success',

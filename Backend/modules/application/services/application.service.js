@@ -5,8 +5,8 @@ const ApiError = require('../../../core/utils/ApiError');
 const Application = require('../models/applicationModel');
 const Job = require('../../job/models/jobModel');
 const Candidate = require('../../candidate/models/candidateModel');
+const documentStorage = require('./documents/storage.service');
 
-const cleanupFiles = require('../../../core/utils/cleanupFiles');
 const path = require('path');
 
 /**
@@ -14,109 +14,29 @@ const path = require('path');
  * @description Business logic for job applications
  */
 class ApplicationService {
-  /**
-   * Upload and store a document in the application
-   * @param {string} applicationId
-   * @param {Object} documentInfo - { path, url, originalName, mimetype, size }
-   * @returns {Promise<Object>} Updated application document
-   * @throws {ApiError} If application not found
-   */
-  static async storeDocument(id, uploadedFiles) {
-    const application = await Application.findById(id);
+  static async storeDocument(applicationId, files) {
+    try {
+      const updatedApp = await documentStorage.storeDocuments(
+        applicationId,
+        files
+      );
 
-    if (!application) {
-      throw new ApiError(`Application with ID ${id} not found`, 404);
-    }
-
-    // Validate we have files to process
-    if (
-      !uploadedFiles ||
-      (!uploadedFiles.resume &&
-        !uploadedFiles.coverLetter &&
-        !uploadedFiles.documents?.length)
-    ) {
-      throw new ApiError('No valid files to store', 400);
-    }
-
-    // Handle resume upload
-    if (uploadedFiles.resume) {
-      if (!uploadedFiles.resume.url || !uploadedFiles.resume.name) {
-        throw new ApiError('Resume file is missing required fields', 400);
+      return updatedApp;
+    } catch (error) {
+      if (error.code === 'FILE_UPLOAD_FAILED') {
+        throw new ApiError('Document storage failed: ' + error.message, 502);
       }
-      application.resumeUrl = uploadedFiles.resume.url;
+      throw error;
     }
-
-    // Handle cover letter upload
-    if (uploadedFiles.coverLetter) {
-      if (!uploadedFiles.coverLetter.url || !uploadedFiles.coverLetter.name) {
-        throw new ApiError('Cover letter is missing required fields', 400);
-      }
-      application.coverLetter = uploadedFiles.coverLetter.url;
-    }
-
-    // Handle additional documents
-    if (uploadedFiles.documents?.length > 0) {
-      for (const doc of uploadedFiles.documents) {
-        if (!doc.name || !doc.url || !doc.type || !doc.size) {
-          console.error('Invalid document format:', doc);
-          continue; // Skip invalid documents or throw error if you prefer
-        }
-
-        application.documents.push({
-          name: doc.name,
-          url: doc.url,
-          type: doc.type,
-          size: doc.size,
-          uploadedAt: new Date(),
-        });
-      }
-    }
-
-    await application.save();
-    return application;
   }
 
   /**
-   * Remove a document from the application and delete file from disk
+   * Remove all documents from an application
    * @param {string} applicationId
-   * @param {string} documentUrl - Relative path of the document to remove
-   * @returns {Promise<Object>} Updated application document
-   * @throws {ApiError} If document or application not found
+   * @returns {Promise<Object>} Updated application
    */
-  static async removeAllDocumentsAndCoverLetter(id) {
-    const application = await Application.findById(id);
-    if (!application) {
-      throw new ApiError(`Application with ID ${id} not found`, 404);
-    }
-
-    const filesToDelete = [];
-
-    if (application.coverLetter) {
-      console.log('Deleting cover letter:', application.coverLetter);
-      const coverLetterPath = path.join(
-        process.cwd(),
-        application.coverLetter.replace(/^\/+/, '')
-      );
-      filesToDelete.push(coverLetterPath);
-      application.coverLetter = undefined;
-    }
-
-    if (application.documents && application.documents.length) {
-      application.documents.forEach((doc) => {
-        console.log('Deleting document:', doc.url);
-        const docPath = path.join(process.cwd(), doc.url.replace(/^\/+/, ''));
-        filesToDelete.push(docPath);
-      });
-      application.documents = [];
-    }
-
-    console.log('Files to delete:', filesToDelete);
-
-    await cleanupFiles(filesToDelete);
-
-    await application.save();
-
-    return application;
+  static async removeAllDocuments(applicationId) {
+    return documentStorage.removeAllDocuments(applicationId);
   }
 
   /**
