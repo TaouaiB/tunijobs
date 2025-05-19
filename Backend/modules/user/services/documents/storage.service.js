@@ -62,7 +62,7 @@ module.exports = {
     // Cleanup existing files
     await this._cleanupPreviousAvatar(user.avatar.medium);
 
-    // Reset to default (matches your constants)
+    // Reset to default
     user.avatar = {
       medium: '/uploads/avatars/default_avatar-md.webp',
       thumbnail: '/uploads/avatars/default_avatar-thumb.webp',

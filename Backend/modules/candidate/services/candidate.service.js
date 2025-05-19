@@ -6,7 +6,6 @@ const Candidate = require('../models/candidateModel');
 const User = require('../../user/models/userModel');
 const resumeStorage = require('./documents/storage.service');
 
-
 /**
  * Service layer for candidate profile operations
  * @class CandidateService
@@ -20,7 +19,7 @@ class CandidateService {
    * @returns {Promise<Object>} Created candidate document
    * @throws {ApiError} If user not found (404) or profile exists (409)
    */
-  static async createCandidate(userId, candidateData) {
+  static async createCandidate(userId, candidateData, documentInfo) {
     const [userExists, candidateExists] = await Promise.all([
       User.exists({ _id: userId }),
       Candidate.exists({ userId }),
@@ -30,10 +29,17 @@ class CandidateService {
     if (candidateExists)
       throw new ApiError('Candidate profile already exists', 409);
 
-    return await Candidate.create({
+    const candidate = await Candidate.create({
       ...pickFields(candidateData, 'candidate', true),
       userId,
-    }).then((doc) => doc.populate('userId', 'name email'));
+    });
+
+    // Store resume if provided
+    if (documentInfo) {
+      await resumeStorage.storeResume(userId, documentInfo);
+    }
+
+    return candidate.populate('userId', 'name email');
   }
 
   /**

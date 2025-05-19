@@ -7,16 +7,20 @@ const documentUploadHandler = require('../../../core/middlewares/multer/document
  * @route   POST /api/v1/users/:userId/candidate
  * @access  Private
  */
-exports.createCandidate = asyncHandler(async (req, res) => {
-  const candidate = await CandidateService.createCandidate(
-    req.params.userId,
-    req.body
-  );
-  res.status(201).json({
-    status: 'success',
-    data: { candidate },
-  });
-});
+exports.createCandidate = [
+  documentUploadHandler,
+  asyncHandler(async (req, res) => {
+    const candidate = await CandidateService.createCandidate(
+      req.params.userId,
+      req.body,
+      req.documentInfo
+    );
+    res.status(201).json({
+      status: 'success',
+      data: { candidate },
+    });
+  }),
+];
 
 /**
  * @desc    Upload and update candidate resume
