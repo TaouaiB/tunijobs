@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 
 dotenv.config({ path: 'config.env' });
 const dbConnection = require('./core/config/database');
-const ApiError = require('./core/utils/apiError');
+const ApiError = require('./core/utils/ApiError');
 const globalErrorHandler = require('./core/middlewares/errorMiddleware');
 
 const userRoute = require('./modules/user/routes/userRoute');
@@ -12,6 +12,7 @@ const candidateRoute = require('./modules/candidate/routes/candidateRoute');
 const companyRoute = require('./modules/company/routes/companyRoute');
 const jobRoute = require('./modules/job/routes/jobRoute');
 const applicationRoutes = require('./modules/application/routes/applicationRoute');
+const authRoutes = require('./modules/auth/routes/auth.routes');
 
 // Connect with db
 dbConnection();
@@ -35,6 +36,8 @@ app.use('/api/v1/users', userRoute);
 app.use('/api/v1/jobs', jobRoute);
 app.use('/api/v1/companies', jobRoute);
 app.use('/api/v1/applications', applicationRoutes);
+app.use('/api/v1/auth', authRoutes);
+
 
 app.all('/{*any}', (req, res, next) => {
   next(new ApiError(`can't find this route: ${req.originalUrl}`, 404));
