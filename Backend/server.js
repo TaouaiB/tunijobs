@@ -1,3 +1,5 @@
+require('./core/utils/logger/logger');
+
 const express = require('express');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
@@ -5,7 +7,7 @@ const dotenv = require('dotenv');
 dotenv.config({ path: 'config.env' });
 const dbConnection = require('./core/config/database');
 const ApiError = require('./core/utils/ApiError');
-const globalErrorHandler = require('./core/middlewares/errorMiddleware');
+const ErrorHandler = require('./core/middlewares/errorMiddleware');
 
 const userRoute = require('./modules/user/routes/userRoute');
 const candidateRoute = require('./modules/candidate/routes/candidateRoute');
@@ -18,6 +20,9 @@ const authRoutes = require('./modules/auth/routes/auth.routes');
 dbConnection();
 
 const app = express();
+
+// Initialize error handler first
+ErrorHandler.init(app);
 
 // Middlewares
 app.use(express.json());
@@ -38,13 +43,12 @@ app.use('/api/v1/companies', jobRoute);
 app.use('/api/v1/applications', applicationRoutes);
 app.use('/api/v1/auth', authRoutes);
 
-
 app.all('/{*any}', (req, res, next) => {
   next(new ApiError(`can't find this route: ${req.originalUrl}`, 404));
 });
 
 // globalErrorHandler
-app.use(globalErrorHandler);
+app.use(ErrorHandler.handle());
 
 // Start the server on port 5000 (or any available port)
 const PORT = process.env.PORT || 5000;

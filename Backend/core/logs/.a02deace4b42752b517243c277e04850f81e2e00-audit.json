@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "C:\\Users\\taouai\\Documents\\Mern Projects\\Real Project\\JobWebsite\\Backend\\core\\logs\\.a02deace4b42752b517243c277e04850f81e2e00-audit.json",
+    "files": [
+        {
+            "date": 1748049879539,
+            "name": "C:\\Users\\taouai\\Documents\\Mern Projects\\Real Project\\JobWebsite\\Backend\\core\\logs\\application-2025-05-24.log",
+            "hash": "dd8c225124f9adc972ebb72e0cb5cc0834944370b83657fe8b8dff230e54d719"
+        }
+    ],
+    "hashType": "sha256"
+}

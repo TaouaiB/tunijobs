@@ -30,9 +30,12 @@
     "path-to-regexp": "^1.8.0",
     "sharp": "^0.34.1",
     "slugify": "^1.6.6",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "winston": "^3.17.0",
+    "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
+    "bcryptjs": "^3.0.2",
     "eslint": "^8.57.1",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^10.1.2",
@@ -41,12 +44,9 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^5.2.6",
     "eslint-plugin-react": "^7.37.5",
-    "nodemon": "^3.1.10",
-    "prettier": "^3.5.3",
-    "bcryptjs": "^3.0.2",
     "joi": "^17.13.3",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.5.3"
   }
 }
-  
-
