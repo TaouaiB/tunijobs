@@ -10,13 +10,46 @@ const avatarStorage = require('./documents/storage.service');
  */
 class UserService {
   /**
-   * Create a new user
-   * @param {Object} userData - User data to create
-   * @returns {Promise<User>} Created user
-   * @throws {ApiError} If validation fails
+   * Check if user exists by email
+   * @param {string} email
+   * @returns {Promise<boolean>}
    */
-  static async createUser(userData) {
-    return await User.create(pickFields(userData, 'user', true));
+  static async userExists(email) {
+    return Boolean(await this.findByEmail(email));
+  }
+
+  /**
+   * Find user by email (with password selection option)
+   * @param {string} email
+   * @param {boolean} [withPassword=false]
+   * @returns {Promise<User|null>}
+   */
+  static async findByEmail(email, withPassword = false) {
+    const query = User.findOne({ email });
+    return withPassword ? query.select('+password') : query;
+  }
+
+  /**
+   * Create a new user (now handles both auth and non-auth cases)
+   * @param {Object} userData
+   * @param {boolean} [isAuthContext=false] - Set true when called from auth flow
+   * @returns {Promise<User>}
+   */
+  static async createUser(userData, isAuthContext = false) {
+    // Only apply field filtering for non-auth cases
+    const data = isAuthContext ? userData : pickFields(userData, 'user', true);
+    return User.create(data);
+  }
+
+  /**
+   * Sanitize user object by removing sensitive fields
+   * @param {User} user
+   * @returns {Object}
+   */
+  static sanitizeUser(user) {
+    const userObj = user.toObject?.() || user;
+    const { password, __v, ...sanitized } = userObj;
+    return sanitized;
   }
 
   /**
