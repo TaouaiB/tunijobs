@@ -68,6 +68,16 @@ const userSchema = new mongoose.Schema(
     // ======================
     // 4. ACCOUNT STATUS
     // ======================
+
+    // Email verification fields
+    emailVerificationToken: {
+      type: String,
+    },
+    emailVerificationExpires: {
+      type: Date,
+    },
+
+    // Account status flags
     isVerified: {
       type: Boolean,
       default: false, // Becomes true after email verification
