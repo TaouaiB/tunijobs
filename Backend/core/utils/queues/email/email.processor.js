@@ -1,18 +1,37 @@
-// core/utils/queues/email/email.processor.js
 const transporter = require('./transporter');
 const logger = require('../../logger/logger');
 const ApiError = require('../../ApiError');
+const { getTemplate } = require('./templates');
 
 module.exports = async (job) => {
   console.log('📥 Received job in worker:', job.data);
 
-  const { to, subject, html, attachments } = job.data;
+  const { to, subject, html, text, template, payload, attachments } = job.data;
+
+  let finalHtml = html;
+  let finalText = text;
+
+  // If no pre-rendered html/text, but template + payload provided, render it now
+  if ((!finalHtml || !finalText) && template && payload) {
+    try {
+      const tmpl = getTemplate(template);
+      finalHtml = tmpl.html(payload);
+      finalText = tmpl.text(payload);
+    } catch (err) {
+      console.error('Error rendering email template:', err);
+      throw new ApiError('Failed to render email template', 500, {
+        originalError: err.message,
+      });
+    }
+  }
+
   try {
     const info = await transporter.sendMail({
       from: process.env.SMTP_FROM || '"No Reply" <noreply@example.com>',
       to,
       subject,
-      html,
+      html: finalHtml,
+      text: finalText,
       attachments,
     });
 

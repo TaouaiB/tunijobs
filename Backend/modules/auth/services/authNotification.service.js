@@ -1,3 +1,4 @@
+const jwt = require('../utils/jwt');
 const EmailJobDispatcher = require('../../../core/utils/queues/email/email.job');
 const logger = require('../../../core/utils/logger/logger');
 
@@ -14,17 +15,20 @@ class AuthNotificationService {
    */
   static async sendWelcomeEmail(user) {
     try {
-      const jobData = {
-        type: 'WELCOME_EMAIL',
-        to: user.email,
-        subject: `🎉 Welcome ${user.name} to Our Platform!`,
-        template: 'welcome',
-        payload: {
-          firstName: user.name,
-        },
-      };
+      // Generate the verification token, passing payload and options object with expiresIn
+      const token = jwt.signToken(
+        { id: user._id, purpose: 'verifyEmail' },
+        { expiresIn: '1d' }
+      );
+      // 2. Build verification link
+      const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
 
-      await EmailJobDispatcher.dispatch(jobData);
+      await EmailJobDispatcher.sendWelcomeEmail(
+        user.email,
+        user.firstName,
+        verificationLink
+      );
+
       logger.info('📧 Welcome email job dispatched', { email: user.email });
     } catch (error) {
       logger.error('Failed to dispatch welcome email', {

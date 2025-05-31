@@ -5,9 +5,11 @@
 
 const passwordResetTemplate = require('./passwordReset.template');
 
+const welcomeTemplate = require('./welcome.template');
+
 const templates = {
   passwordReset: passwordResetTemplate,
-  // Add other templates here later (e.g., 'welcome': require('./welcome.template'))
+  welcome: welcomeTemplate,
 };
 
 /**

@@ -400,3 +400,101 @@
 {"email":"baha.edine1990@gmail.com","level":"info","message":"📧 Welcome email job dispatched","timestamp":"2025-05-31T02:15:03.398Z"}
 {"jobId":"16","level":"info","message":"Email sent to baha.edine1990@gmail.com","messageId":"<2dee5a9f-4e61-4eda-fd9a-7637d2c2bcac@tunijobs.tn>","timestamp":"2025-05-31T02:15:06.156Z"}
 {"jobId":"16","level":"info","message":"Job completed in email","timestamp":"2025-05-31T02:15:06.158Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T02:21:53.273Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T02:21:53.420Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T02:21:53.913Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T10:48:12.630Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T10:48:12.829Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T10:48:13.502Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T10:48:50.681Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T10:48:50.942Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T10:48:53.405Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T10:48:53.563Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T10:48:54.110Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T10:49:21.644Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T10:49:21.796Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T10:49:22.371Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T10:49:52.209Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T10:49:52.470Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T10:49:53.039Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T10:49:58.407Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T10:49:58.561Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T10:49:59.108Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T10:52:05.194Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T10:52:05.716Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T10:52:06.365Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T10:52:11.828Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T10:52:12.011Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T10:52:12.538Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T10:56:49.635Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T10:56:49.823Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T10:56:50.402Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T10:56:56.387Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T10:56:56.468Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T10:56:57.521Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T10:57:24.926Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T10:57:25.085Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T10:57:25.641Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T10:57:45.875Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T10:57:46.009Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T10:57:46.690Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T10:57:49.816Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T10:57:49.986Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T10:57:50.512Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T10:58:15.456Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T10:58:15.537Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T10:58:16.093Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T10:58:37.387Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T10:58:37.482Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T10:58:38.048Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T10:58:42.981Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T10:58:43.130Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T10:58:45.655Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T10:58:45.751Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T10:58:46.298Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T10:59:28.026Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T10:59:28.115Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T10:59:28.769Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T11:01:39.480Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T11:01:39.605Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T11:01:40.381Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T11:01:43.506Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T11:01:43.577Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T11:01:44.224Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T11:05:34.917Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T11:05:34.988Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T11:05:35.704Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T11:07:25.383Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T11:07:25.544Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T11:07:26.375Z"}
+{"level":"debug","message":"Registration attempt for email: baha.edine1990@gmail.com","timestamp":"2025-05-31T11:07:33.601Z"}
+{"level":"info","message":"New user registered: 683ae2f58ab80c301697f6f1","timestamp":"2025-05-31T11:07:34.048Z"}
+{"email":"baha.edine1990@gmail.com","error":"jwt is not defined","level":"error","message":"Failed to dispatch welcome email","timestamp":"2025-05-31T11:07:34.049Z"}
+{"level":"info","message":"Request completed","request":{"body":{"email":"baha.edine1990@gmail.com","name":"John Doe","password":"**REDACTED**"},"id":"474a8a7f-f467-4b2a-bb32-79667ea583e0","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/register","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":201,"timeMs":"479.17"},"system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18357946,"external":20923987,"heapTotal":45666304,"heapUsed":40326848,"rss":97734656},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-31T11:07:34.057Z"}
+{"level":"debug","message":"Registration attempt for email: baha.edine1990@gmail.com","timestamp":"2025-05-31T11:12:26.031Z"}
+{"level":"info","message":"New user registered: 683ae41a8ab80c301697f6f4","timestamp":"2025-05-31T11:12:26.523Z"}
+{"email":"baha.edine1990@gmail.com","error":"jwt is not defined","level":"error","message":"Failed to dispatch welcome email","timestamp":"2025-05-31T11:12:26.524Z"}
+{"level":"info","message":"Request completed","request":{"body":{"email":"baha.edine1990@gmail.com","name":"John Doe","password":"**REDACTED**"},"id":"19b0f4cd-b355-4a0d-9014-68337443674c","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/register","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":201,"timeMs":"500.98"},"system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18390714,"external":20956795,"heapTotal":43044864,"heapUsed":40683192,"rss":99131392},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-31T11:12:26.530Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T11:14:31.133Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T11:14:31.469Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T11:14:32.795Z"}
+{"level":"debug","message":"Registration attempt for email: baha.edine1990@gmail.com","timestamp":"2025-05-31T11:14:39.324Z"}
+{"level":"info","message":"New user registered: 683ae49f0d4ecc1b69a0dd8c","timestamp":"2025-05-31T11:14:39.966Z"}
+{"email":"baha.edine1990@gmail.com","error":"jwt.signToken is not a function","level":"error","message":"Failed to dispatch welcome email","timestamp":"2025-05-31T11:14:39.967Z"}
+{"level":"info","message":"Request completed","request":{"body":{"email":"baha.edine1990@gmail.com","name":"John Doe","password":"**REDACTED**"},"id":"88ca6c1c-dd29-43a0-a845-1f28647ac1b2","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/register","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":201,"timeMs":"699.81"},"system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18453034,"external":21058076,"heapTotal":78696448,"heapUsed":46194864,"rss":130494464},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-31T11:14:39.983Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T11:18:28.022Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T11:18:28.194Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T11:18:28.767Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T11:19:07.481Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T11:19:07.613Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T11:19:08.345Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T11:19:22.327Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T11:19:22.539Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T11:19:23.099Z"}
+{"level":"debug","message":"Registration attempt for email: baha.edine1990@gmail.com","timestamp":"2025-05-31T11:19:24.491Z"}
+{"level":"info","message":"New user registered: 683ae5bc5ced9a6f6c210ea0","timestamp":"2025-05-31T11:19:25.085Z"}
+{"email":"baha.edine1990@gmail.com","error":"\"0\" is not allowed in \"options\"","level":"error","message":"Failed to dispatch welcome email","timestamp":"2025-05-31T11:19:25.087Z"}
+{"level":"info","message":"Request completed","request":{"body":{"email":"baha.edine1990@gmail.com","name":"John Doe","password":"**REDACTED**"},"id":"7336e00b-ddc3-40cc-ad18-6a0c90e8be7a","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/register","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":201,"timeMs":"618.17"},"system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18453041,"external":21058083,"heapTotal":79220736,"heapUsed":46256424,"rss":131026944},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-31T11:19:25.093Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T11:21:32.225Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T11:21:32.588Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T11:21:33.177Z"}
