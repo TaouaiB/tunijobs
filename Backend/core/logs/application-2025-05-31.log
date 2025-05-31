@@ -1,0 +1,402 @@
+{"level":"debug","message":"Registration attempt for email: john.doe5@example.cOM","timestamp":"2025-05-30T23:50:58.104Z"}
+{"level":"warn","message":"Duplicate registration attempt: john.doe5@example.cOM","timestamp":"2025-05-30T23:50:58.184Z"}
+{"error":{"isCritical":false,"isOperational":true,"message":"Email already in use","name":"Error","stack":"Error: Email already in use\n    at AuthService.registerUser (C:\\Users\\taouai\\Documents\\Mern Projects\\Real Project\\JobWebsite\\Backend\\modules\\auth\\services\\auth.service.js:23:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async C:\\Users\\taouai\\Documents\\Mern Projects\\Real Project\\JobWebsite\\Backend\\modules\\auth\\controllers\\auth.controller.js:5:27","type":"operational"},"level":"error","message":"Email already in use","request":{"body":{"email":"john.doe5@example.cOM","name":"John Doe","password":"**REDACTED**"},"id":"f5ef7a98-3efb-4333-bdf9-109bdf0caeb5","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/register","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":200,"timeMs":"127.63"},"severity":"ERROR","stack":"Error: Email already in use\n    at AuthService.registerUser (C:\\Users\\taouai\\Documents\\Mern Projects\\Real Project\\JobWebsite\\Backend\\modules\\auth\\services\\auth.service.js:23:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async C:\\Users\\taouai\\Documents\\Mern Projects\\Real Project\\JobWebsite\\Backend\\modules\\auth\\controllers\\auth.controller.js:5:27","system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18337614,"external":20830535,"heapTotal":36233216,"heapUsed":33860384,"rss":92438528},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-30T23:50:58.191Z","type":"operational"}
+{"level":"debug","message":"Registration attempt for email: baha.edine1990@gmail.com","timestamp":"2025-05-30T23:51:48.804Z"}
+{"level":"info","message":"New user registered: 683a4495bb675fe0691b09f0","timestamp":"2025-05-30T23:51:49.312Z"}
+{"email":"baha.edine1990@gmail.com","error":"EmailJobDispatcher.dispatch is not a function","level":"error","message":"Failed to dispatch welcome email","timestamp":"2025-05-30T23:51:49.313Z"}
+{"level":"info","message":"Request completed","request":{"body":{"email":"baha.edine1990@gmail.com","name":"John Doe","password":"**REDACTED**"},"id":"7ff546e6-5912-4e9b-a56f-7b3be2eb42d0","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/register","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":201,"timeMs":"521.16"},"system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18357666,"external":20867025,"heapTotal":38330368,"heapUsed":35145936,"rss":93810688},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-30T23:51:49.323Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-30T23:55:48.038Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-30T23:55:48.053Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-30T23:55:53.266Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-30T23:55:53.279Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-30T23:55:59.178Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-30T23:55:59.193Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-30T23:56:07.999Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-30T23:56:08.012Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-30T23:56:25.939Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-30T23:56:25.950Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-30T23:56:32.521Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-30T23:56:32.536Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-30T23:56:36.351Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-30T23:56:36.372Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-30T23:56:39.100Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-30T23:56:39.117Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-30T23:56:43.695Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-30T23:56:43.707Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-30T23:57:52.657Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-30T23:57:52.667Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-30T23:58:30.947Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-30T23:58:30.957Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:04:34.287Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:04:34.298Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:09:15.732Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:09:15.744Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:13:27.405Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:13:27.420Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:13:29.657Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:13:29.669Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:13:54.608Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:13:54.620Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:15:03.016Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:15:03.029Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:15:10.346Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:15:10.359Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:15:20.074Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:15:20.089Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:17:01.407Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:17:01.419Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:17:43.823Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:17:43.835Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:21:03.773Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:21:03.787Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:23:03.823Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:23:03.836Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:24:14.679Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:24:14.691Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:24:28.396Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:24:28.408Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:26:10.413Z"}
+{"host":"127.0.0.1","level":"info","maxRetriesPerRequest":null,"message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:26:10.426Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:27:24.070Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:27:24.092Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:28:04.475Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:28:04.578Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:28:27.498Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:28:27.586Z"}
+{"level":"debug","message":"Login attempt for email: john.doe3@example.com","timestamp":"2025-05-31T00:28:39.851Z"}
+{"level":"info","message":"User authenticated: 6831902bfe6e84b59558ad74","timestamp":"2025-05-31T00:28:40.270Z"}
+{"level":"info","message":"Request completed","request":{"body":{"email":"john.doe3@example.com","password":"**REDACTED**"},"id":"50c50ec1-76e6-4978-8686-607f07a80c08","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/login","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":200,"timeMs":"456.65"},"system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18357700,"external":20895983,"heapTotal":40685568,"heapUsed":38253112,"rss":92094464},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-31T00:28:40.280Z"}
+{"level":"debug","message":"Registration attempt for email: baha.edine1990@gmail.com","timestamp":"2025-05-31T00:28:48.371Z"}
+{"level":"info","message":"New user registered: 683a4d4099f69c911fa15c47","timestamp":"2025-05-31T00:28:48.844Z"}
+{"level":"info","message":"Request completed","request":{"body":{"email":"baha.edine1990@gmail.com","name":"John Doe","password":"**REDACTED**"},"id":"a419a058-33da-4ad5-b9bd-75ba52d55d61","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/register","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":201,"timeMs":"483.94"},"system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18388283,"external":20943004,"heapTotal":41734144,"heapUsed":38497464,"rss":92831744},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-31T00:28:48.852Z"}
+{"error":"ERR Lua redis lib command arguments must be strings or integers script: 5d72599ecf6223f7a774b2871f2468ac5892c694, on @user_script:320.","level":"error","message":"Failed to add job to email","timestamp":"2025-05-31T00:28:48.859Z"}
+{"error":"ERR Lua redis lib command arguments must be strings or integers script: 5d72599ecf6223f7a774b2871f2468ac5892c694, on @user_script:320.","level":"error","message":"Failed to add email job to queue","timestamp":"2025-05-31T00:28:48.861Z"}
+{"email":"baha.edine1990@gmail.com","error":"ERR Lua redis lib command arguments must be strings or integers script: 5d72599ecf6223f7a774b2871f2468ac5892c694, on @user_script:320.","level":"error","message":"Failed to dispatch welcome email","timestamp":"2025-05-31T00:28:48.861Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:39:49.935Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:39:50.035Z"}
+{"level":"debug","message":"Registration attempt for email: baha.edine1990@gmail.com","timestamp":"2025-05-31T00:40:10.688Z"}
+{"level":"info","message":"New user registered: 683a4feb5277724ac48e7178","timestamp":"2025-05-31T00:40:11.146Z"}
+{"level":"info","message":"Request completed","request":{"body":{"email":"baha.edine1990@gmail.com","name":"John Doe","password":"**REDACTED**"},"id":"14551fa9-d2d8-439b-9227-baacbce107b2","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/register","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":201,"timeMs":"501.69"},"system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18388298,"external":20942979,"heapTotal":41996288,"heapUsed":38247264,"rss":93126656},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-31T00:40:11.163Z"}
+{"jobId":"2","level":"info","message":"Job added to email - send_email","timestamp":"2025-05-31T00:40:11.167Z"}
+{"level":"info","message":"Email job added to queue","timestamp":"2025-05-31T00:40:11.168Z","to":"baha.edine1990@gmail.com","type":"WELCOME_EMAIL"}
+{"email":"baha.edine1990@gmail.com","level":"info","message":"📧 Welcome email job dispatched","timestamp":"2025-05-31T00:40:11.169Z"}
+{"level":"debug","message":"Registration attempt for email: baha.edine1990@gmail.com","timestamp":"2025-05-31T00:52:10.259Z"}
+{"level":"info","message":"New user registered: 683a52ba5277724ac48e717b","timestamp":"2025-05-31T00:52:10.764Z"}
+{"level":"info","message":"Request completed","request":{"body":{"email":"baha.edine1990@gmail.com","name":"John Doe","password":"**REDACTED**"},"id":"59cfd9be-42c4-484c-a992-7aa4df8b9a6d","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/register","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":201,"timeMs":"511.46"},"system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18394866,"external":20949587,"heapTotal":42258432,"heapUsed":39094904,"rss":94027776},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-31T00:52:10.770Z"}
+{"jobId":"3","level":"info","message":"Job added to email - send_email","timestamp":"2025-05-31T00:52:10.772Z"}
+{"level":"info","message":"Email job added to queue","timestamp":"2025-05-31T00:52:10.773Z","to":"baha.edine1990@gmail.com","type":"WELCOME_EMAIL"}
+{"email":"baha.edine1990@gmail.com","level":"info","message":"📧 Welcome email job dispatched","timestamp":"2025-05-31T00:52:10.773Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:57:38.940Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:57:39.031Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:58:58.264Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:58:58.365Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:59:04.659Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:59:04.757Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:59:23.009Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:59:23.111Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:59:32.464Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:59:32.558Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:59:42.964Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:59:43.048Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T00:59:58.294Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T00:59:58.392Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:00:11.193Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:00:11.291Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:00:21.611Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:00:21.733Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:00:49.318Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:00:49.410Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:01:06.462Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:01:06.557Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:01:49.099Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:01:49.211Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:01:54.752Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:01:54.847Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:02:00.281Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:02:00.392Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:02:02.132Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:02:02.232Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:02:05.952Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:02:06.053Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:02:18.520Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:02:18.608Z"}
+{"level":"debug","message":"Registration attempt for email: baha.edine1990@gmail.com","timestamp":"2025-05-31T01:02:31.672Z"}
+{"level":"warn","message":"Duplicate registration attempt: baha.edine1990@gmail.com","timestamp":"2025-05-31T01:02:31.728Z"}
+{"error":{"isCritical":false,"isOperational":true,"message":"Email already in use","name":"Error","stack":"Error: Email already in use\n    at AuthService.registerUser (C:\\Users\\taouai\\Documents\\Mern Projects\\Real Project\\JobWebsite\\Backend\\modules\\auth\\services\\auth.service.js:23:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async C:\\Users\\taouai\\Documents\\Mern Projects\\Real Project\\JobWebsite\\Backend\\modules\\auth\\controllers\\auth.controller.js:5:27","type":"operational"},"level":"error","message":"Email already in use","request":{"body":{"email":"baha.edine1990@gmail.com","name":"John Doe","password":"**REDACTED**"},"id":"7e6ef71e-09c5-4558-8b84-3d9641920a90","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/register","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":200,"timeMs":"78.53"},"severity":"ERROR","stack":"Error: Email already in use\n    at AuthService.registerUser (C:\\Users\\taouai\\Documents\\Mern Projects\\Real Project\\JobWebsite\\Backend\\modules\\auth\\services\\auth.service.js:23:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async C:\\Users\\taouai\\Documents\\Mern Projects\\Real Project\\JobWebsite\\Backend\\modules\\auth\\controllers\\auth.controller.js:5:27","system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18356533,"external":20894816,"heapTotal":40685568,"heapUsed":37868144,"rss":91394048},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-31T01:02:31.730Z","type":"operational"}
+{"level":"debug","message":"Registration attempt for email: baha.edine1990@gmail.com","timestamp":"2025-05-31T01:02:54.050Z"}
+{"level":"info","message":"New user registered: 683a553e0d0043b01c413c67","timestamp":"2025-05-31T01:02:54.560Z"}
+{"level":"info","message":"Request completed","request":{"body":{"email":"baha.edine1990@gmail.com","name":"John Doe","password":"**REDACTED**"},"id":"70c91991-0b67-457f-a17c-9da05d6e3ae5","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/register","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":201,"timeMs":"520.39"},"system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18404682,"external":20959403,"heapTotal":42258432,"heapUsed":38549824,"rss":92889088},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-31T01:02:54.569Z"}
+{"jobId":"4","level":"info","message":"Job added to email - send_email","timestamp":"2025-05-31T01:02:54.572Z"}
+{"level":"info","message":"Email job added to queue","timestamp":"2025-05-31T01:02:54.573Z","to":"baha.edine1990@gmail.com","type":"WELCOME_EMAIL"}
+{"email":"baha.edine1990@gmail.com","level":"info","message":"📧 Welcome email job dispatched","timestamp":"2025-05-31T01:02:54.573Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:10:37.211Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:10:37.321Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:10:45.330Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:10:45.423Z"}
+{"level":"debug","message":"Registration attempt for email: baha.edine1990@gmail.com","timestamp":"2025-05-31T01:12:06.950Z"}
+{"level":"info","message":"New user registered: 683a5767c254609e8b3f46ba","timestamp":"2025-05-31T01:12:07.333Z"}
+{"level":"info","message":"Request completed","request":{"body":{"email":"baha.edine1990@gmail.com","name":"John Doe","password":"**REDACTED**"},"id":"0267d2f9-6a3b-48cc-ab24-934c276495ee","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/register","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":201,"timeMs":"406.01"},"system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18396506,"external":20951187,"heapTotal":40947712,"heapUsed":38897104,"rss":93478912},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-31T01:12:07.342Z"}
+{"jobId":"5","level":"info","message":"Job added to email - send_email","timestamp":"2025-05-31T01:12:07.345Z"}
+{"level":"info","message":"Email job added to queue","timestamp":"2025-05-31T01:12:07.346Z","to":"baha.edine1990@gmail.com","type":"WELCOME_EMAIL"}
+{"email":"baha.edine1990@gmail.com","level":"info","message":"📧 Welcome email job dispatched","timestamp":"2025-05-31T01:12:07.347Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:15:31.481Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:15:31.583Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:15:35.769Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:15:35.875Z"}
+{"level":"debug","message":"Registration attempt for email: baha.edine1990@gmail.com","timestamp":"2025-05-31T01:15:53.908Z"}
+{"level":"info","message":"New user registered: 683a584a1db59ba93ab339a6","timestamp":"2025-05-31T01:15:54.429Z"}
+{"level":"info","message":"Request completed","request":{"body":{"email":"baha.edine1990@gmail.com","name":"John Doe","password":"**REDACTED**"},"id":"e87abe23-2e07-4a8c-a0cd-9361e7526666","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/register","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":201,"timeMs":"561.93"},"system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18380122,"external":20934803,"heapTotal":41209856,"heapUsed":38190224,"rss":92504064},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-31T01:15:54.441Z"}
+{"jobId":"6","level":"info","message":"Job added to email - send_email","timestamp":"2025-05-31T01:15:54.445Z"}
+{"level":"info","message":"Email job added to queue","timestamp":"2025-05-31T01:15:54.446Z","to":"baha.edine1990@gmail.com","type":"WELCOME_EMAIL"}
+{"email":"baha.edine1990@gmail.com","level":"info","message":"📧 Welcome email job dispatched","timestamp":"2025-05-31T01:15:54.447Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:16:47.553Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:16:47.654Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:16:53.288Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:16:53.377Z"}
+{"level":"debug","message":"Registration attempt for email: baha.edine1990@gmail.com","timestamp":"2025-05-31T01:17:12.006Z"}
+{"level":"info","message":"New user registered: 683a5898e8f14e5f7d3cbebc","timestamp":"2025-05-31T01:17:12.458Z"}
+{"level":"info","message":"Request completed","request":{"body":{"email":"baha.edine1990@gmail.com","name":"John Doe","password":"**REDACTED**"},"id":"58f6ac81-8a11-4f88-ae30-986a5b8e5828","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/register","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":201,"timeMs":"494.30"},"system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18380106,"external":20934787,"heapTotal":41472000,"heapUsed":38786608,"rss":92729344},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-31T01:17:12.477Z"}
+{"jobId":"7","level":"info","message":"Job added to email - send_email","timestamp":"2025-05-31T01:17:12.482Z"}
+{"level":"info","message":"Email job added to queue","timestamp":"2025-05-31T01:17:12.483Z","to":"baha.edine1990@gmail.com","type":"WELCOME_EMAIL"}
+{"email":"baha.edine1990@gmail.com","level":"info","message":"📧 Welcome email job dispatched","timestamp":"2025-05-31T01:17:12.485Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:18:38.588Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:18:38.706Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:18:40.214Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:18:40.315Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:19:03.210Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:19:03.404Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:19:11.326Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:19:11.477Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:19:14.333Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:19:14.430Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:26:39.754Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:26:39.841Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:29:11.467Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:29:11.569Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:29:18.357Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:29:18.450Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:29:21.978Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:29:22.124Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:29:28.465Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:29:28.561Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:30:21.601Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:30:21.702Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:30:24.677Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:30:24.790Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:30:26.857Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:30:26.998Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:30:29.694Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:30:29.797Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:31:00.553Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:31:00.638Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:32:30.819Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:32:30.915Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:32:58.388Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:32:58.477Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:33:48.241Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:33:48.354Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:33:50.815Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:33:50.901Z"}
+{"level":"debug","message":"Registration attempt for email: baha.edine1990@gmail.com","timestamp":"2025-05-31T01:34:14.120Z"}
+{"level":"info","message":"New user registered: 683a5c96d4d7c6d288113b82","timestamp":"2025-05-31T01:34:14.620Z"}
+{"level":"info","message":"Request completed","request":{"body":{"email":"baha.edine1990@gmail.com","name":"John Doe","password":"**REDACTED**"},"id":"41d96920-d27d-4596-bf28-1f92f4bfa6d7","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/register","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":201,"timeMs":"544.33"},"system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18388298,"external":20942979,"heapTotal":41209856,"heapUsed":38686128,"rss":92856320},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-31T01:34:14.637Z"}
+{"jobId":"8","level":"info","message":"Job added to email - send_email","timestamp":"2025-05-31T01:34:14.643Z"}
+{"level":"info","message":"Email job added to queue","timestamp":"2025-05-31T01:34:14.644Z","to":"baha.edine1990@gmail.com","type":"WELCOME_EMAIL"}
+{"email":"baha.edine1990@gmail.com","level":"info","message":"📧 Welcome email job dispatched","timestamp":"2025-05-31T01:34:14.645Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:35:22.152Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:35:22.244Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:35:28.995Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:35:29.103Z"}
+{"level":"debug","message":"Registration attempt for email: baha.edine1990@gmail.com","timestamp":"2025-05-31T01:35:39.786Z"}
+{"level":"info","message":"New user registered: 683a5cec9e7cf17fdbb5b100","timestamp":"2025-05-31T01:35:40.336Z"}
+{"level":"info","message":"Request completed","request":{"body":{"email":"baha.edine1990@gmail.com","name":"John Doe","password":"**REDACTED**"},"id":"72a7b262-4758-4482-a9a6-e85d2e2f71c2","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/register","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":201,"timeMs":"607.86"},"system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18387783,"external":20955334,"heapTotal":41996288,"heapUsed":38743856,"rss":92364800},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-31T01:35:40.353Z"}
+{"jobId":"9","level":"info","message":"Job added to email - send_email","timestamp":"2025-05-31T01:35:40.356Z"}
+{"level":"info","message":"Email job added to queue","timestamp":"2025-05-31T01:35:40.358Z","to":"baha.edine1990@gmail.com","type":"WELCOME_EMAIL"}
+{"email":"baha.edine1990@gmail.com","level":"info","message":"📧 Welcome email job dispatched","timestamp":"2025-05-31T01:35:40.359Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:37:03.137Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:37:03.240Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:37:04.656Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:37:04.746Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:37:57.282Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:37:57.368Z"}
+{"level":"debug","message":"Registration attempt for email: baha.edine1990@gmail.com","timestamp":"2025-05-31T01:38:15.307Z"}
+{"level":"info","message":"New user registered: 683a5d87cde2e154f3099563","timestamp":"2025-05-31T01:38:15.871Z"}
+{"level":"info","message":"Request completed","request":{"body":{"email":"baha.edine1990@gmail.com","name":"John Doe","password":"**REDACTED**"},"id":"5cf58eb5-b362-4a27-9b9f-8aee4f4606ab","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/register","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":201,"timeMs":"610.81"},"system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18380106,"external":20934787,"heapTotal":41472000,"heapUsed":38631224,"rss":90955776},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-31T01:38:15.887Z"}
+{"jobId":"10","level":"info","message":"Job added to email - send_email","timestamp":"2025-05-31T01:38:15.893Z"}
+{"level":"info","message":"Email job added to queue","timestamp":"2025-05-31T01:38:15.894Z","to":"baha.edine1990@gmail.com","type":"WELCOME_EMAIL"}
+{"email":"baha.edine1990@gmail.com","level":"info","message":"📧 Welcome email job dispatched","timestamp":"2025-05-31T01:38:15.894Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:39:27.099Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:39:27.297Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:39:32.588Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:39:32.704Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:39:37.726Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:39:37.832Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:40:18.903Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:40:18.985Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T01:40:19.710Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:42:07.396Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:42:07.506Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:42:14.212Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:42:14.331Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:42:16.396Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:42:16.523Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:42:18.849Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:42:18.939Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:42:26.783Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:42:26.884Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T01:42:27.549Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:42:49.332Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:42:49.414Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:43:01.156Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:43:01.249Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:43:14.300Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:43:14.402Z"}
+{"level":"debug","message":"Registration attempt for email: baha.edine1990@gmail.com","timestamp":"2025-05-31T01:43:27.449Z"}
+{"level":"info","message":"New user registered: 683a5ebf23952a462a770037","timestamp":"2025-05-31T01:43:28.031Z"}
+{"level":"info","message":"Request completed","request":{"body":{"email":"baha.edine1990@gmail.com","name":"John Doe","password":"**REDACTED**"},"id":"e68c1598-f089-4065-8748-b2a140a49a84","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/register","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":201,"timeMs":"626.99"},"system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18380106,"external":20934787,"heapTotal":40947712,"heapUsed":38812720,"rss":90341376},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-31T01:43:28.044Z"}
+{"jobId":"11","level":"info","message":"Job added to email - send_email","timestamp":"2025-05-31T01:43:28.050Z"}
+{"level":"info","message":"Email job added to queue","timestamp":"2025-05-31T01:43:28.051Z","to":"baha.edine1990@gmail.com","type":"WELCOME_EMAIL"}
+{"email":"baha.edine1990@gmail.com","level":"info","message":"📧 Welcome email job dispatched","timestamp":"2025-05-31T01:43:28.052Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:48:15.258Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:48:15.350Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:53:21.721Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:53:21.734Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:53:27.178Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:53:27.190Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:53:53.199Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:53:53.312Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:53:55.477Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:53:55.569Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T01:53:56.189Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:54:44.437Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:54:44.497Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T01:54:44.986Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:54:55.717Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:54:55.861Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T01:54:56.374Z"}
+{"jobId":"2","level":"info","message":"Email sent to baha.edine1990@gmail.com","messageId":"<0e4529ec-57c7-148d-b43f-dbfddee44c6e@tunijobs.tn>","timestamp":"2025-05-31T01:54:57.272Z"}
+{"jobId":"2","level":"info","message":"Job completed in email","timestamp":"2025-05-31T01:54:57.277Z"}
+{"jobId":"4","level":"info","message":"Email sent to baha.edine1990@gmail.com","messageId":"<86442151-0dc4-6f2b-0d8d-53a05628ad30@tunijobs.tn>","timestamp":"2025-05-31T01:54:57.414Z"}
+{"jobId":"4","level":"info","message":"Job completed in email","timestamp":"2025-05-31T01:54:57.415Z"}
+{"jobId":"5","level":"info","message":"Email sent to baha.edine1990@gmail.com","messageId":"<4ca89758-9b1f-99e7-78d4-3c699e49a3ed@tunijobs.tn>","timestamp":"2025-05-31T01:54:57.617Z"}
+{"jobId":"5","level":"info","message":"Job completed in email","timestamp":"2025-05-31T01:54:57.620Z"}
+{"jobId":"3","level":"info","message":"Email sent to baha.edine1990@gmail.com","messageId":"<a2f15da8-e6fa-a76e-d2ce-d1b4b3f81af3@tunijobs.tn>","timestamp":"2025-05-31T01:54:58.024Z"}
+{"jobId":"3","level":"info","message":"Job completed in email","timestamp":"2025-05-31T01:54:58.025Z"}
+{"jobId":"7","level":"info","message":"Email sent to baha.edine1990@gmail.com","messageId":"<3b6e3f27-0cfb-d8da-1e44-a5cd8de06f27@tunijobs.tn>","timestamp":"2025-05-31T01:54:58.782Z"}
+{"jobId":"7","level":"info","message":"Job completed in email","timestamp":"2025-05-31T01:54:58.784Z"}
+{"jobId":"6","level":"info","message":"Email sent to baha.edine1990@gmail.com","messageId":"<d8b34c00-89ef-f958-3d50-667d40ee4296@tunijobs.tn>","timestamp":"2025-05-31T01:54:59.096Z"}
+{"jobId":"6","level":"info","message":"Job completed in email","timestamp":"2025-05-31T01:54:59.097Z"}
+{"jobId":"8","level":"info","message":"Email sent to baha.edine1990@gmail.com","messageId":"<34856cd1-68dd-ad0c-972e-20b98c36a4b9@tunijobs.tn>","timestamp":"2025-05-31T01:54:59.518Z"}
+{"jobId":"8","level":"info","message":"Job completed in email","timestamp":"2025-05-31T01:54:59.519Z"}
+{"jobId":"10","level":"info","message":"Email sent to baha.edine1990@gmail.com","messageId":"<589dfa33-a601-2290-4d9e-e36e2bb0c231@tunijobs.tn>","timestamp":"2025-05-31T01:54:59.910Z"}
+{"jobId":"10","level":"info","message":"Job completed in email","timestamp":"2025-05-31T01:54:59.911Z"}
+{"jobId":"9","level":"info","message":"Email sent to baha.edine1990@gmail.com","messageId":"<efdfe3bf-4c48-9ae3-73d8-78b7db7b5557@tunijobs.tn>","timestamp":"2025-05-31T01:55:00.322Z"}
+{"jobId":"9","level":"info","message":"Job completed in email","timestamp":"2025-05-31T01:55:00.324Z"}
+{"jobId":"11","level":"info","message":"Email sent to baha.edine1990@gmail.com","messageId":"<74e47fc7-62f2-f516-36e4-34cb11c2e0d2@tunijobs.tn>","timestamp":"2025-05-31T01:55:00.685Z"}
+{"jobId":"11","level":"info","message":"Job completed in email","timestamp":"2025-05-31T01:55:00.691Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:55:04.950Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:55:04.962Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:55:10.912Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:55:11.120Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T01:55:11.655Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:55:16.274Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:55:16.290Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:55:18.006Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:55:18.019Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:55:28.398Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:55:28.533Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T01:55:29.147Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:56:15.729Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:56:15.874Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T01:56:16.521Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:56:32.282Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:56:32.447Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:56:34.241Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:56:34.377Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T01:56:34.907Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T01:56:54.930Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T01:56:55.077Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T01:56:55.627Z"}
+{"level":"debug","message":"Registration attempt for email: baha.edine1990@gmail.com","timestamp":"2025-05-31T01:59:09.545Z"}
+{"level":"info","message":"New user registered: 683a626efeaabcd624dff50b","timestamp":"2025-05-31T01:59:10.107Z"}
+{"level":"info","message":"Request completed","request":{"body":{"email":"baha.edine1990@gmail.com","name":"John Doe","password":"**REDACTED**"},"id":"702131da-9854-4fab-93da-ebb9105a9385","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/register","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":201,"timeMs":"597.84"},"system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18404682,"external":20970723,"heapTotal":43569152,"heapUsed":40629304,"rss":94048256},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-31T01:59:10.119Z"}
+{"jobId":"12","level":"info","message":"Job added to email - send_email","timestamp":"2025-05-31T01:59:10.123Z"}
+{"level":"info","message":"Email job added to queue","timestamp":"2025-05-31T01:59:10.124Z","to":"baha.edine1990@gmail.com","type":"WELCOME_EMAIL"}
+{"email":"baha.edine1990@gmail.com","level":"info","message":"📧 Welcome email job dispatched","timestamp":"2025-05-31T01:59:10.124Z"}
+{"jobId":"12","level":"info","message":"Email sent to baha.edine1990@gmail.com","messageId":"<c126667e-a36c-25d5-01aa-fd4450b5be4c@tunijobs.tn>","timestamp":"2025-05-31T01:59:11.374Z"}
+{"jobId":"12","level":"info","message":"Job completed in email","timestamp":"2025-05-31T01:59:11.377Z"}
+{"level":"debug","message":"Registration attempt for email: baha.edine1990@gmail.com","timestamp":"2025-05-31T02:00:16.714Z"}
+{"level":"info","message":"New user registered: 683a62b1feaabcd624dff50e","timestamp":"2025-05-31T02:00:17.339Z"}
+{"level":"info","message":"Request completed","request":{"body":{"email":"baha.edine1990@gmail.com","name":"John Doe","password":"**REDACTED**"},"id":"4a98bae0-e359-44a3-83d0-e3d4c0c08033","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/register","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":201,"timeMs":"627.96"},"system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18419442,"external":20985523,"heapTotal":43569152,"heapUsed":41031960,"rss":95432704},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-31T02:00:17.341Z"}
+{"jobId":"13","level":"info","message":"Job added to email - send_email","timestamp":"2025-05-31T02:00:17.343Z"}
+{"level":"info","message":"Email job added to queue","timestamp":"2025-05-31T02:00:17.344Z","to":"baha.edine1990@gmail.com","type":"WELCOME_EMAIL"}
+{"email":"baha.edine1990@gmail.com","level":"info","message":"📧 Welcome email job dispatched","timestamp":"2025-05-31T02:00:17.344Z"}
+{"jobId":"13","level":"info","message":"Email sent to baha.edine1990@gmail.com","messageId":"<9188b66e-bb19-d2c2-3559-7f45434295cf@tunijobs.tn>","timestamp":"2025-05-31T02:00:19.092Z"}
+{"jobId":"13","level":"info","message":"Job completed in email","timestamp":"2025-05-31T02:00:19.093Z"}
+{"level":"debug","message":"Registration attempt for email: baha.edine1990@gmail.com","timestamp":"2025-05-31T02:00:44.614Z"}
+{"level":"info","message":"New user registered: 683a62ccfeaabcd624dff511","timestamp":"2025-05-31T02:00:44.985Z"}
+{"level":"info","message":"Request completed","request":{"body":{"email":"baha.edine1990@gmail.com","name":"John Doe","password":"**REDACTED**"},"id":"2c8cb008-35c0-418e-bb82-4910cc13b6bf","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/register","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":201,"timeMs":"373.61"},"system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18444018,"external":21010099,"heapTotal":44093440,"heapUsed":41255128,"rss":95887360},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-31T02:00:44.988Z"}
+{"jobId":"14","level":"info","message":"Job added to email - send_email","timestamp":"2025-05-31T02:00:44.989Z"}
+{"level":"info","message":"Email job added to queue","timestamp":"2025-05-31T02:00:44.990Z","to":"baha.edine1990@gmail.com","type":"WELCOME_EMAIL"}
+{"email":"baha.edine1990@gmail.com","level":"info","message":"📧 Welcome email job dispatched","timestamp":"2025-05-31T02:00:44.991Z"}
+{"jobId":"14","level":"info","message":"Email sent to baha.edine1990@gmail.com","messageId":"<5d157830-5430-bdd2-a1c0-8039befa1751@tunijobs.tn>","timestamp":"2025-05-31T02:00:46.966Z"}
+{"jobId":"14","level":"info","message":"Job completed in email","timestamp":"2025-05-31T02:00:46.968Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T02:10:28.427Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T02:10:28.612Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T02:10:29.134Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T02:10:33.130Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T02:10:33.282Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T02:10:33.785Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T02:10:51.053Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T02:10:51.187Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T02:10:51.704Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T02:10:57.345Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T02:10:57.497Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T02:10:58.103Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T02:11:12.464Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T02:11:12.646Z"}
+{"level":"debug","message":"Registration attempt for email: baha.edine1990@gmail.com","timestamp":"2025-05-31T02:11:12.993Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T02:11:13.153Z"}
+{"level":"info","message":"New user registered: 683a6541f5fc2e188e6047c5","timestamp":"2025-05-31T02:11:14.057Z"}
+{"level":"info","message":"Request completed","request":{"body":{"email":"baha.edine1990@gmail.com","name":"John Doe","password":"**REDACTED**"},"id":"2751dc84-1742-432f-b731-34f5c810f4d1","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/register","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":201,"timeMs":"1085.13"},"system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18457114,"external":21062156,"heapTotal":78696448,"heapUsed":46005288,"rss":127164416},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-31T02:11:14.065Z"}
+{"jobId":"15","level":"info","message":"Job added to email - send_email","timestamp":"2025-05-31T02:11:14.069Z"}
+{"level":"info","message":"Email job added to queue","timestamp":"2025-05-31T02:11:14.070Z","to":"baha.edine1990@gmail.com","type":"WELCOME_EMAIL"}
+{"email":"baha.edine1990@gmail.com","level":"info","message":"📧 Welcome email job dispatched","timestamp":"2025-05-31T02:11:14.070Z"}
+{"jobId":"15","level":"info","message":"Email sent to baha.edine1990@gmail.com","messageId":"<1f24ecc3-ad96-3321-fcf4-72e46bb56fee@tunijobs.tn>","timestamp":"2025-05-31T02:11:16.954Z"}
+{"jobId":"15","level":"info","message":"Job completed in email","timestamp":"2025-05-31T02:11:16.956Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T02:11:30.780Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T02:11:30.921Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T02:11:31.546Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T02:12:31.447Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T02:12:31.607Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T02:12:32.109Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T02:12:37.910Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T02:12:38.056Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T02:12:38.580Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T02:12:41.709Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T02:12:41.900Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T02:12:42.430Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T02:13:01.482Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T02:13:01.637Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T02:13:02.178Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T02:13:07.281Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T02:13:07.425Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T02:13:07.910Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T02:13:13.513Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T02:13:13.688Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T02:13:14.237Z"}
+{"level":"debug","message":"Registration attempt for email: baha.edine1990@gmail.com","timestamp":"2025-05-31T02:13:30.742Z"}
+{"level":"info","message":"New user registered: 683a65cb25cbe3eb2c88e6f3","timestamp":"2025-05-31T02:13:31.335Z"}
+{"email":"baha.edine1990@gmail.com","error":"firstName is not defined","level":"error","message":"Failed to dispatch welcome email","timestamp":"2025-05-31T02:13:31.336Z"}
+{"level":"info","message":"Request completed","request":{"body":{"email":"baha.edine1990@gmail.com","name":"John Doe","password":"**REDACTED**"},"id":"99891ba3-37c5-4392-91ab-e72da0c0f5db","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/register","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":201,"timeMs":"636.73"},"system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18366122,"external":20932163,"heapTotal":41996288,"heapUsed":39691472,"rss":94015488},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-31T02:13:31.344Z"}
+{"level":"debug","message":"Singleton RedisClient initialized","timestamp":"2025-05-31T02:14:55.759Z"}
+{"host":"127.0.0.1","level":"info","message":"✅ Redis connected","port":6379,"timestamp":"2025-05-31T02:14:55.901Z"}
+{"level":"info","message":"SMTP server is ready to send messages","timestamp":"2025-05-31T02:14:56.399Z"}
+{"level":"debug","message":"Registration attempt for email: baha.edine1990@gmail.com","timestamp":"2025-05-31T02:15:02.839Z"}
+{"level":"info","message":"New user registered: 683a66279935afa309e06973","timestamp":"2025-05-31T02:15:03.377Z"}
+{"level":"info","message":"Request completed","request":{"body":{"email":"baha.edine1990@gmail.com","name":"John Doe","password":"**REDACTED**"},"id":"af26bd8a-e04e-457d-b394-4f0d7080b164","ip":"::1","method":"POST","params":{},"query":{},"url":"/api/v1/auth/register","userAgent":"PostmanRuntime/7.43.4"},"response":{"statusCode":201,"timeMs":"578.75"},"system":{"appVersion":"1.0.0","hostname":"HP-5CG3514NR6","load":[0,0,0],"memory":{"arrayBuffers":18466963,"external":21072005,"heapTotal":79220736,"heapUsed":46155456,"rss":126992384},"nodeVersion":"v22.14.0"},"timestamp":"2025-05-31T02:15:03.391Z"}
+{"jobId":"16","level":"info","message":"Job added to email - send_email","timestamp":"2025-05-31T02:15:03.396Z"}
+{"level":"info","message":"Email job added to queue","timestamp":"2025-05-31T02:15:03.397Z","to":"baha.edine1990@gmail.com","type":"WELCOME_EMAIL"}
+{"email":"baha.edine1990@gmail.com","level":"info","message":"📧 Welcome email job dispatched","timestamp":"2025-05-31T02:15:03.398Z"}
+{"jobId":"16","level":"info","message":"Email sent to baha.edine1990@gmail.com","messageId":"<2dee5a9f-4e61-4eda-fd9a-7637d2c2bcac@tunijobs.tn>","timestamp":"2025-05-31T02:15:06.156Z"}
+{"jobId":"16","level":"info","message":"Job completed in email","timestamp":"2025-05-31T02:15:06.158Z"}

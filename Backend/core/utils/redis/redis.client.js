@@ -30,9 +30,7 @@ class RedisClient {
       logger.error('❌ Redis error', { error: err.message })
     );
 
-    this.client.on('close', () =>
-      logger.warn('⚠️ Redis connection closed')
-    );
+    this.client.on('close', () => logger.warn('⚠️ Redis connection closed'));
 
     this.client.on('reconnecting', () =>
       logger.info('🔁 Redis reconnecting...')

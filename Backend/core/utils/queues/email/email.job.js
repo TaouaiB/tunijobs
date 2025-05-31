@@ -1,24 +1,23 @@
-/**
- * Email Job payload structure
- * @typedef {Object} EmailJobData
- * @property {string} to - Recipient email address
- * @property {string} subject - Email subject line
- * @property {string} html - Email HTML content
- * @property {Object} [attachments] - Optional attachments
- */
+// core/utils/queues/email/email.job.js
+const EmailQueue = require('./email.queue');
+const logger = require('../../logger/logger');
 
-/**
- * Helper to create an email job data object
- * @param {string} to
- * @param {string} subject
- * @param {string} html
- * @param {Object} [attachments]
- * @returns {EmailJobData}
- */
-function createEmailJobData(to, subject, html, attachments = null) {
-  return { to, subject, html, attachments };
+class EmailJobDispatcher {
+  static async dispatch(jobData) {
+    try {
+      await EmailQueue.addJob('send_email', jobData);
+      console.log(`Added job to email queue for ${jobData.to}`);
+      logger.info('Email job added to queue', {
+        to: jobData.to,
+        type: jobData.type,
+      });
+    } catch (error) {
+      logger.error('Failed to add email job to queue', {
+        error: error.message,
+      });
+      throw error;
+    }
+  }
 }
 
-module.exports = {
-  createEmailJobData,
-};
+module.exports = EmailJobDispatcher;

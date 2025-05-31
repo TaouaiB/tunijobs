@@ -1,3 +1,4 @@
+require('module-alias/register');
 require('./core/utils/logger/logger');
 
 const express = require('express');

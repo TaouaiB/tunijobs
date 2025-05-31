@@ -1,4 +1,4 @@
-const { Queue, Worker, QueueScheduler, JobsOptions } = require('bullmq');
+const { Queue, Worker, QueueEvents } = require('bullmq');
 const redisClient = require('../redis/redis.client');
 const logger = require('../logger/logger');
 
@@ -9,7 +9,7 @@ const logger = require('../logger/logger');
  */
 class BaseQueue {
   /**
-   * 
+   *
    * @param {string} queueName - The name of the queue
    * @param {object} [options] - BullMQ Queue options
    */
@@ -18,13 +18,18 @@ class BaseQueue {
       throw new TypeError('Cannot instantiate BaseQueue directly');
     }
     this.queueName = queueName;
+
     this.queue = new Queue(queueName, {
       connection: redisClient.client,
       ...options,
     });
-    this.scheduler = new QueueScheduler(queueName, {
+
+    // BullMQ v5 no longer uses QueueScheduler;
+    // Instead, create QueueEvents to listen to queue lifecycle events
+    this.queueEvents = new QueueEvents(queueName, {
       connection: redisClient.client,
     });
+
     this.worker = null;
 
     this.setupListeners();
@@ -34,15 +39,19 @@ class BaseQueue {
    * Add a job to the queue
    * @param {string} name - Job name
    * @param {object} data - Job payload
-   * @param {JobsOptions} [opts] - Optional BullMQ job options
+   * @param {object} [opts] - Optional BullMQ job options (no more JobsOptions type)
    */
   async addJob(name, data, opts = {}) {
     try {
       const job = await this.queue.add(name, data, opts);
-      logger.info(`Job added to ${this.queueName} - ${name}`, { jobId: job.id });
+      logger.info(`Job added to ${this.queueName} - ${name}`, {
+        jobId: job.id,
+      });
       return job;
     } catch (err) {
-      logger.error(`Failed to add job to ${this.queueName}`, { error: err.message });
+      logger.error(`Failed to add job to ${this.queueName}`, {
+        error: err.message,
+      });
       throw err;
     }
   }
@@ -56,35 +65,46 @@ class BaseQueue {
   }
 
   /**
-   * Setup basic event listeners on queue and worker
+   * Setup basic event listeners on queueEvents and worker
    */
   setupListeners() {
-    this.queue.on('completed', (job) => {
-      logger.info(`Job completed in ${this.queueName}`, { jobId: job.id, name: job.name });
+    // Listen to job completed event
+    this.queueEvents.on('completed', ({ jobId }) => {
+      logger.info(`Job completed in ${this.queueName}`, {
+        jobId,
+      });
     });
 
-    this.queue.on('failed', (job, err) => {
-      logger.error(`Job failed in ${this.queueName}`, { jobId: job.id, name: job.name, error: err.message });
+    // Listen to job failed event
+    this.queueEvents.on('failed', ({ jobId, failedReason }) => {
+      logger.error(`Job failed in ${this.queueName}`, {
+        jobId,
+        error: failedReason,
+      });
     });
 
     if (this.worker) {
       this.worker.on('error', (err) => {
-        logger.error(`Worker error in ${this.queueName}`, { error: err.message });
+        logger.error(`Worker error in ${this.queueName}`, {
+          error: err.message,
+        });
       });
     }
   }
 
   /**
-   * Gracefully close the queue, scheduler, and worker
+   * Gracefully close the queue, queueEvents, and worker
    */
   async close() {
     try {
       await this.queue.close();
-      await this.scheduler.close();
+      await this.queueEvents.close();
       if (this.worker) await this.worker.close();
       logger.info(`Queue ${this.queueName} closed gracefully`);
     } catch (err) {
-      logger.error(`Error closing queue ${this.queueName}`, { error: err.message });
+      logger.error(`Error closing queue ${this.queueName}`, {
+        error: err.message,
+      });
     }
   }
 }

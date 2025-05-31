@@ -3,6 +3,7 @@ const jwt = require('../utils/jwt');
 const UserService = require('../../user/services/user.service');
 const ApiError = require('../../../core/utils/ApiError');
 const logger = require('../../../core/utils/logger/logger');
+const AuthNotificationService = require('./authNotification.service');
 
 class AuthService {
   /**
@@ -32,6 +33,16 @@ class AuthService {
       );
 
       logger.info(`New user registered: ${user._id}`);
+
+      // Send welcome email asynchronously (no await, don't block)
+      AuthNotificationService.sendWelcomeEmail(user).catch((error) => {
+        logger.error('Failed to send welcome email', {
+          error: error.message,
+          userId: user._id,
+          email: user.email,
+        });
+      });
+      
       return this.generateAuthResponse(user);
     } catch (err) {
       logger.error('Registration failed', { error: err.stack, email });
