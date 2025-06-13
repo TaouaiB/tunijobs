@@ -1,9 +1,9 @@
 const asyncHandler = require('express-async-handler');
-const { verifyEmailToken } = require('../services/emailVerification.service');
+const { verifyEmail } = require('../services/verifyEmail.service');
 
 const verifyEmailController = asyncHandler(async (req, res) => {
   const { token } = req.query;
-  const result = await verifyEmailToken(token);
+  const result = await verifyEmail(token);
 
   if (result.alreadyVerified) {
     return res.status(200).json({ message: result.message });

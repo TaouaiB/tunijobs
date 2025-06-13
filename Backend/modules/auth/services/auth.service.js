@@ -42,7 +42,7 @@ class AuthService {
           email: user.email,
         });
       });
-      
+
       return this.generateAuthResponse(user);
     } catch (err) {
       logger.error('Registration failed', { error: err.stack, email });
