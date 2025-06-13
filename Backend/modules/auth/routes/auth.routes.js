@@ -16,11 +16,22 @@ const {
   resetPasswordController,
 } = require('../controllers/resetPassword.controller');
 
+const controller = require('../controllers/resendEmail.controller');
+
 // POST /auth/password-reset/request
 router.post('/password-reset/request', requestPasswordResetController);
 
 // POST /auth/password-reset/reset
 router.post('/password-reset/reset', resetPasswordController);
+
+router.post(
+  '/resend-verification-email',
+  controller.resendVerificationEmailHandler
+);
+router.post(
+  '/resend-password-reset-email',
+  controller.resendPasswordResetEmailHandler
+);
 
 router.post('/register', validateRegister, register);
 router.post('/login', validateLogin, login);

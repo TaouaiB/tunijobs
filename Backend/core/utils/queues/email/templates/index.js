@@ -4,12 +4,14 @@
  */
 
 const passwordResetTemplate = require('./passwordReset.template');
+const verificationEmailTemplate = require('./verificationEmail.template');
 
 const welcomeTemplate = require('./welcome.template');
 
 const templates = {
   passwordReset: passwordResetTemplate,
   welcome: welcomeTemplate,
+  verificationEmail: verificationEmailTemplate,
 };
 
 /**
