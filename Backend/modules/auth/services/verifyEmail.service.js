@@ -1,18 +1,12 @@
 // Backend/modules/auth/services/verifyEmail.service.js
 
 const asyncHandler = require('express-async-handler');
-const jwt = require('../utils/jwt');
 const User = require('../../user/models/userModel');
 const ApiError = require('../../../core/utils/ApiError');
+const verifyEmailTokenPayload = require('../../../core/utils/tokens/verifyEmailTokenPayload');
 
 const verifyEmail = asyncHandler(async (token) => {
-  if (!token) throw new ApiError(400, 'Token is missing');
-
-  const decoded = jwt.verifyToken(token.trim());
-
-  if (decoded.purpose !== 'verifyEmail') {
-    throw new ApiError(400, 'Invalid token purpose');
-  }
+  const decoded = verifyEmailTokenPayload(token);
 
   const user = await User.findById(decoded.id);
   if (!user) throw new ApiError(404, 'User not found');

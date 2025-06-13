@@ -6,7 +6,7 @@ const verifyPasswordResetTokenPayload = (token) => {
 
   const decoded = jwt.verifyToken(token.trim());
 
-  if (decoded.purpose !== 'resetPassword') {
+  if (decoded.purpose !== 'passwordReset') {
     throw new ApiError(400, 'Invalid token purpose');
   }
 
