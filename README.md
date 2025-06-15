@@ -71,7 +71,7 @@ npm install
 npm run start:dev
 
 # Start production server
-npm run production:dev
+npm run start:production
 
 ```
 
