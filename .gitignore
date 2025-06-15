@@ -1,0 +1,4 @@
+node_modules/
+config.env
+core/logs/*
+core/uploads/*
