@@ -168,7 +168,7 @@ class ErrorHandler {
         status: 'error',
         message: 'An unexpected error occurred',
         requestId: err.requestId,
-        supportContact: 'support@yourdomain.com',
+        supportContact: 'support@TuniJobs.com',
       });
     }
   }

@@ -1,32 +1,25 @@
 // /modules/job/policies/job.rules.js
 
-const { AbilityBuilder, Ability } = require('@casl/ability');
-
-function defineJobRulesFor(user) {
-  const { can, cannot, rules } = new AbilityBuilder(Ability);
-
+function defineJobRulesFor(user, can, cannot) {
   if (!user) {
-    // Guest - no permissions (or you can allow read only public jobs)
+    // Guest - allow read only active, non-confidential jobs
     cannot('manage', 'all');
     can('read', 'Job', { isActive: true, isConfidential: false });
-    return new Ability(rules);
+    return;
   }
 
   switch (user.role) {
     case 'admin':
-      can('manage', 'all'); // admin can do anything
+      can('manage', 'all');
       break;
 
     case 'company':
       can('create', 'Job');
-      can('read', 'Job'); // company can read all jobs
-
-      // company can update and delete only jobs they own (match companyId)
+      can('read', 'Job');
       can(['update', 'delete'], 'Job', { companyId: user.companyId });
       break;
 
     case 'candidate':
-      // candidates can only read active, non-confidential jobs
       can('read', 'Job', { isActive: true, isConfidential: false });
       break;
 
@@ -35,8 +28,6 @@ function defineJobRulesFor(user) {
       can('read', 'Job', { isActive: true, isConfidential: false });
       break;
   }
-
-  return new Ability(rules);
 }
 
 module.exports = { defineJobRulesFor };

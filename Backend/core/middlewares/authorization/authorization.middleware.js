@@ -1,13 +1,26 @@
-import { ForbiddenError } from '@casl/ability'
-import ApiError from '../../utils/ApiError'
+const checkAbilityOrThrow = require('../../utils/checkAbilityOrThrow');
+const ApiError = require('../../utils/ApiError');
 
-export function authorize(action, subject) {
-  return (req, res, next) => {
+function authorize(action, subject, getResource) {
+  return async (req, res, next) => {
     try {
-      ForbiddenError.from(req.ability).throwUnlessCan(action, subject)
-      next()
+      const ability = req.ability;
+      let resource = subject;
+
+      if (getResource) {
+        resource = await getResource(req);
+        if (!resource) {
+          return next(new ApiError(`${subject} not found`, 404));
+        }
+      }
+
+      checkAbilityOrThrow(ability, action, resource);
+
+      next();
     } catch (error) {
-      next(new ApiError(403, 'Forbidden: ' + error.message))
+      next(error);
     }
-  }
+  };
 }
+
+module.exports = authorize;

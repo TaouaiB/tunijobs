@@ -11,7 +11,7 @@ This document describes access control rules for the `Job` resource using CASL.
 | company   | read          | Job      | All jobs                                 |
 | company   | update/delete | Job      | Only own jobs (`job.userId === user.id`) |
 | candidate | read          | Job      | All jobs                                 |
-
+| guest     | read          | Job      | PUBLIC jobs (later)                      |
 ---
 
 ## ✅ Notes

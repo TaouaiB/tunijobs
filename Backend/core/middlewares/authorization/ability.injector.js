@@ -1,7 +1,16 @@
-import { defineAbilityFor } from '../../auth/abilities/ability.factory'
+const { buildAbilityFor } = require('../../auth/abilities/ability.factory');
 
-export function abilityInjector(req, res, next) {
-  if (!req.user) return next()
-  req.ability = defineAbilityFor(req.user)
-  next()
+/**
+ * Middleware to build and inject CASL Ability into req.ability
+ */
+function abilityInjector(req, res, next) {
+  try {
+    const user = req.user || null;
+    req.ability = buildAbilityFor(user);
+    next();
+  } catch (err) {
+    next(err);
+  }
 }
+
+module.exports = abilityInjector;
