@@ -35,13 +35,13 @@ router.get('/:companyId/jobs', getJobsByCompany);
 /*--------------------------------------------------
   Protected Routes (Company Admin Only)
 ---------------------------------------------------*/
-router.post('/:companyId/jobs', createJobValidator, createJob);*
+router.post('/:companyId/jobs', createJobValidator, createJob);
 
 router.put(
   '/:id',
   updateJobValidator,
   abilityInjector,
-  authorize('update', 'Job', getJobById),
+  authorize('update', 'Job', getJob),
   updateJob
 );
 

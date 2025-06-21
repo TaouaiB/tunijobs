@@ -44,9 +44,19 @@ app.use('/api/v1/companies', jobRoute);
 app.use('/api/v1/applications', applicationRoutes);
 app.use('/api/v1/auth', authRoutes);
 
+
+// Health check route
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+// Catch all other routes and return a 404 error
 app.all('/{*any}', (req, res, next) => {
   next(new ApiError(`can't find this route: ${req.originalUrl}`, 404));
 });
+
+
+
 
 // globalErrorHandler
 app.use(ErrorHandler.handle());
@@ -72,3 +82,5 @@ process.on('unhandledRejection', (err) => {
     process.exit(1);
   });
 });
+
+module.exports = app;

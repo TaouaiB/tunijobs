@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "test": "jest",
     "start:dev": "nodemon server.js",
     "start:prod": "set NODE_ENV=production && node server.js"
   },
@@ -52,9 +53,11 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^5.2.6",
     "eslint-plugin-react": "^7.37.5",
+    "jest": "^30.0.2",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "nodemon": "^3.1.10",
-    "prettier": "^3.5.3"
+    "prettier": "^3.5.3",
+    "supertest": "^7.1.1"
   }
 }

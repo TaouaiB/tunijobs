@@ -13,7 +13,10 @@ function checkAbilityOrThrow(ability, action, subject) {
     ForbiddenError.from(ability).throwUnlessCan(action, subject);
   } catch (error) {
     if (error instanceof ForbiddenError) {
-      throw new ApiError(403, 'Forbidden: You are not authorized to perform this action');
+      throw new ApiError(
+        403,
+        'Forbidden: You are not authorized to perform this action'
+      );
     }
     throw error;
   }
