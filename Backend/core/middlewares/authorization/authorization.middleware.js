@@ -1,10 +1,16 @@
 const checkAbilityOrThrow = require('../../utils/checkAbilityOrThrow');
 const ApiError = require('../../utils/ApiError');
+const { Types } = require('mongoose');
+
+function normalizeId(id) {
+  return id?.toString ? id.toString() : id;
+}
 
 function authorize(action, subject, getResource) {
   return async (req, res, next) => {
     try {
-      if (!req.ability) {
+      const ability = req.ability;
+      if (!ability) {
         return next(new ApiError('User ability is not defined', 500));
       }
 
@@ -15,16 +21,29 @@ function authorize(action, subject, getResource) {
         if (!resource) {
           return next(new ApiError(`${subject} not found`, 404));
         }
+
+        // Normalize all ObjectId fields to strings
+        if (Types.ObjectId.isValid(resource.companyId)) {
+          resource.companyId = normalizeId(resource.companyId);
+        }
+
+        // Ensure CASL can detect the subject type
+        resource.__type = subject;
       }
 
-      checkAbilityOrThrow(req.ability, action, resource);
+      console.log('Authorization check:', {
+        userRole: req.user?.role,
+        userCompanyId: normalizeId(req.user?.companyId),
+        resourceCompanyId: normalizeId(resource.companyId),
+        action,
+        subject
+      });
 
+      checkAbilityOrThrow(ability, action, resource);
       next();
     } catch (error) {
-      console.log('Caught error in authorize:', error);
-      if (error instanceof ApiError) {
-        return next(error);
-      }
+      console.error('Authorization error:', error);
+      if (error instanceof ApiError) return next(error);
       return next(new ApiError(error.message || 'Authorization failed', 403));
     }
   };

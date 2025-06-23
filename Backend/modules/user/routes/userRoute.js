@@ -25,7 +25,7 @@ const {
 
 // User routes
 
-router.route('/').post(createUserValidator, createUser).get(getAllUsers);
+router.route('/').get(getAllUsers);
 
 router
   .route('/:id')

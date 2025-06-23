@@ -1,29 +1,28 @@
-// /core/auth/abilities/ability.factory.js
-
 const { AbilityBuilder, createMongoAbility } = require('@casl/ability');
 const { defineJobRulesFor } = require('../../../modules/job/policies/job.rules');
-// If you have other modules, import their define*RulesFor similarly
+const { Types } = require('mongoose');
 
-/**
- * Builds a CASL Ability instance for the given user
- * combining rules from all modules (job, user, candidate, etc).
- *
- * @param {Object} user - The logged-in user object
- * @returns {Ability} - CASL Ability instance
- */
+function normalizeId(id) {
+  return id?.toString ? id.toString() : id;
+}
+
 function buildAbilityFor(user) {
   const { can, cannot, rules } = new AbilityBuilder(createMongoAbility);
 
-  // Add rules from Job module
-  defineJobRulesFor(user, can, cannot);
+  // Create a normalized user object with string IDs
+  const normalizedUser = {
+    ...user,
+    companyId: normalizeId(user?.companyId)
+  };
 
-  // TODO: Add rules from other modules here, e.g.
-  // defineUserRulesFor(user, can, cannot);
-  // defineCandidateRulesFor(user, can, cannot);
+  // Add rules from all modules
+  defineJobRulesFor(normalizedUser, can, cannot);
+  // Add other module rules here...
 
+  console.log('Built ability with rules:', rules);
   return new createMongoAbility(rules, {
     detectSubjectType: item => item.__type || item.constructor.name,
   });
 }
 
-module.exports = { buildAbilityFor };
+module.exports = { buildAbilityFor, normalizeId };

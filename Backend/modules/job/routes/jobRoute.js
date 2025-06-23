@@ -1,5 +1,6 @@
 const router = require('express').Router();
 
+const authenticateJWT = require('../../../core/middlewares/authentication/authenticateJWT');
 // Import CASL middlewares
 const abilityInjector = require('../../../core/middlewares/authorization/ability.injector');
 const authorize = require('../../../core/middlewares/authorization/authorization.middleware');
@@ -41,6 +42,7 @@ router.post('/:companyId/jobs', createJobValidator, createJob);
 router.put(
   '/:id',
   updateJobValidator,
+  authenticateJWT,
   abilityInjector,
   authorize('update', 'Job', getJobResource),
   updateJob
