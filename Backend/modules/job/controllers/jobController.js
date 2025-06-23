@@ -68,6 +68,11 @@ exports.getJob = asyncHandler(async (req, res, next) => {
   });
 });
 
+// Getter fucntion
+exports.getJobResource = async (req) => {
+  return await jobService.getJobById(req.params.id);
+};
+
 /**
  * @desc    Update job
  * @route   PUT /api/v1/jobs/:id

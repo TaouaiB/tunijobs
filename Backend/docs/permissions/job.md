@@ -4,14 +4,14 @@ This document describes access control rules for the `Job` resource using CASL.
 
 ## 🧠 Roles & Actions
 
-| Role      | Action        | Resource | Condition                                |
-|-----------|---------------|----------|------------------------------------------|
-| admin     | manage        | all      | No restrictions                          |
-| company   | create        | Job      | Always allowed                           |
-| company   | read          | Job      | All jobs                                 |
-| company   | update/delete | Job      | Only own jobs (`job.userId === user.id`) |
-| candidate | read          | Job      | All jobs                                 |
-| guest     | read          | Job      | PUBLIC jobs (later)                      |
+| Role      | Action        | Resource | Condition                                          |
+|-----------|---------------|----------|----------------------------------------------------|
+| admin     | manage        | all      | No restrictions                                    |
+| company   | create        | Job      | Always allowed                                     |
+| company   | read          | Job      | All jobs                                           |
+| company   | update/delete | Job      | Only own jobs (`job.companyId === user.companyId`) |
+| candidate | read          | Job      | All jobs                                           |
+| guest     | read          | Job      | PUBLIC jobs (later)                                |
 ---
 
 ## ✅ Notes

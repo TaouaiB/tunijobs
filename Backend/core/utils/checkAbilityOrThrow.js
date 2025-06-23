@@ -14,8 +14,8 @@ function checkAbilityOrThrow(ability, action, subject) {
   } catch (error) {
     if (error instanceof ForbiddenError) {
       throw new ApiError(
-        403,
-        'Forbidden: You are not authorized to perform this action'
+        'Forbidden: You are not authorized to perform this action',
+        403
       );
     }
     throw error;

@@ -14,6 +14,7 @@ const {
   setJobActiveStatus,
   deleteJob,
   getJobsByCompany,
+  getJobResource,
 } = require('../controllers/jobController');
 
 // Import validators
@@ -41,7 +42,7 @@ router.put(
   '/:id',
   updateJobValidator,
   abilityInjector,
-  authorize('update', 'Job', getJob),
+  authorize('update', 'Job', getJobResource),
   updateJob
 );
 

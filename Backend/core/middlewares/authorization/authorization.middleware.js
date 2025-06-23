@@ -4,7 +4,10 @@ const ApiError = require('../../utils/ApiError');
 function authorize(action, subject, getResource) {
   return async (req, res, next) => {
     try {
-      const ability = req.ability;
+      if (!req.ability) {
+        return next(new ApiError('User ability is not defined', 500));
+      }
+
       let resource = subject;
 
       if (getResource) {
@@ -14,11 +17,15 @@ function authorize(action, subject, getResource) {
         }
       }
 
-      checkAbilityOrThrow(ability, action, resource);
+      checkAbilityOrThrow(req.ability, action, resource);
 
       next();
     } catch (error) {
-      next(error);
+      console.log('Caught error in authorize:', error);
+      if (error instanceof ApiError) {
+        return next(error);
+      }
+      return next(new ApiError(error.message || 'Authorization failed', 403));
     }
   };
 }
