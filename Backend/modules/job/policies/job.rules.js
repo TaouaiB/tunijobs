@@ -9,7 +9,7 @@ function defineJobRulesFor(user, can, cannot) {
   switch (user.role) {
     case 'admin':
       can('read', 'Job');
-      can('update', 'Job', { isActive: true }); // needed for toggle-featured
+      can('update', 'Job', { requestedToBeFeatured: true }); // needed for toggle-featured
       cannot(['create', 'delete'], 'Job');
       break;
 

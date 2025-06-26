@@ -1,6 +1,7 @@
 const pickFields = require('../../../core/utils/pickFields');
 const Job = require('../models/jobModel');
 const Company = require('../../company/models/companyModel');
+const ApiError = require('../../../core/utils/ApiError');
 
 /**
  * @namespace JobService
@@ -101,6 +102,9 @@ exports.toggleJobActiveStatus = async (id) => {
   if (!job.isActive && job.isFeatured) {
     job.isFeatured = false;
   }
+  if (!job.isActive && job.requestedToBeFeatured) {
+    job.requestedToBeFeatured = false;
+  }
 
   await job.save();
 
@@ -120,17 +124,46 @@ exports.toggleJobFeaturedStatus = async (id) => {
   const job = await Job.findById(id);
   if (!job) return { job: null, message: 'Job not found' };
 
-  if (!job.isActive) {
-    throw new ApiError('Cannot feature an inactive job', 400);
+  if (!job.requestedToBeFeatured) {
+    throw new ApiError('Feature request not submitted for this job', 400);
   }
 
   job.isFeatured = !job.isFeatured;
+
+  if (job.isFeatured) {
+    job.requestedToBeFeatured = false;
+  }
+
   await job.save();
 
   return {
     job,
     message: `Job ${job.isFeatured ? 'marked as featured' : 'unfeatured'}`,
   };
+};
+
+/**
+ * @desc    Request a job to be featured (company initiates)
+ * @param   {string} jobId - Job ID
+ * @param   {Object} user - Authenticated user object
+ * @return  {Promise<Object>} Job document with updated request flag
+ * @memberof JobService
+ */
+exports.requestJobToBeFeatured = async (jobId, user) => {
+  const job = await Job.findById(jobId).populate('companyId');
+
+  if (!job) throw new ApiError('Job not found', 404);
+  if (!job.isActive)
+    throw new ApiError('Cannot request feature on inactive job', 400);
+  if (job.isFeatured) throw new ApiError('Job is already featured', 400);
+  if (job.requestedToBeFeatured) {
+    throw new ApiError('Feature request already submitted', 400);
+  }
+
+  job.requestedToBeFeatured = true;
+  await job.save();
+
+  return job;
 };
 
 /**

@@ -115,6 +115,25 @@ exports.setJobActiveStatus = asyncHandler(async (req, res, next) => {
 });
 
 /**
+ * @desc    Company requests to feature a job (admin reviews later)
+ * @route   PATCH /api/v1/jobs/:id/request-feature
+ * @access  Private (Company only)
+ * @memberof JobController
+ */
+exports.requestFeature = asyncHandler(async (req, res, next) => {
+  if (req.user.role === 'admin') {
+    return next(new ApiError('Admins cannot requestFeature', 403));
+  }
+  const job = await jobService.requestJobToBeFeatured(req.params.id, req.user);
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Feature request submitted for admin review',
+    data: { job },
+  });
+});
+
+/**
  * @desc    Toggle job isFeatured status
  * @route   PATCH /api/v1/jobs/:id/toggle-featured
  * @access  Private (Company Admin)

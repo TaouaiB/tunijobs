@@ -49,6 +49,7 @@ const allowedFields = {
     'applicationDeadline',
     'referralBonus',
     'isActive',
+    'requestedToBeFeatured',
     'isFeatured',
     'isConfidential',
     'benefits',

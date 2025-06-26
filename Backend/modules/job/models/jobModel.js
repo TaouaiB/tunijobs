@@ -78,6 +78,10 @@ const jobSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    requestedToBeFeatured: {
+      type: Boolean,
+      default: false,
+    },
     isFeatured: {
       type: Boolean,
       default: false,

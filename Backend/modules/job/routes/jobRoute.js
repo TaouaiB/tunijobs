@@ -16,6 +16,7 @@ const {
   getJobsByCompany,
   getJobResource,
   toggleFeaturedStatus,
+  requestFeature,
 } = require('../controllers/jobController');
 
 const {
@@ -61,6 +62,14 @@ router.patch(
   abilityInjector,
   authorize('update', 'Job', getJobResource),
   setJobActiveStatus
+);
+
+router.patch(
+  '/:id/request-feature',
+  authenticateJWT,
+  abilityInjector,
+  authorize('update', 'Job', getJobResource),
+  requestFeature
 );
 
 router.patch(
