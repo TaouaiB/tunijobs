@@ -1,11 +1,9 @@
 const router = require('express').Router();
 
 const authenticateJWT = require('../../../core/middlewares/authentication/authenticateJWT');
-// Import CASL middlewares
 const abilityInjector = require('../../../core/middlewares/authorization/ability.injector');
 const authorize = require('../../../core/middlewares/authorization/authorization.middleware');
 
-// Import controller methods using destructuring
 const {
   createJob,
   getAllJobs,
@@ -18,7 +16,6 @@ const {
   getJobResource,
 } = require('../controllers/jobController');
 
-// Import validators
 const {
   createJobValidator,
   updateJobValidator,
@@ -29,26 +26,51 @@ const {
 /*--------------------------------------------------
   Public Routes
 ---------------------------------------------------*/
+// Guest and all authenticated users can read jobs
 router.get('/', getAllJobs);
 router.get('/featured', getFeaturedJobs);
 router.get('/:id', getJobValidator, getJob);
-router.get('/:companyId/jobs', getJobsByCompany);
 
 /*--------------------------------------------------
-  Protected Routes (Company Admin Only)
+  Protected Routes
 ---------------------------------------------------*/
-router.post('/:companyId/jobs', createJobValidator, createJob);
+// Company admin routes
+router.post(
+  '/:companyId/jobs',
+  authenticateJWT,
+  abilityInjector,
+  authorize('create', 'Job'),
+  createJobValidator,
+  createJob
+);
 
 router.put(
   '/:id',
-  updateJobValidator,
   authenticateJWT,
   abilityInjector,
   authorize('update', 'Job', getJobResource),
+  updateJobValidator,
   updateJob
 );
 
-router.patch('/:id/set-active', setJobActiveStatus);
-router.delete('/:id', deleteJobValidator, deleteJob);
+router.patch(
+  '/:id/set-active',
+  authenticateJWT,
+  abilityInjector,
+  authorize('update', 'Job', getJobResource),
+  setJobActiveStatus
+);
+
+router.delete(
+  '/:id',
+  authenticateJWT,
+  abilityInjector,
+  authorize('delete', 'Job', getJobResource),
+  deleteJobValidator,
+  deleteJob
+);
+
+// Get jobs by specific company (public read access)
+router.get('/:companyId/jobs', getJobsByCompany);
 
 module.exports = router;

@@ -1,5 +1,3 @@
-// /modules/job/policies/job.rules.js
-
 function defineJobRulesFor(user, can, cannot) {
   if (!user) {
     // Guest - allow read only active, non-confidential jobs
@@ -10,7 +8,11 @@ function defineJobRulesFor(user, can, cannot) {
 
   switch (user.role) {
     case 'admin':
-      can('manage', 'all');
+      // ✅ Only allow reading any job
+      can('read', 'Job');
+      // ❌ Do not allow create, update, or delete
+      // TO DO admin will be able to disable jobs
+      cannot(['create', 'update', 'delete'], 'Job');
       break;
 
     case 'company':

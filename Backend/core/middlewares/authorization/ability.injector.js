@@ -1,5 +1,6 @@
 const { buildAbilityFor } = require('../../auth/abilities/ability.factory');
 
+
 function abilityInjector(req, res, next) {
   try {
     const user = req.user || null;

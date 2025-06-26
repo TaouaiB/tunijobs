@@ -31,18 +31,9 @@ function authorize(action, subject, getResource) {
         resource.__type = subject;
       }
 
-      console.log('Authorization check:', {
-        userRole: req.user?.role,
-        userCompanyId: normalizeId(req.user?.companyId),
-        resourceCompanyId: normalizeId(resource.companyId),
-        action,
-        subject
-      });
-
       checkAbilityOrThrow(ability, action, resource);
       next();
     } catch (error) {
-      console.error('Authorization error:', error);
       if (error instanceof ApiError) return next(error);
       return next(new ApiError(error.message || 'Authorization failed', 403));
     }
