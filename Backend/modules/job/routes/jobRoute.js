@@ -3,6 +3,7 @@ const router = require('express').Router();
 const authenticateJWT = require('../../../core/middlewares/authentication/authenticateJWT');
 const abilityInjector = require('../../../core/middlewares/authorization/ability.injector');
 const authorize = require('../../../core/middlewares/authorization/authorization.middleware');
+const checkAdminRole = require('../../../core/middlewares/authorization/checkAdminRole');
 
 const {
   createJob,
@@ -14,6 +15,7 @@ const {
   deleteJob,
   getJobsByCompany,
   getJobResource,
+  toggleFeaturedStatus,
 } = require('../controllers/jobController');
 
 const {
@@ -54,11 +56,20 @@ router.put(
 );
 
 router.patch(
-  '/:id/set-active',
+  '/:id/toggle-active',
   authenticateJWT,
   abilityInjector,
   authorize('update', 'Job', getJobResource),
   setJobActiveStatus
+);
+
+router.patch(
+  '/:id/toggle-featured',
+  authenticateJWT,
+  abilityInjector,
+  checkAdminRole,
+  authorize('update', 'Job', getJobResource),
+  toggleFeaturedStatus
 );
 
 router.delete(

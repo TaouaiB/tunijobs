@@ -80,6 +80,9 @@ exports.getJobResource = async (req) => {
  * @memberof JobController
  */
 exports.updateJob = asyncHandler(async (req, res, next) => {
+  if (req.user.role === 'admin') {
+    return next(new ApiError('Admins cannot update jobs.', 403));
+  }
   const job = await jobService.updateJob(req.params.id, req.body);
   if (!job) {
     return next(new ApiError(`No job found with id: ${req.params.id}`, 404));
@@ -101,6 +104,24 @@ exports.setJobActiveStatus = asyncHandler(async (req, res, next) => {
     req.params.id,
     req.body.isActive
   );
+  if (!result.job) {
+    return next(new ApiError(`No job found with id: ${req.params.id}`, 404));
+  }
+  res.status(200).json({
+    status: 'success',
+    message: result.message,
+    data: { job: result.job },
+  });
+});
+
+/**
+ * @desc    Toggle job isFeatured status
+ * @route   PATCH /api/v1/jobs/:id/toggle-featured
+ * @access  Private (Company Admin)
+ * @memberof JobController
+ */
+exports.toggleFeaturedStatus = asyncHandler(async (req, res, next) => {
+  const result = await jobService.toggleJobFeaturedStatus(req.params.id);
   if (!result.job) {
     return next(new ApiError(`No job found with id: ${req.params.id}`, 404));
   }

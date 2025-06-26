@@ -8,11 +8,9 @@ function defineJobRulesFor(user, can, cannot) {
 
   switch (user.role) {
     case 'admin':
-      // ✅ Only allow reading any job
       can('read', 'Job');
-      // ❌ Do not allow create, update, or delete
-      // TO DO admin will be able to disable jobs
-      cannot(['create', 'update', 'delete'], 'Job');
+      can('update', 'Job', { isActive: true }); // needed for toggle-featured
+      cannot(['create', 'delete'], 'Job');
       break;
 
     case 'company':

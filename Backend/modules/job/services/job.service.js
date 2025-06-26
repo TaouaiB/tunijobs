@@ -74,6 +74,10 @@ exports.getJobById = async (id) => {
  * @memberof JobService
  */
 exports.updateJob = async (id, updateData) => {
+  // Make sure isFeatured is not updated via general update
+  if ('isFeatured' in updateData) {
+    delete updateData.isFeatured;
+  }
   return Job.findByIdAndUpdate(id, pickFields(updateData, 'job', true), {
     new: true,
     runValidators: true,
@@ -103,6 +107,29 @@ exports.toggleJobActiveStatus = async (id) => {
   return {
     job,
     message: `Job ${job.isActive ? 'activated' : 'deactivated'}`,
+  };
+};
+
+/**
+ * @desc    Toggle job isFeatured status
+ * @param   {string} id - Job ID
+ * @return  {Promise<Object>} Object containing job and message
+ * @memberof JobService
+ */
+exports.toggleJobFeaturedStatus = async (id) => {
+  const job = await Job.findById(id);
+  if (!job) return { job: null, message: 'Job not found' };
+
+  if (!job.isActive) {
+    throw new ApiError('Cannot feature an inactive job', 400);
+  }
+
+  job.isFeatured = !job.isFeatured;
+  await job.save();
+
+  return {
+    job,
+    message: `Job ${job.isFeatured ? 'marked as featured' : 'unfeatured'}`,
   };
 };
 
