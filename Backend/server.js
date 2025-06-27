@@ -10,6 +10,10 @@ const dbConnection = require('./core/config/database');
 const ApiError = require('./core/utils/ApiError');
 const ErrorHandler = require('./core/middlewares/errorMiddleware');
 
+const {
+  autoUnfeatureJobTask,
+} = require('./core/cron/autoUnfeatureJobs');
+
 const userRoute = require('./modules/user/routes/userRoute');
 const candidateRoute = require('./modules/candidate/routes/candidateRoute');
 const companyRoute = require('./modules/company/routes/companyRoute');
@@ -44,7 +48,6 @@ app.use('/api/v1/companies', jobRoute);
 app.use('/api/v1/applications', applicationRoutes);
 app.use('/api/v1/auth', authRoutes);
 
-
 // Health check route
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
@@ -55,9 +58,6 @@ app.all('/{*any}', (req, res, next) => {
   next(new ApiError(`can't find this route: ${req.originalUrl}`, 404));
 });
 
-
-
-
 // globalErrorHandler
 app.use(ErrorHandler.handle());
 
@@ -65,6 +65,10 @@ app.use(ErrorHandler.handle());
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {
   console.log(`App running on port ${PORT}`);
+
+  // Start cron jobs here - after server is ready
+  // Daily at midnight (0 0 * * *)
+  autoUnfeatureJobTask.start();
 });
 
 // Handle uncaught exceptions

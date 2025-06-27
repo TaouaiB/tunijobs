@@ -124,7 +124,7 @@ exports.toggleJobFeaturedStatus = async (id) => {
   const job = await Job.findById(id);
   if (!job) return { job: null, message: 'Job not found' };
 
-  if (!job.requestedToBeFeatured) {
+  if (!job.requestedToBeFeatured && !job.isFeatured) {
     throw new ApiError('Feature request not submitted for this job', 400);
   }
 
@@ -132,6 +132,9 @@ exports.toggleJobFeaturedStatus = async (id) => {
 
   if (job.isFeatured) {
     job.requestedToBeFeatured = false;
+    job.featuredAt = new Date(); // set current time when featured
+  } else {
+    job.featuredAt = null; // reset timestamp when unfeatured
   }
 
   await job.save();
@@ -162,6 +165,35 @@ exports.requestJobToBeFeatured = async (jobId, user) => {
 
   job.requestedToBeFeatured = true;
   await job.save();
+
+  return job;
+};
+
+/**
+ * Find all featured jobs with featuredAt date older than given date
+ * @param {Date} date
+ * @returns {Promise<Array>}
+ */
+exports.findFeaturedJobsOlderThan = async (date) => {
+  return Job.find({
+    isFeatured: true,
+    featuredAt: { $lt: date },
+  });
+};
+
+/**
+ * Unfeature job by ID (update isFeatured=false and reset requestedToBeFeatured)
+ * @param {string} id
+ * @returns {Promise<Object|null>}
+ */
+exports.unfeatureJobById = async (id) => {
+  const job = await Job.findById(id);
+  if (!job) throw new ApiError('Job not found', 404);
+
+  job.isFeatured = false;
+  job.requestedToBeFeatured = false;
+  await job.save();
+  console.log(`Unfeatured job ${id}`); // Log for debugging
 
   return job;
 };

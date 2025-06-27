@@ -86,6 +86,10 @@ const jobSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    featuredAt: {
+      type: Date,
+      default: null,
+    },
     isConfidential: {
       type: Boolean,
       default: false,
