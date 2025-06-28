@@ -11,6 +11,7 @@ const {
   getApplicationDashboard,
   deleteApplication,
   scheduleInterview,
+  updateInterviewResult,
   uploadDocument,
   removeDocument,
 } = require('../controllers/applicationController');
@@ -24,6 +25,7 @@ const {
   getApplicationsByCandidateValidator,
   deleteApplicationValidator,
   searchApplicationsValidator,
+  updateInterviewResultValidator,
 } = require('../validators/applicationValidator');
 const normalizeUploadFields = require('../../../core/middlewares/multer/normalizeUploads');
 
@@ -74,6 +76,13 @@ router.get('/jobs/:jobId', getApplicationsByJobValidator, getApplicationsByJob);
 router.put('/:id/status', updateApplicationValidator, updateApplicationStatus);
 
 router.patch('/:id/interviews', scheduleInterviewValidator, scheduleInterview);
+
+router.patch(
+  '/:id/interviews/:interviewId/result',
+  updateApplicationValidator,
+  updateInterviewResultValidator,
+  updateInterviewResult
+);
 
 // =============================================
 //               ADMIN ROUTES

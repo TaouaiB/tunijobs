@@ -50,8 +50,8 @@ const applicationSchema = new mongoose.Schema(
         url: { type: String, required: true },
         type: { type: String, required: true },
         size: { type: Number, required: true },
-        uploadedAt: { type: Date, default: Date.now }
-      }
+        uploadedAt: { type: Date, default: Date.now },
+      },
     ],
 
     // ======================
@@ -111,6 +111,7 @@ const applicationSchema = new mongoose.Schema(
     // ======================
     interviews: [
       {
+        _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
         scheduledAt: Date,
         interviewType: {
           type: String,

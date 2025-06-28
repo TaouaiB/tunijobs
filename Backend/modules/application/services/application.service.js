@@ -547,6 +547,27 @@ exports.scheduleInterview = async (id, interviewData) => {
 };
 
 /**
+ * @desc    Update the result of a specific interview in an application
+ * @param   {string} applicationId
+ * @param   {string} interviewId
+ * @param   {string} result - New result ("passed", "failed", "no-show", etc.)
+ * @return  {Promise<Object>} Updated interview
+ */
+exports.updateInterviewResult = async (id, interviewId, result) => {
+  const application = await Application.findById(id);
+
+  const interview = application.interviews.id(interviewId);
+
+  interview.result = result; // 'pass', 'fail', or 'pending'
+  await application.save();
+
+  return {
+    status: 'success',
+    data: { interview },
+  };
+};
+
+/**
  * @desc    Recalculate application score
  * @param   {string} id - Application ID
  * @return  {Promise<Object>} Updated score

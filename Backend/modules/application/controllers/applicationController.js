@@ -66,7 +66,10 @@ exports.submitApplication = asyncHandler(async (req, res) => {
  * @access  Employer/Admin
  */
 exports.updateApplicationStatus = asyncHandler(async (req, res) => {
-  const result = await ApplicationService.updateApplicationStatus(req.params.id, req.body);
+  const result = await ApplicationService.updateApplicationStatus(
+    req.params.id,
+    req.body
+  );
 
   res.json(result);
 });
@@ -158,6 +161,23 @@ exports.scheduleInterview = asyncHandler(async (req, res) => {
   res.json(result);
 });
 
+/**
+ * @desc    Update the result of a specific interview in an application
+ * @route   PATCH /api/v1/applications/:id/interviews/:interviewId/result
+ * @access  Employer
+ */
+exports.updateInterviewResult = asyncHandler(async (req, res) => {
+  const { id, interviewId } = req.params;
+  const { result } = req.body;
+
+  const response = await ApplicationService.updateInterviewResult(
+    id,
+    interviewId,
+    result
+  );
+
+  res.status(200).json(response);
+});
 /**
  * @desc    Recalculate application score
  * @route   PUT /api/v1/applications/:id/score

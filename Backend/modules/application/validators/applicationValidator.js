@@ -195,6 +195,17 @@ exports.scheduleInterviewValidator = [
 ];
 
 /**
+ * Validator for updating interview result
+ * PATCH /applications/:id/interviews/:interviewId/result
+ */
+exports.updateInterviewResultValidator = [
+  validateApplicationId,
+  validateId('interviewId', 'interview'),
+  validateEnumField('result', APPLICATION_METADATA.INTERVIEW_RESULTS),
+  validatorMiddleware,
+];
+
+/**
  * Validator for getting a single application
  * @type {import('express').RequestHandler[]}
  */
@@ -253,7 +264,9 @@ exports.searchApplicationsValidator = [
   query().custom((query) => {
     const { jobId, candidateId } = query;
     if (!jobId && !candidateId) {
-      throw new Error('At least one search parameter ( jobId, candidateId) is required');
+      throw new Error(
+        'At least one search parameter ( jobId, candidateId) is required'
+      );
     }
     return true;
   }),
