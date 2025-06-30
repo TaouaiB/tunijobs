@@ -125,7 +125,6 @@ exports.getApplicationsByJob = asyncHandler(async (req, res) => {
   res.json(result);
 });
 
-
 /**
  * @desc    Controller to get all applications for a company
  * @route   GET /api/v1/applications/company/:companyId
@@ -213,3 +212,12 @@ exports.recalculateScore = asyncHandler(async (req, res) => {
 
   res.json(result);
 });
+
+/**
+ * @desc Application Resource Getter 
+ */
+exports.getApplicationResource = async (req) => {
+  return await applicationService
+    .getApplicationById(req.params.id)
+    .then((res) => res.data.application);
+};

@@ -3,7 +3,6 @@ const Application = require('../../models/applicationModel');
 const ApiError = require('../../../../core/utils/ApiError');
 const cleanupFiles = require('../../../../core/utils/cleanupFiles');
 
-
 module.exports = {
   /**
    * Stores uploaded files in an application

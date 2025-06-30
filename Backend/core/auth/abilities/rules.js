@@ -2,10 +2,10 @@ const { normalizeId } = require('../../auth/abilities/ability.factory');
 
 function defineJobRulesFor(user, can, cannot) {
   const userCompanyId = normalizeId(user?.companyId);
-  
+
   console.log('Defining job rules for:', {
     role: user?.role,
-    companyId: userCompanyId
+    companyId: userCompanyId,
   });
 
   switch (user?.role) {
@@ -15,10 +15,10 @@ function defineJobRulesFor(user, can, cannot) {
     case 'company':
       can('read', 'Job');
       can(['create', 'update', 'delete'], 'Job', {
-        companyId: userCompanyId
+        companyId: userCompanyId,
       });
       break;
-    case 'candidate':
+    case 'jobSeeker':
       can('read', 'Job');
       can(['apply'], 'Job');
       break;

@@ -286,7 +286,6 @@ exports.updateApplicationStatus = async (id, updateData) => {
     },
   };
 };
-
 /**
  * @desc    Withdraw an application
  * @param   {string} id - Application ID

@@ -1,6 +1,11 @@
 const express = require('express');
 const router = express.Router();
 
+const authenticateJWT = require('../../../core/middlewares/authentication/authenticateJWT');
+const abilityInjector = require('../../../core/middlewares/authorization/ability.injector');
+const authorize = require('../../../core/middlewares/authorization/authorization.middleware');
+const checkAdminRole = require('../../../core/middlewares/authorization/checkAdminRole');
+
 const {
   submitApplication,
   updateApplicationStatus,
@@ -15,6 +20,7 @@ const {
   uploadDocument,
   removeDocument,
   getApplicationsByCompany,
+  getApplicationResource,
 } = require('../controllers/applicationController');
 
 const {
@@ -45,7 +51,14 @@ router.get('/:id', getApplicationValidator, getApplicationById);
 //            CANDIDATE PROTECTED ROUTES
 // =============================================
 
-router.post('/:jobId/apply', submitApplicationValidator, submitApplication);
+router.post(
+  '/:jobId/apply',
+  authenticateJWT,
+  abilityInjector,
+  authorize('create', 'Application'),
+  submitApplicationValidator,
+  submitApplication
+);
 
 router.get(
   '/candidate/:candidateId',
