@@ -125,6 +125,31 @@ exports.getApplicationsByJob = asyncHandler(async (req, res) => {
   res.json(result);
 });
 
+
+/**
+ * @desc    Controller to get all applications for a company
+ * @route   GET /api/v1/applications/company/:companyId
+ * @access  Company (Protected)
+ */
+exports.getApplicationsByCompany = async (req, res, next) => {
+  try {
+    const { companyId } = req.params;
+    const filters = {
+      status: req.query.status,
+      jobId: req.query.jobId,
+      search: req.query.search,
+    };
+
+    const result = await ApplicationService.getApplicationsByCompany(
+      companyId,
+      filters
+    );
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 /**
  * @desc    Get application dashboard
  * @route   GET /api/v1/applications/dashboard

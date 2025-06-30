@@ -72,6 +72,12 @@ const validateJobId = validateId('jobId', 'job');
 const validateCandidateId = validateId('candidateId', 'candidate');
 
 /**
+ * Validates company ID parameter
+ * @type {import('express-validator').ValidationChain}
+ */
+const validateCompanyId = validateId('companyId', 'company');
+
+/**
  * Validates and sanitizes cover letter field
  * @type {import('express-validator').ValidationChain}
  */
@@ -239,6 +245,30 @@ exports.getApplicationsByCandidateValidator = [
     .optional()
     .isIn(APPLICATION_METADATA.STATUSES.values)
     .withMessage('Invalid status filter'),
+  query(['limit', 'page'])
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('Must be a positive integer'),
+  validatorMiddleware,
+];
+
+/**
+ * Validator for getting applications by company
+ * @type {import('express').RequestHandler[]}
+ */
+exports.getApplicationsByCompanyValidator = [
+  validateCompanyId.bail().custom(async (companyId) => {
+    // Check if any application exists with this companyId
+    const exists = await Application.exists({ companyId });
+    if (!exists)
+      throw new Error('Company ID does not exist or has no applications');
+    return true;
+  }),
+  query('status')
+    .optional()
+    .isIn(APPLICATION_METADATA.STATUSES.values)
+    .withMessage('Invalid status filter'),
+  query('jobId').optional().isMongoId().withMessage('Invalid job ID'),
   query(['limit', 'page'])
     .optional()
     .isInt({ min: 1 })

@@ -14,6 +14,7 @@ const {
   updateInterviewResult,
   uploadDocument,
   removeDocument,
+  getApplicationsByCompany,
 } = require('../controllers/applicationController');
 
 const {
@@ -26,6 +27,7 @@ const {
   deleteApplicationValidator,
   searchApplicationsValidator,
   updateInterviewResultValidator,
+  getApplicationsByCompanyValidator,
 } = require('../validators/applicationValidator');
 const normalizeUploadFields = require('../../../core/middlewares/multer/normalizeUploads');
 
@@ -49,6 +51,13 @@ router.get(
   '/candidate/:candidateId',
   getApplicationsByCandidateValidator,
   getApplicationsByCandidate
+);
+
+// Get all applications for a specific company
+router.get(
+  '/company/:companyId',
+  getApplicationsByCompanyValidator,
+  getApplicationsByCompany
 );
 
 router.put('/:id/withdraw', updateApplicationValidator, withdrawApplication);

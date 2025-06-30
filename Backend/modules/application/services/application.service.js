@@ -476,6 +476,46 @@ exports.getApplicationsByJob = async (
 };
 
 /**
+ * @desc    Get all applications for a specific company
+ * @param   {string} companyId - Company ID
+ * @param   {Object} filters - Optional filters (status, jobId, search)
+ * @return  {Promise<Object>} List of applications with candidate & job info
+ * @memberof ApplicationService
+ */
+exports.getApplicationsByCompany = async (companyId, filters = {}) => {
+  const query = { companyId };
+
+  if (filters.status) query.status = filters.status;
+  if (filters.jobId) query.jobId = filters.jobId;
+  if (filters.search) {
+    query.$or = [{ coverLetter: { $regex: filters.search, $options: 'i' } }];
+  }
+
+  const applications = await Application.find(query)
+    .populate({
+      path: 'jobId',
+      select: 'title location',
+    })
+    .populate({
+      path: 'candidateId',
+      select: 'headline resumeUrl',
+      populate: {
+        path: 'userId',
+        select: 'name email',
+      },
+    })
+    .sort({ createdAt: -1 });
+
+  if (!applications.length) throw new ApiError('No applications found', 404);
+
+  return {
+    status: 'success',
+    results: applications.length,
+    data: { applications },
+  };
+};
+
+/**
  * @desc    Get application dashboard for company
  * @param   {string} companyId - Company ID
  * @param   {Object} [options] - Optional parameters
