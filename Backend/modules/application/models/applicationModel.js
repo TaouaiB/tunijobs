@@ -172,9 +172,17 @@ const applicationSchema = new mongoose.Schema(
     isArchived: {
       type: Boolean,
       default: false,
+      index: true,
+    },
+    archivedAt: Date,
+    archivedByCompany: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Company',
+      required: false,
     },
     deletedAt: {
       type: Date,
+      expires: '30d', // Automatically purge after 30 days
       default: null,
     },
     version: {
@@ -322,3 +330,16 @@ applicationSchema.methods.getTimeline = function () {
 
 const Application = mongoose.model('Application', applicationSchema);
 module.exports = Application;
+
+applicationSchema.methods.archive = function (companyId) {
+  this.isArchived = true;
+  this.archivedAt = new Date();
+  this.archivedByCompany = companyId; // Direct company reference
+  return this.save();
+};
+
+applicationSchema.methods.unarchive = function () {
+  this.isArchived = false;
+  this.archivedByCompany = undefined; // Clear when unarchiving
+  return this.save();
+};

@@ -100,6 +100,7 @@ exports.submitApplication = async (
   if (!mongoose.Types.ObjectId.isValid(jobId)) {
     throw new ApiError('Invalid job ID format', 400);
   }
+  console.log('Passed jobId validation'); // Add this
 
   const filteredBody = pickFields(applicationData, 'application', true);
   const { candidateId, coverLetter } = filteredBody;
@@ -108,14 +109,70 @@ exports.submitApplication = async (
   const existingApplication = await Application.findOne({
     jobId,
     candidateId,
+    deletedAt: { $exists: true }, // Explicitly check for soft-deleted docs
+  }).exec();
+
+  console.log('Found application:', {
+    exists: !!existingApplication,
+    deletedAt: existingApplication?.deletedAt,
+    id: existingApplication?._id,
+    jobId,
+    candidateId,
   });
+
   if (existingApplication) {
-    throw new ApiError('You have already applied to this job', 409);
+    if (existingApplication.deletedAt) {
+      // Candidate withdrew before, allow reapply by "reactivating" app
+      existingApplication.deletedAt = null; // clear soft delete
+      existingApplication.status = 'submitted';
+      existingApplication.statusHistory.push({
+        status: 'submitted',
+        changedBy: candidateId,
+        notes: 'Re-applied after withdrawal',
+        changedAt: new Date(),
+      });
+      // Update cover letter and metadata if needed below (optional)
+      existingApplication.coverLetter =
+        coverLetter ?
+          sanitizeHtml(coverLetter, { allowedTags: [], allowedAttributes: {} })
+        : '';
+      existingApplication.metadata = {
+        ...existingApplication.metadata,
+        aiAnalysis:
+          coverLetter ? AIService.analyzeCoverLetter(coverLetter) : null,
+        ipAddress,
+        userAgent,
+      };
+      existingApplication.score = calculateApplicationScore({
+        resumeUrl: existingApplication.candidateId.resumeUrl,
+        coverLetterLength: existingApplication.coverLetter.length,
+      });
+
+      await existingApplication.save();
+
+      NotificationService.send(
+        existingApplication.companyId,
+        `Re-application received for ${existingApplication.jobId}`
+      );
+
+      return {
+        status: 'success',
+        data: {
+          application: existingApplication,
+          message: 'Re-applied successfully',
+        },
+      };
+    } else {
+      // Application already active
+      throw new ApiError('You have already applied to this job', 409);
+    }
   }
+
+  // No existing application found, proceed normally to create a new one
 
   const [job, candidate] = await Promise.all([
     Job.findById(jobId),
-    Candidate.findById(candidateId),
+    Candidate.findById(candidateId).populate('userId'),
   ]);
 
   if (!job?.isActive) throw new ApiError('Job not found or inactive', 404);
@@ -238,22 +295,24 @@ exports.updateApplicationStatus = async (id, updateData) => {
  * @memberof ApplicationService
  */
 exports.withdrawApplication = async (id, withdrawData) => {
-  const { userId, reason } = withdrawData;
+  const { candidateId, reason } = withdrawData;
 
-  const application = await Application.findById(id).populate({
-    path: 'candidateId',
-    select: 'userId',
-  });
+  const application = await Application.findById(id);
 
-  if (!application) throw new ApiError('Application not found', 404);
-  if (application.candidateId.userId.toString() !== userId.toString()) {
+  if (application.candidateId.toString() !== candidateId.toString()) {
+    console.log(
+      `Candidate ${candidateId} attempted to withdraw application ${id} without permission`
+    );
     throw new ApiError('Unauthorized', 403);
   }
 
   application.status = 'withdrawn';
+  application.deletedAt = new Date();
+  application.version = (application.version || 0) + 1;
+
   application.statusHistory.push({
     status: 'withdrawn',
-    changedBy: userId,
+    changedBy: candidateId,
     notes: reason || 'Withdrawn by candidate',
   });
 

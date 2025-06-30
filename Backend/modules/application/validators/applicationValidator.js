@@ -93,6 +93,7 @@ const validateCandidateReference = body('candidateId')
     const exists = await Application.findOne({
       jobId: req.params.jobId,
       candidateId: value,
+      deletedAt: null, // Only block active applications
     });
     if (exists) throw new Error('You have already applied to this job');
     return true;
