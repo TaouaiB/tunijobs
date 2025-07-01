@@ -2,6 +2,7 @@ const asyncHandler = require('express-async-handler');
 const ApplicationService = require('../services/application.service');
 const documentUploadHandler = require('../../../core/middlewares/multer/documentUploadHandler');
 const ApiError = require('../../../core/utils/ApiError');
+const Application = require('../models/applicationModel');
 
 /**
  * @desc    Upload a document to an application
@@ -214,10 +215,43 @@ exports.recalculateScore = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc Application Resource Getter 
+ * @desc Application Resource Getter
+ * Now properly handles both resource fetching and authorization context
  */
 exports.getApplicationResource = async (req) => {
-  return await applicationService
-    .getApplicationById(req.params.id)
-    .then((res) => res.data.application);
+  try {
+    const application = await Application.findById(req.params.id)
+      .populate('jobId', 'companyId') // Populate job's companyId
+      .lean();
+
+    if (!application) {
+      return {
+        id: req.params.id,
+        job: { companyId: null },
+        candidateId: null,
+      };
+    }
+
+    console.log('DEBUG - Application:', {
+      id: application._id,
+      jobCompanyId: application.jobId?.companyId?.toString(),
+      userCompanyId: req.user.companyId,
+    });
+
+    return {
+      id: application._id,
+      job: {
+        companyId: application.jobId?.companyId?.toString(),
+      },
+      candidateId: application.candidateId?.toString(),
+      status: application.status,
+    };
+  } catch (error) {
+    console.error('Error in getApplicationResource:', error);
+    return {
+      id: req.params.id,
+      job: { companyId: null },
+      candidateId: null,
+    };
+  }
 };

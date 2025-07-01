@@ -70,6 +70,13 @@ exports.getJob = asyncHandler(async (req, res, next) => {
 
 // Getter fucntion
 exports.getJobResource = async (req) => {
+  // For create operations, return a template with the companyId
+  if (req.method === 'POST') {
+    return {
+      companyId: req.params.companyId, // Use the route parameter
+    };
+  }
+  // For other operations, fetch the actual job
   return await jobService.getJobById(req.params.id);
 };
 

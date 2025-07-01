@@ -95,7 +95,14 @@ router.delete(
 router.get('/jobs/:jobId', getApplicationsByJobValidator, getApplicationsByJob);
 
 // Changed to use updateApplicationValidator
-router.put('/:id/status', updateApplicationValidator, updateApplicationStatus);
+router.put(
+  '/:id/status',
+  authenticateJWT,
+  abilityInjector,
+  authorize('update', 'Application', getApplicationResource),
+  updateApplicationValidator,
+  updateApplicationStatus
+);
 
 router.patch('/:id/interviews', scheduleInterviewValidator, scheduleInterview);
 

@@ -1,8 +1,8 @@
 function defineApplicationRulesFor(user, can, cannot) {
-  // NEW: Debug logging
   console.log('[POLICY] Processing rules for:', {
     role: user?.role,
     candidateId: user?.candidateId,
+    companyId: user?.companyId,
   });
 
   if (!user) {
@@ -17,14 +17,23 @@ function defineApplicationRulesFor(user, can, cannot) {
       break;
 
     case 'company':
-      can('read', 'Application', { companyId: user.companyId });
-      can('update', 'Application', { companyId: user.companyId });
+      if (user.companyId) {
+        can('read', 'Application', { 'job.companyId': user.companyId });
+        can('update', 'Application', {
+          'job.companyId': user.companyId,
+        });
+      }
       break;
 
     case 'jobSeeker':
-      can('read', 'Application', { candidateId: user.candidateId });
-      can('create', 'Application');
-      can('withdraw', 'Application', { candidateId: user.candidateId });
+      if (user.candidateId) {
+        can('read', 'Application', { candidateId: user.candidateId });
+        can('create', 'Application');
+        can('withdraw', 'Application', {
+          candidateId: user.candidateId,
+          status: 'submitted', // Can only withdraw from submitted state
+        });
+      }
       break;
 
     default:

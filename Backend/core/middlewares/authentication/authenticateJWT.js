@@ -38,7 +38,7 @@ async function authenticateJWT(req, res, next) {
       id: user._id.toString(),
       role: user.role,
       companyId: company?._id?.toString(),
-      candidateId, 
+      candidateId,
       email: user.email,
     };
 

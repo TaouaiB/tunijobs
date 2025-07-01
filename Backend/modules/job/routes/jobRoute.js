@@ -42,7 +42,7 @@ router.post(
   '/:companyId/jobs',
   authenticateJWT,
   abilityInjector,
-  authorize('create', 'Job'),
+  authorize('create', 'Job', getJobResource),
   createJobValidator,
   createJob
 );
