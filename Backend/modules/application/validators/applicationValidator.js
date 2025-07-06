@@ -156,12 +156,12 @@ const createApplicationValidationPipeline = (options = {}) => {
     isUpdate ? validateCoverLetter : validateCoverLetter.optional(),
     isUpdate ?
       validateEnumField('status', APPLICATION_METADATA.STATUSES).optional()
-    : validateCandidateReference,
+    : null,
     ...(includeInterview ? validateInterview : []),
     validateOptionalStringField('notes', 2000),
   ];
 
-  return pipeline;
+  return pipeline.filter(Boolean);
 };
 
 /**
@@ -171,7 +171,9 @@ const createApplicationValidationPipeline = (options = {}) => {
 exports.submitApplicationValidator = [
   ...createApplicationValidationPipeline(),
   body().custom((data, { req }) => {
-    const allowed = ['candidateId', 'coverLetter'];
+    if (!data || typeof data !== 'object') return true;
+    const allowed = ['coverLetter', 'documents'];
+
     const invalid = Object.keys(data).filter((f) => !allowed.includes(f));
     if (invalid.length)
       throw new Error(`Invalid fields for submission: ${invalid.join(', ')}`);

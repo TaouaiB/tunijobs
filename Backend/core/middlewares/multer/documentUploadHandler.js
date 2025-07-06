@@ -16,105 +16,116 @@ const uploadCandidateDocuments = upload.fields([
 
 const outputDir = path.join(process.cwd(), 'uploads/documents');
 
-const documentUploadHandler = (req, res, next) => {
-  uploadCandidateDocuments(req, res, async (err) => {
-    if (err) {
-      let statusCode = 400;
-      let message = err.message;
+const documentUploadHandler =
+  (opts = {}) =>
+  (req, res, next) => {
+    const contentType = req.headers['content-type'] || '';
 
-      if (typeof err.code === 'string') {
-        switch (err.code) {
-          case 'LIMIT_UNEXPECTED_FILE':
-            if (err.field === 'coverLetter') {
-              message = 'Only 1 cover letter allowed.';
-            } else if (err.field === 'resumeUrl') {
-              message = 'Only 1 resume file allowed.';
-            } else if (err.field === 'documents') {
-              message = 'Too many files uploaded. Max 5 documents allowed.';
-            } else {
-              message = `Unexpected field: ${err.field}`;
-            }
-            break;
-          default:
-            statusCode = 500;
-            message = 'Upload failed due to a server error.';
-        }
-      }
-
-      return next(new ApiError(message, statusCode));
+    // ✅ NEW: If not multipart/form-data, skip multer completely
+    if (!contentType.startsWith('multipart/form-data')) {
+      return next();
     }
 
-    try {
-      const uploadedFiles = {};
+    uploadCandidateDocuments(req, res, async (err) => {
+      if (err) {
+        let statusCode = 400;
+        let message = err.message;
 
-      // Resume
-      if (req.files?.resumeUrl?.[0]) {
-        const file = req.files.resumeUrl[0];
-        const saved = await storeDocument(
-          file.buffer,
-          file.originalname,
-          outputDir
-        );
+        if (typeof err.code === 'string') {
+          switch (err.code) {
+            case 'LIMIT_UNEXPECTED_FILE':
+              if (err.field === 'coverLetter') {
+                message = 'Only 1 cover letter allowed.';
+              } else if (err.field === 'resumeUrl') {
+                message = 'Only 1 resume file allowed.';
+              } else if (err.field === 'documents') {
+                message = 'Too many files uploaded. Max 5 documents allowed.';
+              } else {
+                message = `Unexpected field: ${err.field}`;
+              }
+              break;
+            default:
+              statusCode = 500;
+              message = 'Upload failed due to a server error.';
+          }
+        }
 
-        uploadedFiles.resume = {
-          originalName: saved.originalName, // ✅ Use what's returned from storeDocument
-          url: saved.url,
-          mimetype: file.mimetype,
-          size: file.size,
-        };
-
-        req.documentInfo = uploadedFiles.resume; // ✅ Required for storeResume
+        return next(new ApiError(message, statusCode));
       }
 
-      // Cover Letter
-      if (req.files?.coverLetter?.[0]) {
-        const file = req.files.coverLetter[0];
-        const saved = await storeDocument(
-          file.buffer,
-          file.originalname,
-          outputDir
-        );
-        uploadedFiles.coverLetter = {
-          name: saved.originalName,
-          url: saved.url,
-          type: file.mimetype,
-          size: file.size,
-        };
-      }
+      try {
+        const uploadedFiles = {};
 
-      // Documents
-      if (req.files?.documents) {
-        uploadedFiles.documents = [];
-        for (const file of req.files.documents) {
+        // Resume
+        if (req.files?.resumeUrl?.[0]) {
+          const file = req.files.resumeUrl[0];
           const saved = await storeDocument(
             file.buffer,
             file.originalname,
             outputDir
           );
-          uploadedFiles.documents.push({
+
+          uploadedFiles.resume = {
+            originalName: saved.originalName, // ✅ Use what's returned from storeDocument
+            url: saved.url,
+            mimetype: file.mimetype,
+            size: file.size,
+          };
+
+          req.documentInfo = uploadedFiles.resume; // ✅ Required for storeResume
+        }
+
+        // Cover Letter
+        if (req.files?.coverLetter?.[0]) {
+          const file = req.files.coverLetter[0];
+          const saved = await storeDocument(
+            file.buffer,
+            file.originalname,
+            outputDir
+          );
+          uploadedFiles.coverLetter = {
             name: saved.originalName,
             url: saved.url,
             type: file.mimetype,
             size: file.size,
-          });
+          };
         }
-      }
 
-      // Verify we have at least one file
-      if (
-        !uploadedFiles.resume &&
-        !uploadedFiles.coverLetter &&
-        !uploadedFiles.documents?.length
-      ) {
-        return next(new ApiError('No valid files were uploaded', 400));
-      }
+        // Additional Documents
+        if (req.files?.documents) {
+          uploadedFiles.documents = [];
+          for (const file of req.files.documents) {
+            const saved = await storeDocument(
+              file.buffer,
+              file.originalname,
+              outputDir
+            );
+            uploadedFiles.documents.push({
+              name: saved.originalName,
+              url: saved.url,
+              type: file.mimetype,
+              size: file.size,
+            });
+          }
+        }
 
-      req.uploadedFiles = uploadedFiles;
-      next();
-    } catch (error) {
-      next(error);
-    }
-  });
-};
+        //Only throw error if no files AND allowNoFiles flag is false or not set
+        if (
+          !opts.allowNoFiles && 
+          !uploadedFiles.resume &&
+          !uploadedFiles.coverLetter &&
+          (!uploadedFiles.documents || uploadedFiles.documents.length === 0)
+        ) {
+          return next(new ApiError('No valid files were uploaded', 400));
+        }
+
+        req.uploadedFiles = uploadedFiles;
+
+        next();
+      } catch (error) {
+        next(error);
+      }
+    });
+  };
 
 module.exports = documentUploadHandler;

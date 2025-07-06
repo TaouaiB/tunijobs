@@ -95,15 +95,17 @@ exports.submitApplication = async (
   jobId,
   applicationData,
   ipAddress,
-  userAgent
+  userAgent,
+  uploadedFiles
 ) => {
   if (!mongoose.Types.ObjectId.isValid(jobId)) {
     throw new ApiError('Invalid job ID format', 400);
   }
-  console.log('Passed jobId validation'); // Add this
+  console.log('Passed jobId validation');
 
   const filteredBody = pickFields(applicationData, 'application', true);
-  const { candidateId, coverLetter } = filteredBody;
+  const candidateId = applicationData.candidateId;
+  const coverLetter = filteredBody.coverLetter;
 
   // Check for existing application
   const existingApplication = await Application.findOne({
@@ -149,6 +151,10 @@ exports.submitApplication = async (
       });
 
       await existingApplication.save();
+
+      if (uploadedFiles && Object.keys(uploadedFiles).length > 0) {
+        await exports.storeDocument(existingApplication._id, uploadedFiles);
+      }
 
       NotificationService.send(
         existingApplication.companyId,
@@ -217,6 +223,17 @@ exports.submitApplication = async (
       },
     ],
   });
+
+  // ✅ Save uploaded PDFs after creation
+  if (uploadedFiles && Object.keys(uploadedFiles).length > 0) {
+    console.log('Files received in submitApplication:', uploadedFiles); // Log files input
+
+    await exports.storeDocument(application._id, uploadedFiles);
+
+    console.log('Documents stored successfully');
+  } else {
+    console.log('No files to store');
+  }
 
   NotificationService.send(
     job.companyId,

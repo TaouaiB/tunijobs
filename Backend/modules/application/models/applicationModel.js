@@ -172,7 +172,7 @@ const applicationSchema = new mongoose.Schema(
     isArchived: {
       type: Boolean,
       default: false,
-      index: true,
+      index: true, // Optimizes filtering for active records
     },
     archivedAt: Date,
     archivedByCompany: {
@@ -182,8 +182,12 @@ const applicationSchema = new mongoose.Schema(
     },
     deletedAt: {
       type: Date,
-      expires: '30d', // Automatically purge after 30 days
+      expires: '30d', // Auto-purge after 30 days (TTL index)
       default: null,
+    },
+    deletedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
     },
     version: {
       type: Number,
@@ -341,5 +345,21 @@ applicationSchema.methods.archive = function (companyId) {
 applicationSchema.methods.unarchive = function () {
   this.isArchived = false;
   this.archivedByCompany = undefined; // Clear when unarchiving
+  return this.save();
+};
+
+// Add to status history
+applicationSchema.methods.archive = function (companyId) {
+  this.isArchived = true;
+  this.archivedAt = new Date();
+  this.archivedByCompany = companyId;
+
+  // Add to status history
+  this.statusHistory.push({
+    status: this.status, // Current status
+    changedAt: new Date(),
+    notes: `Application archived by company ${companyId}`,
+  });
+
   return this.save();
 };

@@ -50,16 +50,23 @@ exports.removeDocument = asyncHandler(async (req, res) => {
  * @route   POST /api/v1/jobs/:jobId/apply
  * @access  Candidate
  */
-exports.submitApplication = asyncHandler(async (req, res) => {
-  const result = await ApplicationService.submitApplication(
-    req.params.jobId,
-    req.body,
-    req.ip,
-    req.get('User-Agent')
-  );
+exports.submitApplication = [
+  documentUploadHandler({ allowNoFiles: true }), // Allow no files to be uploaded
+  asyncHandler(async (req, res) => {
+    const result = await ApplicationService.submitApplication(
+      req.params.jobId,
+      {
+        ...req.body,
+        candidateId: req.user.candidateId,
+      },
+      req.ip,
+      req.get('User-Agent'),
+      req.uploadedFiles
+    );
 
-  res.status(201).json(result);
-});
+    res.status(201).json(result);
+  }),
+];
 
 /**
  * @desc    Update application status

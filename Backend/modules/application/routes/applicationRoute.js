@@ -73,7 +73,14 @@ router.get(
   getApplicationsByCompany
 );
 
-router.put('/:id/withdraw', updateApplicationValidator, withdrawApplication);
+router.put(
+  '/:id/withdraw',
+  authenticateJWT,
+  abilityInjector,
+  authorize('withdraw', 'Application', getApplicationResource),
+  updateApplicationValidator,
+  withdrawApplication
+);
 
 router.post(
   '/:id/documents',

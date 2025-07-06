@@ -25,8 +25,10 @@ class CompanyService {
     if (!user) throw new ApiError('User not found', 404);
     if (user.role !== 'company')
       throw new ApiError('User must have company role', 400);
+    console.log('Company data:', companyData);
     if (existingCompany)
       throw new ApiError('Company profile already exists', 409);
+    
 
     return await Company.create({
       ...pickFields(companyData, 'company', true),
