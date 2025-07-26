@@ -33,7 +33,8 @@ router.patch('/me', authenticateJWT, updateUserValidator, updateUser);
 router.route('/me').delete(authenticateJWT, deleteUser);
 
 // with :id will be admin panel
-// to be removed from userRoute
+// TODO : Protect Admin access with CASL
+// TODO : add controller for admin panel
 router
   .route('/:id')
   .get(getUserById)

@@ -7,10 +7,8 @@ const CompanyService = require('../services/company.service');
  * @access  Private
  */
 exports.createCompanyProfile = asyncHandler(async (req, res) => {
-  const company = await CompanyService.createCompanyProfile(
-    req.params.userId,
-    req.body
-  );
+  const userId = req.user.id;
+  const company = await CompanyService.createCompanyProfile(userId, req.body);
   res.status(201).json({
     status: 'success',
     data: { company },
@@ -23,7 +21,8 @@ exports.createCompanyProfile = asyncHandler(async (req, res) => {
  * @access  Public
  */
 exports.getCompanyProfile = asyncHandler(async (req, res) => {
-  const company = await CompanyService.getCompanyByUserId(req.params.userId);
+  const userId = req.user.id;
+  const company = await CompanyService.getCompanyByUserId(userId);
   res.status(200).json({
     status: 'success',
     data: { company },
@@ -36,10 +35,8 @@ exports.getCompanyProfile = asyncHandler(async (req, res) => {
  * @access  Private
  */
 exports.updateCompanyProfile = asyncHandler(async (req, res) => {
-  const company = await CompanyService.updateCompanyProfile(
-    req.params.userId,
-    req.body
-  );
+  const userId = req.user.id;
+  const company = await CompanyService.updateCompanyProfile(userId, req.body);
   res.status(200).json({
     status: 'success',
     data: { company },
@@ -52,7 +49,8 @@ exports.updateCompanyProfile = asyncHandler(async (req, res) => {
  * @access  Private
  */
 exports.deleteCompanyProfile = asyncHandler(async (req, res) => {
-  await CompanyService.deleteCompanyProfile(req.params.userId);
+  const userId = req.user.id;
+  await CompanyService.deleteCompanyProfile(userId);
   res.status(204).json({
     status: 'success',
     data: null,

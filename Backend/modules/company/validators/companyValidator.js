@@ -108,7 +108,6 @@ const validateSocialMedia = [
 
 // Validation pipelines
 exports.createCompanyValidator = [
-  validateUserIdParam,
   validateCompanyName,
   validateIndustry,
   validateDescription,
@@ -119,7 +118,6 @@ exports.createCompanyValidator = [
 ];
 
 exports.updateCompanyValidator = [
-  validateUserIdParam,
   validateOptionalCompanyName,
   validateOptionalIndustry,
   validateDescription,
