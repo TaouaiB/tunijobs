@@ -79,7 +79,6 @@ exports.createUserValidator = [
 exports.getUserValidator = [validateId('id', 'User'), validatorMiddleware];
 
 exports.updateUserValidator = [
-  validateId('id', 'User'),
   validateOptionalNameWithSlug,
   validateOptionalEmailField(),
   validateUniqueEmailOnUpdate,

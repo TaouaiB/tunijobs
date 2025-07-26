@@ -30,8 +30,13 @@ router.route('/').get(getAllUsers);
 
 router.get('/me', authenticateJWT, getUserById);
 
+router.patch('/me', authenticateJWT, updateUserValidator, updateUser);
+
+// with :id will be admin panel
+// to be removed from userRoute
 router
   .route('/:id')
+  .get(getUserById)
   .put(updateUserValidator, updateUser)
   .delete(getUserValidator, deleteUser);
 
@@ -40,7 +45,7 @@ router.patch('/:id/unblock', unblockUserValidator, unblockUser);
 router.patch('/:id/deactivate', deactivateUserValidator, deactivateUser);
 router.patch('/:id/activate', activateUserValidator, reactivateUser);
 
-router.patch('/me/avatar', authenticateJWT , updateAvatar);
-router.patch('/me/reset-avatar', authenticateJWT , resetAvatar);
+router.patch('/me/avatar', authenticateJWT, updateAvatar);
+router.patch('/me/reset-avatar', authenticateJWT, resetAvatar);
 
 module.exports = router;
