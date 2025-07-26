@@ -78,7 +78,7 @@ exports.getAllUsers = asyncHandler(async (req, res, next) => {
  * @returns {Object} User data
  */
 exports.getUserById = asyncHandler(async (req, res, next) => {
-  const user = await UserService.getUserById(req.params.id);
+  const user = await UserService.getUserById(req.user.id);
   res.status(200).json({
     status: 'success',
     data: { user },

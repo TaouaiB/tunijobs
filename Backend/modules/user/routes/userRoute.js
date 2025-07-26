@@ -28,9 +28,10 @@ const {
 
 router.route('/').get(getAllUsers);
 
+router.get('/me', authenticateJWT, getUserById);
+
 router
   .route('/:id')
-  .get(getUserValidator, getUserById)
   .put(updateUserValidator, updateUser)
   .delete(getUserValidator, deleteUser);
 
