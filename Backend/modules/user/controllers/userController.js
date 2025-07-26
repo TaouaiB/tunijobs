@@ -110,7 +110,8 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
  * @returns {Object} Empty response
  */
 exports.deleteUser = asyncHandler(async (req, res, next) => {
-  await UserService.deleteUser(req.params.id);
+  const userId = req.user.id;
+  await UserService.deleteUser(userId);
   res.status(204).json(); // 204 No Content is more appropriate for DELETE
 });
 

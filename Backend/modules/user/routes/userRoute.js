@@ -29,8 +29,8 @@ const {
 router.route('/').get(getAllUsers);
 
 router.get('/me', authenticateJWT, getUserById);
-
 router.patch('/me', authenticateJWT, updateUserValidator, updateUser);
+router.route('/me').delete(authenticateJWT, deleteUser);
 
 // with :id will be admin panel
 // to be removed from userRoute
