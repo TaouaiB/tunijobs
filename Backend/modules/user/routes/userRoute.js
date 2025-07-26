@@ -1,5 +1,6 @@
 const router = require('express').Router();
 
+const authenticateJWT = require('../../../core/middlewares/authentication/authenticateJWT');
 const {
   createUser,
   getAllUsers,
@@ -38,7 +39,7 @@ router.patch('/:id/unblock', unblockUserValidator, unblockUser);
 router.patch('/:id/deactivate', deactivateUserValidator, deactivateUser);
 router.patch('/:id/activate', activateUserValidator, reactivateUser);
 
-router.patch('/:id/avatar', updateAvatar);
-router.patch('/:id/reset-avatar', resetAvatar);
+router.patch('/me/avatar', authenticateJWT , updateAvatar);
+router.patch('/me/reset-avatar', authenticateJWT , resetAvatar);
 
 module.exports = router;

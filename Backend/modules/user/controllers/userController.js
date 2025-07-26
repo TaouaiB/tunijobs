@@ -16,7 +16,7 @@ const imageUploadHandler = require('../../../core/middlewares/multer/imageUpload
 exports.updateAvatar = [
   imageUploadHandler,
   asyncHandler(async (req, res) => {
-    const userId = req.params.id; // get user id from URL params
+    const userId = req.user.id;
 
     const result = await UserService.storeImage(userId, req.imageInfo);
 
@@ -28,7 +28,8 @@ exports.updateAvatar = [
 ];
 
 exports.resetAvatar = asyncHandler(async (req, res) => {
-  const result = await UserService.resetAvatar(req.params.id);
+  const userId = req.user.id;
+  const result = await UserService.resetAvatar(userId);
   res.status(200).json({
     status: 'success',
     message: result.message,
