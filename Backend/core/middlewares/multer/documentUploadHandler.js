@@ -9,12 +9,13 @@ const ApiError = require('../../utils/ApiError');
 const upload = multer(documentUpload());
 
 const uploadCandidateDocuments = upload.fields([
-  { name: 'resumeUrl', maxCount: 1 },
+  { name: 'resumeFile', maxCount: 1 },
   { name: 'coverLetter', maxCount: 1 },
   { name: 'documents', maxCount: 5 },
 ]);
 
-const outputDir = path.join(process.cwd(), 'uploads/documents');
+const resumeOutputDir = path.join(process.cwd(), 'uploads/candidates/resumes');
+const documentsOutputDir = path.join(process.cwd(), 'uploads/documents');
 
 const documentUploadHandler =
   (opts = {}) =>
@@ -57,19 +58,19 @@ const documentUploadHandler =
         const uploadedFiles = {};
 
         // Resume
-        if (req.files?.resumeUrl?.[0]) {
-          const file = req.files.resumeUrl[0];
+        if (req.files?.resumeFile?.[0]) {
+          const file = req.files.resumeFile[0];
           const saved = await storeDocument(
             file.buffer,
-            file.originalname,
-            outputDir
+            file.originalname, // Original filename from Multer
+            resumeOutputDir
           );
 
           uploadedFiles.resume = {
-            originalName: saved.originalName, // ✅ Use what's returned from storeDocument
-            url: saved.url,
-            mimetype: file.mimetype,
-            size: file.size,
+            originalName: saved.originalName, // ✅ Preserved exactly as you want
+            mimetype: file.mimetype, // From Multer file object
+            size: file.size, // From Multer file object
+            url: `/uploads/candidates/resume/${path.basename(saved.path)}`,
           };
 
           req.documentInfo = uploadedFiles.resume; // ✅ Required for storeResume
@@ -98,7 +99,7 @@ const documentUploadHandler =
             const saved = await storeDocument(
               file.buffer,
               file.originalname,
-              outputDir
+              documentsOutputDir
             );
             uploadedFiles.documents.push({
               name: saved.originalName,
@@ -111,7 +112,7 @@ const documentUploadHandler =
 
         //Only throw error if no files AND allowNoFiles flag is false or not set
         if (
-          !opts.allowNoFiles && 
+          !opts.allowNoFiles &&
           !uploadedFiles.resume &&
           !uploadedFiles.coverLetter &&
           (!uploadedFiles.documents || uploadedFiles.documents.length === 0)

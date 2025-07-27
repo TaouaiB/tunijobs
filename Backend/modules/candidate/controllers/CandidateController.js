@@ -34,9 +34,24 @@ exports.createCandidate = [
  * @access  Private
  */
 exports.updateResume = [
-  documentUploadHandler,
+  documentUploadHandler({ allowNoFiles: false }),
   asyncHandler(async (req, res) => {
-    const userId = req.params.userId;
+    const userId = req.user.id;
+    const candidateId = req.user.candidateId;
+
+    if (!candidateId) {
+      throw new ApiError('No candidate profile exists for this user', 404);
+    }
+
+    if (!req.documentInfo || typeof req.documentInfo !== 'object') {
+      throw new ApiError('Invalid file data received', 400);
+    }
+
+    console.log('Processing resume for:', {
+      userId,
+      candidateId,
+      documentInfo: req.documentInfo,
+    });
 
     const candidate = await CandidateService.storeResume(
       userId,
@@ -130,7 +145,13 @@ exports.updateCandidate = asyncHandler(async (req, res) => {
  * @access  Private
  */
 exports.deleteCandidate = asyncHandler(async (req, res) => {
-  await CandidateService.deleteById(req.params.candidateId);
+  const candidateId = req.user?.candidateId || req.params.id;
+  console.log('Deleting candidate profile :', candidateId);
+
+  if (!candidateId) {
+    return res.status(400).json({ message: 'User ID is required' });
+  }
+  await CandidateService.deleteById(candidateId);
   res.status(204).json({
     status: 'success',
     data: null,

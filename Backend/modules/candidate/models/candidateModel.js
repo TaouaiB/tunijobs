@@ -35,6 +35,15 @@ const candidateSchema = new mongoose.Schema(
     // 3. DOCUMENTS & LINKS
     // ======================
     resumeUrl: { type: String, trim: true },
+
+    resumeFile: {
+      name: { type: String },
+      type: { type: String },
+      size: { type: Number },
+      url: { type: String },
+      lastUpdated: { type: Date },
+    },
+
     links: {
       github: {
         type: String,

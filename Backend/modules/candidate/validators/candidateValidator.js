@@ -41,6 +41,21 @@ const validateResumeUrl = validateUrlField('resumeUrl');
 const validateGithubUrl = validateUrlField('links.github');
 const validateLinkedinUrl = validateUrlField('links.linkedin');
 
+const validateResumeFile = body('resumeFile')
+  .optional()
+  .isObject()
+  .withMessage('resumeFile must be an object')
+  .bail()
+  .custom((file) => {
+    if (file.name && typeof file.name !== 'string') return false;
+    if (file.type && typeof file.type !== 'string') return false;
+    if (file.size && typeof file.size !== 'number') return false;
+    return true;
+  })
+  .withMessage(
+    'resumeFile must contain valid name (string), type (string), and size (number)'
+  );
+
 const validateOtherUrl = body('links.other')
   .optional()
   .isArray({ max: 3 })
@@ -182,6 +197,7 @@ const commonCandidateValidators = [
   validateExperience,
   validateBio,
   validateResumeUrl,
+  validateResumeFile,
   validateGithubUrl,
   validateLinkedinUrl,
   validateOtherUrl,
