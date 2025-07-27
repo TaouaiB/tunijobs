@@ -6,6 +6,7 @@ const {
   getCandidateByUserIdValidator,
   deleteCandidateValidator,
 } = require('../validators/candidateValidator');
+
 const {
   createCandidate,
   getAllCandidates,
@@ -16,37 +17,37 @@ const {
   updateResume,
   removeResume,
 } = require('../controllers/candidateController');
+const authenticateJWT = require('../../../core/middlewares/authentication/authenticateJWT');
 
-router.get('/candidates', getAllCandidates);
-router.post('/:userId/candidate', createCandidateValidator, createCandidate);
-router.put('/:userId/candidate', updateCandidateValidator, updateCandidate);
-router.patch(
-  '/:userId/candidate/resume',
+// ======== NEW /me routes ========
+router.post(
+  '/me/candidate',
+  authenticateJWT,
+  createCandidateValidator,
+  createCandidate
+);
+router.get('/me/candidate', authenticateJWT, getCandidateByUserId);
+router.put(
+  '/me/candidate',
+  authenticateJWT,
   updateCandidateValidator,
-  updateResume
+  updateCandidate
 );
+router.delete('/me/candidate', authenticateJWT, deleteCandidate);
 
-router.patch(
-  '/:userId/candidate/remove-resume',
-  getCandidateByUserIdValidator,
-  removeResume
-);
+router.patch('/me/candidate/resume', authenticateJWT, updateResume);
+router.patch('/me/candidate/remove-resume', authenticateJWT, removeResume);
 
-router.get(
-  '/:userId/candidate',
-  getCandidateByUserIdValidator,
-  getCandidateByUserId
-);
-router.delete(
-  '/candidate/:candidateId',
-  deleteCandidateValidator,
-  deleteCandidate
-);
+// ======== ADMIN ROUTES ========
+router.get('/candidates', getAllCandidates);
 
-router.delete(
-  '/:userId/candidate',
-  getCandidateByUserIdValidator,
-  deleteCandidateByUserId
-);
+// ======== OLD /:userId routes (to be protected later with CASL) ========
+router.post('/:userId/candidate', createCandidateValidator, createCandidate);
+router.get('/:userId/candidate', getCandidateByUserId);
+router.put('/:userId/candidate', updateCandidateValidator, updateCandidate);
+router.delete('/:userId/candidate', deleteCandidate);
+
+router.patch('/:userId/candidate/resume', updateResume);
+router.patch('/:userId/candidate/remove-resume', removeResume);
 
 module.exports = router;

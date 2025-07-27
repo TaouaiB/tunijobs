@@ -8,10 +8,16 @@ const documentUploadHandler = require('../../../core/middlewares/multer/document
  * @access  Private
  */
 exports.createCandidate = [
-  documentUploadHandler,
+  documentUploadHandler({ allowNoFiles: true }),
   asyncHandler(async (req, res) => {
+    const userId = req.user?.id || req.params.userId;
+
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' });
+    }
+
     const candidate = await CandidateService.createCandidate(
-      req.params.userId,
+      userId,
       req.body,
       req.documentInfo
     );
@@ -88,7 +94,12 @@ exports.getAllCandidates = asyncHandler(async (req, res) => {
  * @access  Public
  */
 exports.getCandidateByUserId = asyncHandler(async (req, res) => {
-  const candidate = await CandidateService.getByUserId(req.params.userId);
+  const userId = req.user?.id || req.params.userId;
+
+  if (!userId) {
+    return res.status(400).json({ message: 'User ID is required' });
+  }
+  const candidate = await CandidateService.getByUserId(userId);
   res.status(200).json({
     status: 'success',
     data: { candidate },
@@ -101,10 +112,12 @@ exports.getCandidateByUserId = asyncHandler(async (req, res) => {
  * @access  Private
  */
 exports.updateCandidate = asyncHandler(async (req, res) => {
-  const candidate = await CandidateService.updateByUserId(
-    req.params.userId,
-    req.body
-  );
+  const userId = req.user?.id || req.params.userId;
+
+  if (!userId) {
+    return res.status(400).json({ message: 'User ID is required' });
+  }
+  const candidate = await CandidateService.updateByUserId(userId, req.body);
   res.status(200).json({
     status: 'success',
     data: { candidate },
@@ -130,7 +143,13 @@ exports.deleteCandidate = asyncHandler(async (req, res) => {
  * @access  Private
  */
 exports.deleteCandidateByUserId = asyncHandler(async (req, res) => {
-  await CandidateService.deleteByUserId(req.params.userId);
+  const userId = req.user?.id || req.params.userId;
+
+  if (!userId) {
+    return res.status(400).json({ message: 'User ID is required' });
+  }
+
+  await CandidateService.deleteByUserId(userId);
   res.status(204).json({
     status: 'success',
     data: null,

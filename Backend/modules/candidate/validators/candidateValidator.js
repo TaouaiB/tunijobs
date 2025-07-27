@@ -196,14 +196,12 @@ const commonCandidateValidators = [
 
 // Validator Pipelines
 exports.createCandidateValidator = [
-  validateUserIdParam,
   ...commonCandidateValidators,
   ...validateSalaryRange(),
   validatorMiddleware,
 ];
 
 exports.updateCandidateValidator = [
-  validateUserIdParam,
   ...commonCandidateValidators.map(
     (validator) => (validator.optional && validator.optional()) || validator
   ),
