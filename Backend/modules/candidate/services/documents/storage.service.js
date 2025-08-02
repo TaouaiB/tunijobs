@@ -59,20 +59,38 @@ module.exports = {
    */
   async removeResume(userId) {
     const candidate = await Candidate.findOne({ userId });
+
     if (!candidate) {
       throw new ApiError(`Candidate profile for user ${userId} not found`, 404);
     }
 
-    if (candidate.resumeUrl) {
-      const absolutePath = path.join(process.cwd(), candidate.resumeUrl);
-      await cleanupFiles([absolutePath]);
-
-      candidate.resumeUrl = undefined;
-      candidate.resumeOriginalName = undefined;
-      candidate.resumeMimeType = undefined;
-      candidate.resumeSize = undefined;
-      await candidate.save();
+    // Check if resume exists
+    if (!candidate.resumeFile || !candidate.resumeFile.url) {
+      throw new ApiError(`No resume exists for user ${userId}`, 400);
     }
+
+    // Safe cleanup of existing file
+    if (candidate.resumeFile?.url) {
+      try {
+        const filename = path.basename(candidate.resumeFile.url);
+        const filePath = path.join(resumeOutputDir, filename);
+
+        console.log('Attempting to delete resume:', filePath);
+        await fs.unlink(filePath);
+        console.log('Successfully deleted resume');
+      } catch (err) {
+        if (err.code === 'ENOENT') {
+          console.warn('Resume file not found, may already be deleted');
+        } else {
+          console.error('File cleanup error:', err.message);
+          // Don't rethrow - we still want to clear the DB record
+        }
+      }
+    }
+
+    // Clear resume data - matches your storage structure
+    candidate.resumeFile = undefined;
+    await candidate.save();
 
     return candidate;
   },

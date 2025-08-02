@@ -71,8 +71,12 @@ exports.updateResume = [
  * @access  Private
  */
 exports.removeResume = asyncHandler(async (req, res) => {
-  const userId = req.params.userId;
+  const userId = req.user.id;
+  const candidateId = req.user.candidateId;
 
+  if (!candidateId) {
+    throw new ApiError('No candidate profile exists for this user', 404);
+  }
   const updatedCandidate = await CandidateService.removeResume(userId);
 
   res.status(200).json({
