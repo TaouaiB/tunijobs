@@ -17,6 +17,7 @@ const {
   getJobResource,
   toggleFeaturedStatus,
   requestFeature,
+  getJobsByCompanyForMe,
 } = require('../controllers/jobController');
 
 const {
@@ -45,6 +46,14 @@ router.post(
   authorize('create', 'Job', getJobResource),
   createJobValidator,
   createJob
+);
+
+router.get(
+  '/me/jobs',
+  authenticateJWT,
+  abilityInjector,
+  authorize('read', 'Job', getJobResource),
+  getJobsByCompanyForMe
 );
 
 router.put(

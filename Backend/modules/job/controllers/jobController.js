@@ -23,6 +23,25 @@ exports.createJob = asyncHandler(async (req, res, next) => {
 });
 
 /**
+ * @desc    Get jobs of the authenticated user's company
+ * @route   GET /api/v1/jobs/me/jobs
+ * @access  Private (Company Admin)
+ * @memberof JobController
+ */
+exports.getJobsByCompanyForMe = asyncHandler(async (req, res) => {
+  const companyId = req.user.companyId;
+  if (!companyId) {
+    return res.status(400).json({ message: 'User has no associated company' });
+  }
+  const jobs = await jobService.getJobsByCompany(companyId);
+  res.status(200).json({
+    status: 'success',
+    results: jobs.length,
+    data: { jobs },
+  });
+});
+
+/**
  * @desc    Get all jobs
  * @route   GET /api/v1/jobs
  * @access  Public
@@ -69,23 +88,26 @@ exports.getJob = asyncHandler(async (req, res, next) => {
   });
 });
 
+/**
+ * Dynamic resource resolver for CASL authorization
+ * Handles both company job listing (by companyId) and specific job fetch (by jobId param)
+ */
 exports.getJobResource = async (req) => {
-  if (req.method === 'POST') {
-    // For create actions
+  // For create or company-wide GET: use user’s companyId
+  const isCreateOrListForCompany =
+    req.method === 'POST' ||
+    (req.method === 'GET' && req.originalUrl.includes('/companies/me/jobs'));
+
+  if (isCreateOrListForCompany) {
     return {
       companyId: req.user.companyId,
       __type: 'Job',
     };
   }
 
-  // For other actions like update, delete, etc.
+  // For individual job routes (e.g., /jobs/:id)
   const job = await jobService.getJobById(req.params.id);
-
-  if (job && job.companyId) {
-    job.companyId = job.companyId.toString(); // normalize
-  }
-
-  job.__type = 'Job'; // required by CASL
+  if (!job) return null;
 
   return job;
 };
