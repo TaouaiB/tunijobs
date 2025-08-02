@@ -21,6 +21,7 @@ const {
   removeDocument,
   getApplicationsByCompany,
   getApplicationResource,
+  getMyApplication,
 } = require('../controllers/applicationController');
 
 const {
@@ -61,9 +62,10 @@ router.post(
 );
 
 router.get(
-  '/candidate/:candidateId',
+  '/candidate/me',
+  authenticateJWT,
   getApplicationsByCandidateValidator,
-  getApplicationsByCandidate
+  getMyApplication
 );
 
 // Get all applications for a specific company

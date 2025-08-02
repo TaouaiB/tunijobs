@@ -121,6 +121,20 @@ exports.getApplicationsByCandidate = asyncHandler(async (req, res) => {
 });
 
 /**
+ * @desc    Get My Application
+ * @route   GET /api/v1/applications/candidate/me
+ * @access  Candidate
+ */
+exports.getMyApplication = asyncHandler(async (req, res) => {
+  const candidateId = req.user.candidateId;
+
+  const result =
+    await ApplicationService.getApplicationsByCandidate(candidateId);
+
+  res.json(result);
+});
+
+/**
  * @desc    Get applications by job
  * @route   GET /api/v1/applications/job/:jobId
  * @access  Employer/Admin

@@ -242,7 +242,6 @@ exports.getApplicationsByJobValidator = [
  * @type {import('express').RequestHandler[]}
  */
 exports.getApplicationsByCandidateValidator = [
-  validateCandidateId,
   query('status')
     .optional()
     .isIn(APPLICATION_METADATA.STATUSES.values)
