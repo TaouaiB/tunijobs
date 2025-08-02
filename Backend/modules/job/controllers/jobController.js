@@ -14,7 +14,8 @@ const ApiError = require('../../../core/utils/ApiError');
  * @memberof JobController
  */
 exports.createJob = asyncHandler(async (req, res, next) => {
-  const job = await jobService.createJob(req.params.companyId, req.body);
+  const companyId = req.user.companyId;
+  const job = await jobService.createJob(companyId, req.body);
   res.status(201).json({
     status: 'success',
     data: { job },
@@ -68,16 +69,25 @@ exports.getJob = asyncHandler(async (req, res, next) => {
   });
 });
 
-// Getter fucntion
 exports.getJobResource = async (req) => {
-  // For create operations, return a template with the companyId
   if (req.method === 'POST') {
+    // For create actions
     return {
-      companyId: req.params.companyId, // Use the route parameter
+      companyId: req.user.companyId,
+      __type: 'Job',
     };
   }
-  // For other operations, fetch the actual job
-  return await jobService.getJobById(req.params.id);
+
+  // For other actions like update, delete, etc.
+  const job = await jobService.getJobById(req.params.id);
+
+  if (job && job.companyId) {
+    job.companyId = job.companyId.toString(); // normalize
+  }
+
+  job.__type = 'Job'; // required by CASL
+
+  return job;
 };
 
 /**

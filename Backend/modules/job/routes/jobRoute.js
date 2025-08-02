@@ -39,7 +39,7 @@ router.get('/:id', getJobValidator, getJob);
 ---------------------------------------------------*/
 // Company admin routes
 router.post(
-  '/:companyId/jobs',
+  '/me',
   authenticateJWT,
   abilityInjector,
   authorize('create', 'Job', getJobResource),

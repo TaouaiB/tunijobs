@@ -159,7 +159,6 @@ const validateMetaData = [
 // Validation pipelines
 const createJobValidationPipeline = (isUpdate = false) => {
   const pipeline = [
-    isUpdate ? validateJobId : validateCompanyId,
     isUpdate ? validateOptionalTitle : validateTitle,
     isUpdate ? validateDescription.optional() : validateDescription,
     isUpdate ? validateJobType.optional() : validateJobType,
