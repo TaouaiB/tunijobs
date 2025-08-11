@@ -88,8 +88,10 @@ exports.updateApplicationStatus = asyncHandler(async (req, res) => {
  * @access  Candidate
  */
 exports.withdrawApplication = asyncHandler(async (req, res) => {
+  const candidateId = req.user.candidateId;
   const result = await ApplicationService.withdrawApplication(
     req.params.id,
+    candidateId,
     req.body
   );
 

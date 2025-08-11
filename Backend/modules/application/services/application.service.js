@@ -310,8 +310,8 @@ exports.updateApplicationStatus = async (id, updateData) => {
  * @return  {Promise<Object>} Withdrawal confirmation
  * @memberof ApplicationService
  */
-exports.withdrawApplication = async (id, withdrawData) => {
-  const { candidateId, reason } = withdrawData;
+exports.withdrawApplication = async (id, candidateId, withdrawData) => {
+  const reason = withdrawData.reason || 'Withdrawn by candidate';
 
   const application = await Application.findById(id);
 
@@ -329,7 +329,7 @@ exports.withdrawApplication = async (id, withdrawData) => {
   application.statusHistory.push({
     status: 'withdrawn',
     changedBy: candidateId,
-    notes: reason || 'Withdrawn by candidate',
+    notes: reason,
   });
 
   await application.save();
