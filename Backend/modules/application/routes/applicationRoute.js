@@ -113,7 +113,15 @@ router.put(
   updateApplicationStatus
 );
 
-router.patch('/:id/interviews', scheduleInterviewValidator, scheduleInterview);
+// working on it now
+router.patch(
+  '/:id/interviews',
+  authenticateJWT,
+  abilityInjector,
+  authorize('update', 'Application', getApplicationResource),
+  scheduleInterviewValidator,
+  scheduleInterview
+);
 
 router.patch(
   '/:id/interviews/:interviewId/result',

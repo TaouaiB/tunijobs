@@ -120,11 +120,12 @@ const applicationSchema = new mongoose.Schema(
         location: String,
         attendees: [
           {
-            userId: {
+            companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
+            candidateId: {
               type: mongoose.Schema.Types.ObjectId,
-              ref: 'User',
+              ref: 'Candidate',
             },
-            role: String,
+            role: { type: String, required: true },
           },
         ],
         feedback: String,

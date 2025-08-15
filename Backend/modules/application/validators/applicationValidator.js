@@ -124,20 +124,6 @@ const validateInterview = [
     }),
   validateEnumField('interviewType', APPLICATION_METADATA.INTERVIEW_TYPES),
   validateOptionalStringField('location', 200),
-  body('attendees')
-    .isArray({ min: 1, max: 5 })
-    .withMessage('Must have between 1-5 attendees')
-    .custom((attendees) => {
-      const userIds = attendees.map((a) => a.userId);
-      if (new Set(userIds).size !== userIds.length) {
-        throw new Error('Duplicate attendees not allowed');
-      }
-      return true;
-    }),
-  body('attendees.*.userId')
-    .isMongoId()
-    .withMessage('Attendee ID must be a valid MongoDB ObjectId'),
-  validateRequiredStringField('attendees.*.role', 50),
   validateOptionalStringField('feedback', 2000),
   validateEnumField('result', APPLICATION_METADATA.INTERVIEW_RESULTS),
 ];

@@ -621,30 +621,53 @@ exports.deleteApplication = async (id) => {
  * @return  {Promise<Object>} Scheduled interview details
  * @memberof ApplicationService
  */
-exports.scheduleInterview = async (id, interviewData) => {
-  const { scheduledAt, interviewType, location, attendees } = interviewData;
+exports.scheduleInterview = async (applicationId, companyId, interviewData) => {
+  const { scheduledAt, interviewType, location, result } = interviewData;
 
   if (!interviewType || !scheduledAt) {
     throw new ApiError('Interview type and date are required', 400);
   }
 
-  if (!attendees || attendees.length === 0) {
-    throw new ApiError('At least one attendee is required', 400);
+  // 1. Fetch application
+  const application = await Application.findById(applicationId);
+  if (!application) throw new ApiError('Application not found', 404);
+
+  // 2. Security check: ensure interviewer’s company matches application
+  if (String(application.companyId) !== String(companyId)) {
+    throw new ApiError(
+      'Not authorized to schedule interview for this application',
+      403
+    );
   }
 
-  const application = await Application.findById(id);
-  if (!application) throw new ApiError('Application not found', 404);
+  // Build attendees automatically
+  const attendees = [
+    {
+      companyId,
+      role: 'Interviewer',
+    },
+    {
+      candidateId: application.candidateId,
+      role: 'Candidate',
+    },
+  ];
+
+  console.log('DEBUG: application:', application);
+  console.log('DEBUG: companyId from token:', companyId);
+  console.log('DEBUG: candidateId from application:', application.candidateId);
+  console.log('DEBUG: attendees before validation:', attendees);
 
   const interview = {
     interviewType,
     scheduledAt: new Date(scheduledAt),
     template: getInterviewTemplate(interviewType),
-    result: 'pending',
+    result: result || 'pending',
     location: location || 'To be determined',
-    attendees: attendees.map((attendee) => ({
-      userId: attendee.userId,
-      role: attendee.role || 'Interviewer',
-    })),
+
+    attendees: [
+      { companyId, role: 'Interviewer' }, // interviewer company
+      { candidateId: application.candidateId, role: 'Candidate' }, // actual candidate
+    ],
   };
 
   application.interviews.push(interview);

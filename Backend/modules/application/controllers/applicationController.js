@@ -203,6 +203,7 @@ exports.deleteApplication = asyncHandler(async (req, res) => {
 exports.scheduleInterview = asyncHandler(async (req, res) => {
   const result = await ApplicationService.scheduleInterview(
     req.params.id,
+    req.user.companyId,
     req.body
   );
 
