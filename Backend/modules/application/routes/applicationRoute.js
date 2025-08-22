@@ -91,7 +91,7 @@ router.post(
     console.log('✅ Reached POST /documents route');
     next();
   },
-  documentUploadHandler,
+  documentUploadHandler(),
   authenticateJWT,
   abilityInjector,
   authorize('add-document', 'Application'),

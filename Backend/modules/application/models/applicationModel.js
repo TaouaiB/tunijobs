@@ -151,8 +151,7 @@ const applicationSchema = new mongoose.Schema(
       ipAddress: String,
       userAgent: String,
       applicationSource: String,
-    },
-    // Explicitly define parsedResume field structure
+
       parsedResume: {
         // Common resume parsing fields
         name: String,
@@ -164,23 +163,24 @@ const applicationSchema = new mongoose.Schema(
             title: String,
             company: String,
             duration: String,
-            description: String
-          }
+            description: String,
+          },
         ],
         education: [
           {
             degree: String,
             institution: String,
-            year: String
-          }
+            year: String,
+          },
         ],
         // Raw parsed data for reference
         rawData: mongoose.Schema.Types.Mixed,
         // Metadata about the parsing
         parsedAt: Date,
         parserVersion: String,
-        confidence: Number
+        confidence: Number,
       },
+    },
     analytics: {
       viewCount: { type: Number, default: 0 },
       lastViewed: Date,

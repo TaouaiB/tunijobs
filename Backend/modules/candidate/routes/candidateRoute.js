@@ -16,7 +16,7 @@ const {
   deleteCandidateByUserId,
   updateResume,
   removeResume,
-} = require('../controllers/candidateController');
+} = require('../controllers/CandidateController');
 const authenticateJWT = require('../../../core/middlewares/authentication/authenticateJWT');
 
 // ======== NEW /me routes ========

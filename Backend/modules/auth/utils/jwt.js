@@ -1,7 +1,9 @@
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const ApiError = require('../../../core/utils/ApiError');
 
-const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
+const JWT_SECRET =
+  process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1d';
 const JWT_ISSUER = process.env.JWT_ISSUER || 'your-app-name';
 const JWT_AUDIENCE = process.env.JWT_AUDIENCE || 'your-app-client';
@@ -22,7 +24,7 @@ function signToken(payload, options = {}) {
     issuer: JWT_ISSUER,
     audience: JWT_AUDIENCE,
     algorithm: 'HS256', // Explicitly set algorithm
-    ...options
+    ...options,
   });
 }
 
@@ -41,12 +43,13 @@ function verifyToken(token, options = {}) {
       issuer: JWT_ISSUER,
       audience: JWT_AUDIENCE,
       algorithms: ['HS256'], // Prevent algorithm switching attacks
-      ...options
+      ...options,
     });
   } catch (err) {
     // Specific error messages for different JWT errors
-    const message = err.name === 'TokenExpiredError' 
-      ? 'Token has expired' 
+    const message =
+      err.name === 'TokenExpiredError' ?
+        'Token has expired'
       : 'Invalid authentication token';
     throw new ApiError(message, 401);
   }
@@ -54,7 +57,7 @@ function verifyToken(token, options = {}) {
 
 /**
  * Decodes JWT token without verification (for inspection only)
- * @param {string} token 
+ * @param {string} token
  * @returns {Object|null} Decoded payload or null
  */
 function decodeToken(token) {
@@ -73,5 +76,5 @@ module.exports = {
   signToken,
   verifyToken,
   decodeToken,
-  generateRandomToken
+  generateRandomToken,
 };

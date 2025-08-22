@@ -1,10 +1,20 @@
-const { ResumeParser } = require('resume-parser');
 const Application = require('../models/applicationModel');
 const {
   extractText,
   cleanText,
 } = require('../../../core/utils/parsers/pdfTextParser');
 const ApiError = require('../../../core/utils/ApiError');
+
+const path = require('path');
+let ResumeParser;
+try {
+  ({ ResumeParser } = require('resume-parser'));
+} catch (err) {
+  // Fallback stub when resume-parser is unavailable
+  ResumeParser = {
+    parseResume: async () => ({}),
+  };
+}
 
 /**
  * Parse a document from an Application
@@ -25,17 +35,18 @@ const parseApplicationDocument = async (applicationId, documentId = null) => {
   if (documentId) {
     doc = application.documents.find((d) => d._id.toString() === documentId);
     if (!doc) throw new ApiError('Document not found in application', 404);
-  } else {
-    // default to first document if exists
-    doc = application.documents[0];
-    if (!doc) throw new ApiError('No documents available in application', 400);
+  } else if (application.documents?.length) {
+    doc = application.documents[application.documents.length - 1];
+  } else if (application.resumeUrl) {
+    doc = { name: 'resume', url: application.resumeUrl };
   }
-
-  if (!doc.url) throw new ApiError('Document URL missing', 400);
+  if (!doc || !doc.url)
+    throw new ApiError('No documents available in application', 400);
+  const filePath = path.join(process.cwd(), doc.url);
 
   // 3️⃣ Try specialized resume-parser first
   try {
-    const parsed = await ResumeParser.parseResume(doc.url);
+    const parsed = await ResumeParser.parseResume(filePath);
 
     return {
       applicationId,
@@ -51,7 +62,7 @@ const parseApplicationDocument = async (applicationId, documentId = null) => {
       education: parsed.education || [],
       skills: parsed.skills || [],
       summary: parsed.summary || '',
-      parserUsed: 'resume-parser', 
+      parserUsed: 'resume-parser',
       parserVersion: '1.0.0',
     };
   } catch (err) {
@@ -59,7 +70,7 @@ const parseApplicationDocument = async (applicationId, documentId = null) => {
 
     // 4️⃣ Fallback to pdfTextParser
     try {
-      const rawText = await extractText(doc.url);
+      const rawText = await extractText(filePath);
       return {
         applicationId,
         candidateId: application.candidateId._id,

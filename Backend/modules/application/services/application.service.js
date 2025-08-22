@@ -70,46 +70,28 @@ exports.storeDocument = async (applicationId, files) => {
       applicationId,
       files
     );
+    // 2️⃣ Automatically parse the uploaded document/resume
+    try {
+      const parsedData = await parseApplicationDocument(applicationId);
 
-    // 2️⃣ Automatically parse the latest uploaded document
-    // Assume files is an array of uploaded file info
-    const latestDoc = files[files.length - 1]; // last uploaded
-    if (latestDoc && latestDoc._id) {
-      try {
-        const parsedData = await parseApplicationDocument(
-          applicationId,
-          latestDoc._id
-        );
+      // Add metadata about the parsing
+      parsedData.parsedAt = new Date();
 
-        // Add metadata about the parsing
-        parsedData.parsedAt = new Date();
-        // You might want to add parser version information
+      // Update application with parsed data
+      application.metadata = application.metadata || {};
+      application.metadata.parsedResume = parsedData;
 
-        // Update application with parsed data
-        application.metadata = application.metadata || {};
-        application.metadata.parsedResume = parsedData;
-
-        // Also add reference to the document that was parsed
-        const docIndex = application.documents.findIndex(
-          (doc) => doc._id.toString() === latestDoc._id.toString()
-        );
-        if (docIndex !== -1) {
-          application.documents[docIndex].parsedDataRef = application._id;
-        }
-
-        await application.save();
-      } catch (parseError) {
-        // Log parsing error but don't fail the entire document storage
-        console.error('Failed to parse document:', parseError);
-        // You might want to set a flag indicating parsing failed
-        application.metadata = application.metadata || {};
-        application.metadata.parsedResume = {
-          parseError: true,
-          errorMessage: parseError.message,
-          attemptedAt: new Date(),
-        };
-        await application.save();
-      }
+      await application.save();
+    } catch (parseError) {
+      // Log parsing error but don't fail the entire document storage
+      console.error('Failed to parse document:', parseError);
+      application.metadata = application.metadata || {};
+      application.metadata.parsedResume = {
+        parseError: true,
+        errorMessage: parseError.message,
+        attemptedAt: new Date(),
+      };
+      await application.save();
     }
 
     return application;

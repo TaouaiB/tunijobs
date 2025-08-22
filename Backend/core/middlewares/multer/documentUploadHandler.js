@@ -1,6 +1,5 @@
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs-extra');
 
 const { documentUpload } = require('../../config/multer/documents.config');
 const { storeDocument } = require('../../utils/processors/documents/storage');
@@ -73,7 +72,7 @@ const documentUploadHandler =
             originalName: saved.originalName, // ✅ Preserved exactly as you want
             mimetype: file.mimetype, // From Multer file object
             size: file.size, // From Multer file object
-            url: `/uploads/candidates/resume/${path.basename(saved.path)}`,
+            url: `uploads/candidates/resumes/${path.basename(saved.path)}`,
           };
 
           req.documentInfo = uploadedFiles.resume; // ✅ Required for storeResume
@@ -85,11 +84,11 @@ const documentUploadHandler =
           const saved = await storeDocument(
             file.buffer,
             file.originalname,
-            outputDir
+            documentsOutputDir
           );
           uploadedFiles.coverLetter = {
             name: saved.originalName,
-            url: saved.url,
+            url: `uploads/documents/${saved.url}`,
             type: file.mimetype,
             size: file.size,
           };
@@ -106,7 +105,7 @@ const documentUploadHandler =
             );
             uploadedFiles.documents.push({
               name: saved.originalName,
-              url: saved.url,
+              url: `uploads/documents/${saved.url}`,
               type: file.mimetype,
               size: file.size,
             });

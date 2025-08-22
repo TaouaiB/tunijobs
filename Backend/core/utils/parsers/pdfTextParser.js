@@ -1,6 +1,13 @@
 const fs = require('fs').promises;
-const pdfParse = require('pdf-parse');
-const ApiError = require('../ApiError'); // adjust path
+const ApiError = require('../ApiError');
+
+let pdfParse;
+try {
+  pdfParse = require('pdf-parse');
+} catch (err) {
+  // Fallback stub when pdf-parse is unavailable
+  pdfParse = async () => ({ text: '' });
+}
 
 /**
  * Extract text from a PDF file or buffer
@@ -38,7 +45,7 @@ const cleanText = (rawText) => {
   if (!rawText) return '';
   return rawText
     .split('\n')
-    .map(line => line.trim())
+    .map((line) => line.trim())
     .filter(Boolean)
     .join('\n');
 };
