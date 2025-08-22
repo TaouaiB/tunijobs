@@ -6,14 +6,16 @@ const {
 const ApiError = require('../../../core/utils/ApiError');
 
 const path = require('path');
-let ResumeParser;
+
+// Robust import: always expose a callable parseResume
+let resumeParser;
 try {
-  ({ ResumeParser } = require('resume-parser'));
-} catch (err) {
-  // Fallback stub when resume-parser is unavailable
-  ResumeParser = {
-    parseResume: async () => ({}),
-  };
+  resumeParser = require('resume-parser');
+  if (!resumeParser?.parseResume) {
+    resumeParser = { parseResume: async () => ({}) };
+  }
+} catch {
+  resumeParser = { parseResume: async () => ({}) };
 }
 
 /**
@@ -46,12 +48,9 @@ const parseApplicationDocument = async (applicationId, documentId = null) => {
 
   // 3️⃣ Try specialized resume-parser first
   try {
-    const parsed = await ResumeParser.parseResume(filePath);
-
     return {
-      applicationId,
-      candidateId: application.candidateId._id,
-      documentName: doc.name,
+      //application.service writes with strict:false
+      documentName: doc.name || doc.originalName || 'resume',
       personal_info: {
         name: parsed.name || application.candidateId?.name || '',
         email: parsed.email || '',

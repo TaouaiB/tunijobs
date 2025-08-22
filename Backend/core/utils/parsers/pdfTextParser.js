@@ -1,12 +1,18 @@
 const fs = require('fs').promises;
 const ApiError = require('../ApiError');
 
-let pdfParse;
+let resumeParser;
 try {
-  pdfParse = require('pdf-parse');
-} catch (err) {
-  // Fallback stub when pdf-parse is unavailable
-  pdfParse = async () => ({ text: '' });
+  // Most packages export the parser object directly
+  resumeParser = require('resume-parser');
+  // sanity: ensure it has parseResume
+  if (!resumeParser?.parseResume) {
+    // shape mismatch – fall back to stub so your flow still works
+    resumeParser = { parseResume: async () => ({}) };
+  }
+} catch {
+  // package missing – stub so you still fall back to raw PDF text
+  resumeParser = { parseResume: async () => ({}) };
 }
 
 /**

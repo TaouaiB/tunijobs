@@ -6,6 +6,7 @@ const Application = require('../models/applicationModel');
 const Job = require('../../job/models/jobModel');
 const Candidate = require('../../candidate/models/candidateModel');
 const documentStorage = require('./documents/storage.service');
+const { parseApplicationDocument } = require('./resumeService');
 
 // Mock services (replace with actual implementations)
 const NotificationService = {
@@ -61,7 +62,6 @@ const getInterviewTemplate = (type) => {
  * @return  {Promise<Object>} Updated application
  * @memberof ApplicationService
  */
-const { parseApplicationDocument } = require('./resumeService'); // your parser service
 
 exports.storeDocument = async (applicationId, files) => {
   try {
@@ -70,6 +70,7 @@ exports.storeDocument = async (applicationId, files) => {
       applicationId,
       files
     );
+    if (!application) throw new ApiError('Application not found', 404);
     // 2️⃣ Automatically parse the uploaded document/resume
     try {
       const parsedData = await parseApplicationDocument(applicationId);
@@ -78,19 +79,26 @@ exports.storeDocument = async (applicationId, files) => {
       parsedData.parsedAt = new Date();
 
       // Update application with parsed data
-      application.metadata = application.metadata || {};
-      application.metadata.parsedResume = parsedData;
+      // disable strict on this set
+      application.set('metadata.parsedResume', parsedData, { strict: false });
+      // If the schema uses Mixed or this path is unknown, mark modified:
+      application.markModified('metadata.parsedResume');
 
       await application.save();
     } catch (parseError) {
       // Log parsing error but don't fail the entire document storage
       console.error('Failed to parse document:', parseError);
-      application.metadata = application.metadata || {};
-      application.metadata.parsedResume = {
-        parseError: true,
-        errorMessage: parseError.message,
-        attemptedAt: new Date(),
-      };
+      // ⬅️ Save error info even if path not in schema
+      application.set(
+        'metadata.parsedResume',
+        {
+          parseError: true,
+          errorMessage: parseError.message,
+          attemptedAt: new Date(),
+        },
+        { strict: false }
+      );
+      application.markModified('metadata.parsedResume');
       await application.save();
     }
 

@@ -91,13 +91,15 @@ router.post(
     console.log('✅ Reached POST /documents route');
     next();
   },
-  documentUploadHandler(),
+  documentUploadHandler(), // builds req.uploadedFiles from buffers
   authenticateJWT,
   abilityInjector,
   authorize('add-document', 'Application'),
-  //updateApplicationValidator,
-  normalizeUploadFields,
-  uploadDocument
+  (req, res, next) => {
+    console.dir(req.files, { depth: 4 });
+    next();
+  },
+  uploadDocument // uses req.uploadedFiles
 );
 
 router.delete(

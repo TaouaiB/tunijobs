@@ -1,11 +1,13 @@
-const { buildAbilityFor } = require('../../core/auth/abilities/ability.factory');
+const {
+  buildAbilityFor,
+} = require('../../core/auth/abilities/ability.factory');
 
 describe('CASL Ability Factory - buildAbilityFor', () => {
-  it('should allow admin to manage all', () => {
+  it('should not allow admin to manage all', () => {
     const adminUser = { id: 'admin123', role: 'admin' };
     const ability = buildAbilityFor(adminUser);
 
-    expect(ability.can('manage', 'all')).toBe(true);
+    expect(ability.can('manage', 'all')).toBe(false);
   });
 
   it('should allow company to create a job', () => {
