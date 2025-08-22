@@ -61,9 +61,58 @@ const getInterviewTemplate = (type) => {
  * @return  {Promise<Object>} Updated application
  * @memberof ApplicationService
  */
+const { parseApplicationDocument } = require('./resumeService'); // your parser service
+
 exports.storeDocument = async (applicationId, files) => {
   try {
-    return await documentStorage.storeDocuments(applicationId, files);
+    // 1️⃣ Store documents
+    const application = await documentStorage.storeDocuments(
+      applicationId,
+      files
+    );
+
+    // 2️⃣ Automatically parse the latest uploaded document
+    // Assume files is an array of uploaded file info
+    const latestDoc = files[files.length - 1]; // last uploaded
+    if (latestDoc && latestDoc._id) {
+      try {
+        const parsedData = await parseApplicationDocument(
+          applicationId,
+          latestDoc._id
+        );
+
+        // Add metadata about the parsing
+        parsedData.parsedAt = new Date();
+        // You might want to add parser version information
+
+        // Update application with parsed data
+        application.metadata = application.metadata || {};
+        application.metadata.parsedResume = parsedData;
+
+        // Also add reference to the document that was parsed
+        const docIndex = application.documents.findIndex(
+          (doc) => doc._id.toString() === latestDoc._id.toString()
+        );
+        if (docIndex !== -1) {
+          application.documents[docIndex].parsedDataRef = application._id;
+        }
+
+        await application.save();
+      } catch (parseError) {
+        // Log parsing error but don't fail the entire document storage
+        console.error('Failed to parse document:', parseError);
+        // You might want to set a flag indicating parsing failed
+        application.metadata = application.metadata || {};
+        application.metadata.parsedResume = {
+          parseError: true,
+          errorMessage: parseError.message,
+          attemptedAt: new Date(),
+        };
+        await application.save();
+      }
+    }
+
+    return application;
   } catch (error) {
     if (error.code === 'FILE_UPLOAD_FAILED') {
       throw new ApiError('Document storage failed: ' + error.message, 502);
@@ -133,7 +182,7 @@ exports.submitApplication = async (
         notes: 'Re-applied after withdrawal',
         changedAt: new Date(),
       });
-      // Update cover letter and metadata if needed below (optional)
+      // Update cover letter and metadata
       existingApplication.coverLetter =
         coverLetter ?
           sanitizeHtml(coverLetter, { allowedTags: [], allowedAttributes: {} })
@@ -691,11 +740,29 @@ exports.scheduleInterview = async (applicationId, companyId, interviewData) => {
  * @param   {string} result - New result ("passed", "failed", "no-show", etc.)
  * @return  {Promise<Object>} Updated interview
  */
-exports.updateInterviewResult = async (id, interviewId, result) => {
-  const application = await Application.findById(id);
+exports.updateInterviewResult = async (
+  applicationId,
+  interviewId,
+  result,
+  companyId
+) => {
+  // 1. Fetch application
+  const application = await Application.findById(applicationId);
+  if (!application) throw new ApiError('Application not found', 404);
 
+  // 2. Security: ensure company owns this application
+  if (String(application.companyId) !== String(companyId)) {
+    throw new ApiError(
+      'Not authorized to update interview for this application',
+      403
+    );
+  }
+
+  // 3. Find the interview
   const interview = application.interviews.id(interviewId);
+  if (!interview) throw new ApiError('Interview not found', 404);
 
+  // 4. Update result
   interview.result = result; // 'pass', 'fail', or 'pending'
   await application.save();
 

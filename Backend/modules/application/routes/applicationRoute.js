@@ -37,6 +37,7 @@ const {
   getApplicationsByCompanyValidator,
 } = require('../validators/applicationValidator');
 const normalizeUploadFields = require('../../../core/middlewares/multer/normalizeUploads');
+const documentUploadHandler = require('../../../core/middlewares/multer/documentUploadHandler');
 
 // =============================================
 //               PUBLIC ROUTES
@@ -86,7 +87,15 @@ router.put(
 
 router.post(
   '/:id/documents',
-  updateApplicationValidator,
+  (req, res, next) => {
+    console.log('✅ Reached POST /documents route');
+    next();
+  },
+  documentUploadHandler,
+  authenticateJWT,
+  abilityInjector,
+  authorize('add-document', 'Application'),
+  //updateApplicationValidator,
   normalizeUploadFields,
   uploadDocument
 );
@@ -101,6 +110,7 @@ router.delete(
 //            COMPANY PROTECTED ROUTES
 // =============================================
 
+// To be checked probably to be removed
 router.get('/jobs/:jobId', getApplicationsByJobValidator, getApplicationsByJob);
 
 // Changed to use updateApplicationValidator
@@ -113,7 +123,6 @@ router.put(
   updateApplicationStatus
 );
 
-// working on it now
 router.patch(
   '/:id/interviews',
   authenticateJWT,
@@ -123,8 +132,12 @@ router.patch(
   scheduleInterview
 );
 
+// next to work on
 router.patch(
   '/:id/interviews/:interviewId/result',
+  authenticateJWT,
+  abilityInjector,
+  authorize('update', 'Application', getApplicationResource),
   updateApplicationValidator,
   updateInterviewResultValidator,
   updateInterviewResult

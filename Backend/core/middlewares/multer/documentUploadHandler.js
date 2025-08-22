@@ -21,11 +21,14 @@ const documentUploadHandler =
   (opts = {}) =>
   (req, res, next) => {
     const contentType = req.headers['content-type'] || '';
+    console.log('📋 Content-Type:', contentType);
+    console.log('📋 Request headers:', req.headers);
 
     // ✅ NEW: If not multipart/form-data, skip multer completely
     if (!contentType.startsWith('multipart/form-data')) {
       return next();
     }
+    console.log('✅ Multipart request - processing with Multer');
 
     uploadCandidateDocuments(req, res, async (err) => {
       if (err) {

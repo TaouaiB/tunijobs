@@ -29,9 +29,10 @@ function defineApplicationRulesFor(user, can, cannot) {
       if (user.candidateId) {
         can('read', 'Application', { candidateId: user.candidateId });
         can('create', 'Application');
+        can('add-document', 'Application', { candidateId: user.candidateId });
         can('withdraw', 'Application', {
           candidateId: user.candidateId,
-          status: 'submitted', // Can only withdraw from submitted state
+          status: 'submitted',
         });
       }
       break;

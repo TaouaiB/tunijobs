@@ -10,7 +10,6 @@ const Application = require('../models/applicationModel');
  * @access  Private
  */
 exports.uploadDocument = [
-  documentUploadHandler,
   asyncHandler(async (req, res) => {
     if (!req.uploadedFiles) {
       throw new ApiError('No files were processed', 400);
@@ -222,7 +221,8 @@ exports.updateInterviewResult = asyncHandler(async (req, res) => {
   const response = await ApplicationService.updateInterviewResult(
     id,
     interviewId,
-    result
+    result,
+    req.user.companyId
   );
 
   res.status(200).json(response);

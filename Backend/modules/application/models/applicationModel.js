@@ -152,6 +152,35 @@ const applicationSchema = new mongoose.Schema(
       userAgent: String,
       applicationSource: String,
     },
+    // Explicitly define parsedResume field structure
+      parsedResume: {
+        // Common resume parsing fields
+        name: String,
+        email: String,
+        phone: String,
+        skills: [String],
+        experience: [
+          {
+            title: String,
+            company: String,
+            duration: String,
+            description: String
+          }
+        ],
+        education: [
+          {
+            degree: String,
+            institution: String,
+            year: String
+          }
+        ],
+        // Raw parsed data for reference
+        rawData: mongoose.Schema.Types.Mixed,
+        // Metadata about the parsing
+        parsedAt: Date,
+        parserVersion: String,
+        confidence: Number
+      },
     analytics: {
       viewCount: { type: Number, default: 0 },
       lastViewed: Date,
@@ -220,6 +249,7 @@ applicationSchema.index({ status: 1 });
 applicationSchema.index({ score: -1 });
 applicationSchema.index({ companyId: 1, status: 1 });
 applicationSchema.index({ 'interviews.scheduledAt': 1 });
+applicationSchema.index({ 'metadata.parsedResume.skills': 1 });
 
 // ======================
 // VIRTUAL PROPERTIES
