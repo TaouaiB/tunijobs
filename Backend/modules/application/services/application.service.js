@@ -146,11 +146,10 @@ exports.submitApplication = async (
   const candidateId = applicationData.candidateId;
   const coverLetter = filteredBody.coverLetter;
 
-  // Check for existing application
+  // Check for any existing application (active or withdrawn)
   const existingApplication = await Application.findOne({
     jobId,
     candidateId,
-    deletedAt: { $exists: true }, // Explicitly check for soft-deleted docs
   }).exec();
 
   console.log('Found application:', {
@@ -172,6 +171,10 @@ exports.submitApplication = async (
         notes: 'Re-applied after withdrawal',
         changedAt: new Date(),
       });
+
+      // Fetch candidate to compute score correctly
+      const candidate = await Candidate.findById(candidateId).lean();
+
       // Update cover letter and metadata
       existingApplication.coverLetter =
         coverLetter ?
@@ -185,7 +188,7 @@ exports.submitApplication = async (
         userAgent,
       };
       existingApplication.score = calculateApplicationScore({
-        resumeUrl: existingApplication.candidateId.resumeUrl,
+        resumeUrl: candidate?.resumeUrl,
         coverLetterLength: existingApplication.coverLetter.length,
       });
 
@@ -207,7 +210,6 @@ exports.submitApplication = async (
           message: 'Re-applied successfully',
         },
       };
-    } else {
       // Application already active
       throw new ApiError('You have already applied to this job', 409);
     }

@@ -27,7 +27,7 @@ async function parseApplicationDocument(applicationId, documentId = null) {
 
   // 3) Extract resume text (never throws now)
   const filePath = path.isAbsolute(doc.url) ? doc.url : path.join(process.cwd(), doc.url);
-  const resumeText = cleanText(await extractText(filePath)); // may be ''
+  const resumeText = cleanText(await extractText(filePath));
 
   // 4) Build JD (best effort)
   let jobDescription = '';
