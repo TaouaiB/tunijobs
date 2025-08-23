@@ -143,11 +143,7 @@ const applicationSchema = new mongoose.Schema(
     // 6. METADATA & ANALYTICS
     // ======================
     metadata: {
-      aiAnalysis: {
-        score: Number,
-        keywords: [String],
-        sentiment: String,
-      },
+      
       ipAddress: String,
       userAgent: String,
       applicationSource: String,
