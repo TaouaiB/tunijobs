@@ -203,7 +203,8 @@ exports.submitApplication = async (
           message: 'Re-applied successfully',
         },
       };
-      // Application already active
+    } else {
+      // Application already active ← FIXED: Added else block
       throw new ApiError('You have already applied to this job', 409);
     }
   }
@@ -283,503 +284,492 @@ exports.submitApplication = async (
       ].filter(Boolean),
     },
   };
+};
 
-  /**
-   * @desc    Update application status
-   * @param   {string} id - Application ID
-   * @param   {Object} updateData - Update data (status, userId, notes)
-   * @return  {Promise<Object>} Updated application with suggestions
-   * @memberof ApplicationService
-   */
-  exports.updateApplicationStatus = async (id, updateData) => {
-    const { status, userId, notes } = pickFields(
-      updateData,
-      'application',
-      true
-    );
+/**
+ * @desc    Update application status
+ * @param   {string} id - Application ID
+ * @param   {Object} updateData - Update data (status, userId, notes)
+ * @return  {Promise<Object>} Updated application with suggestions
+ * @memberof ApplicationService
+ */
+exports.updateApplicationStatus = async (id, updateData) => {
+  const { status, userId, notes } = pickFields(updateData, 'application', true);
 
-    const application = await Application.findById(id);
-    if (!application) throw new ApiError('Application not found', 404);
+  const application = await Application.findById(id);
+  if (!application) throw new ApiError('Application not found', 404);
 
-    const previousStatus = application.status;
-    const aiSuggestions = AIService.suggestStatusChange(previousStatus);
+  const previousStatus = application.status;
+  const aiSuggestions = AIService.suggestStatusChange(previousStatus);
 
-    application.status = status;
-    application.statusHistory.push({
-      status,
-      changedBy: userId,
-      notes: notes || `Status updated to ${status}`,
-      metadata: {
-        aiSuggestions,
-        confirmed: !['rejected', 'withdrawn'].includes(status),
-      },
-    });
+  application.status = status;
+  application.statusHistory.push({
+    status,
+    changedBy: userId,
+    notes: notes || `Status updated to ${status}`,
+    metadata: {
+      aiSuggestions,
+      confirmed: !['rejected', 'withdrawn'].includes(status),
+    },
+  });
 
-    await application.save();
+  await application.save();
 
-    NotificationService.send(
-      application.candidateId,
-      `Your application status changed to ${status}`
-    );
+  NotificationService.send(
+    application.candidateId,
+    `Your application status changed to ${status}`
+  );
 
-    return {
-      status: 'success',
-      data: {
-        application,
-        nextSteps: aiSuggestions,
-      },
-    };
+  return {
+    status: 'success',
+    data: {
+      application,
+      nextSteps: aiSuggestions,
+    },
   };
-  /**
-   * @desc    Withdraw an application
-   * @param   {string} id - Application ID
-   * @param   {Object} withdrawData - Withdrawal data (userId, reason)
-   * @return  {Promise<Object>} Withdrawal confirmation
-   * @memberof ApplicationService
-   */
-  exports.withdrawApplication = async (id, candidateId, withdrawData) => {
-    const reason = withdrawData.reason || 'Withdrawn by candidate';
+};
+/**
+ * @desc    Withdraw an application
+ * @param   {string} id - Application ID
+ * @param   {Object} withdrawData - Withdrawal data (userId, reason)
+ * @return  {Promise<Object>} Withdrawal confirmation
+ * @memberof ApplicationService
+ */
+exports.withdrawApplication = async (id, candidateId, withdrawData) => {
+  const reason = withdrawData.reason || 'Withdrawn by candidate';
 
-    const application = await Application.findById(id);
+  const application = await Application.findById(id);
 
-    if (application.candidateId.toString() !== candidateId.toString()) {
-      console.log(
-        `Candidate ${candidateId} attempted to withdraw application ${id} without permission`
-      );
-      throw new ApiError('Unauthorized', 403);
-    }
-
-    application.status = 'withdrawn';
-    application.deletedAt = new Date();
-    application.version = (application.version || 0) + 1;
-
-    application.statusHistory.push({
-      status: 'withdrawn',
-      changedBy: candidateId,
-      notes: reason,
-    });
-
-    await application.save();
-
-    NotificationService.send(
-      application.companyId,
-      `Application withdrawn for job ${application.jobId}`
-    );
-
-    return {
-      status: 'success',
-      message: 'Application withdrawn successfully',
-      data: {
-        applicationId: application._id,
-        jobId: application.jobId,
-        newStatus: application.status,
-      },
-    };
-  };
-
-  /**
-   * @desc    Get application by ID
-   * @param   {string} id - Application ID
-   * @return  {Promise<Object>} Application details
-   * @memberof ApplicationService
-   */
-  exports.getApplicationById = async (id) => {
-    const application = await Application.findById(id)
-      .populate({
-        path: 'jobId',
-        select: 'title description',
-      })
-      .populate({
-        path: 'candidateId',
-        select: 'headline resumeUrl',
-        populate: {
-          path: 'userId',
-          select: 'name email',
-        },
-      });
-
-    if (!application) throw new ApiError('Application not found', 404);
-
-    return {
-      status: 'success',
-      data: { application },
-    };
-  };
-
-  /**
-   * @desc    Get applications by candidate ID
-   * @param   {string} candidateId - Candidate ID
-   * @param   {Object} [options] - Optional parameters
-   * @param   {string} [options.status] - Filter by status
-   * @param   {number} [options.page=1] - Page number
-   * @param   {number} [options.limit=10] - Items per page
-   * @return  {Promise<Object>} Paginated applications
-   * @memberof ApplicationService
-   */
-  exports.getApplicationsByCandidate = async (
-    candidateId,
-    { status, page = 1, limit = 10 } = {}
-  ) => {
-    if (!mongoose.Types.ObjectId.isValid(candidateId)) {
-      throw new ApiError('Invalid candidate ID format', 400);
-    }
-
-    const candidate = await Candidate.findById(candidateId);
-    if (!candidate) throw new ApiError('Candidate not found', 404);
-
-    const filter = { candidateId };
-    if (status) filter.status = status;
-
-    const skip = (page - 1) * limit;
-
-    const [applications, total] = await Promise.all([
-      Application.find(filter)
-        .populate({
-          path: 'jobId',
-          select: 'title companyId',
-          populate: {
-            path: 'companyId',
-            select: 'name logo',
-          },
-        })
-        .skip(skip)
-        .limit(limit)
-        .sort('-createdAt'),
-      Application.countDocuments(filter),
-    ]);
-
-    return {
-      status: 'success',
-      results: applications.length,
-      data: applications,
-      pagination: {
-        total,
-        page,
-        pages: Math.ceil(total / limit),
-        limit,
-      },
-    };
-  };
-
-  /**
-   * @desc    Get applications by job ID
-   * @param   {string} jobId - Job ID
-   * @param   {Object} [options] - Optional parameters
-   * @param   {string} [options.status] - Filter by status
-   * @param   {number} [options.minScore] - Minimum application score
-   * @param   {number} [options.page=1] - Page number
-   * @param   {number} [options.limit=10] - Items per page
-   * @return  {Promise<Object>} Paginated applications
-   * @memberof ApplicationService
-   */
-  exports.getApplicationsByJob = async (
-    jobId,
-    { status, minScore, page = 1, limit = 10 } = {}
-  ) => {
-    if (!mongoose.Types.ObjectId.isValid(jobId)) {
-      throw new ApiError('Invalid job ID format', 400);
-    }
-
-    const job = await Job.findById(jobId);
-    if (!job) throw new ApiError('Job not found', 404);
-
-    const filter = { jobId };
-    if (status) filter.status = status;
-    if (minScore) filter.score = { $gte: Number(minScore) };
-
-    const skip = (page - 1) * limit;
-
-    const [applications, total] = await Promise.all([
-      Application.find(filter)
-        .populate({
-          path: 'candidateId',
-          select: 'headline resumeUrl',
-          populate: {
-            path: 'userId',
-            select: 'name email',
-          },
-        })
-        .skip(skip)
-        .limit(limit)
-        .sort('-score'),
-      Application.countDocuments(filter),
-    ]);
-
-    return {
-      status: 'success',
-      results: applications.length,
-      data: applications,
-      pagination: {
-        total,
-        page,
-        pages: Math.ceil(total / limit),
-        limit,
-      },
-    };
-  };
-
-  /**
-   * @desc    Get all applications for a specific company
-   * @param   {string} companyId - Company ID
-   * @param   {Object} filters - Optional filters (status, jobId, search)
-   * @return  {Promise<Object>} List of applications with candidate & job info
-   * @memberof ApplicationService
-   */
-  exports.getApplicationsByCompany = async (companyId, filters = {}) => {
-    const query = { companyId };
-
-    if (filters.status) query.status = filters.status;
-    if (filters.jobId) query.jobId = filters.jobId;
-    if (filters.search) {
-      query.$or = [{ coverLetter: { $regex: filters.search, $options: 'i' } }];
-    }
-
-    const applications = await Application.find(query)
-      .populate({
-        path: 'jobId',
-        select: 'title location',
-      })
-      .populate({
-        path: 'candidateId',
-        select: 'headline resumeUrl',
-        populate: {
-          path: 'userId',
-          select: 'name email',
-        },
-      })
-      .sort({ createdAt: -1 });
-
-    if (!applications.length) throw new ApiError('No applications found', 404);
-
-    return {
-      status: 'success',
-      results: applications.length,
-      data: { applications },
-    };
-  };
-
-  /**
-   * @desc    Get application dashboard for company
-   * @param   {string} companyId - Company ID
-   * @param   {Object} [options] - Optional parameters
-   * @param   {string} [options.status] - Filter by status
-   * @param   {number} [options.minScore] - Minimum application score
-   * @param   {number} [options.page=1] - Page number
-   * @param   {number} [options.limit=10] - Items per page
-   * @return  {Promise<Object>} Paginated applications with stats
-   * @memberof ApplicationService
-   */
-  exports.getApplicationDashboard = async (
-    companyId,
-    { status, minScore, page = 1, limit = 10 } = {}
-  ) => {
-    if (!mongoose.Types.ObjectId.isValid(companyId)) {
-      throw new ApiError('Invalid company ID format', 400);
-    }
-
-    const filter = { companyId };
-    if (status) filter.status = status;
-    if (minScore) filter.score = { $gte: Number(minScore) };
-
-    const skip = (page - 1) * limit;
-
-    const [applications, total] = await Promise.all([
-      Application.find(filter)
-        .populate({
-          path: 'jobId',
-          select: 'title',
-        })
-        .populate({
-          path: 'candidateId',
-          select: 'headline',
-          populate: {
-            path: 'userId',
-            select: 'name avatar',
-          },
-        })
-        .skip(skip)
-        .limit(limit)
-        .sort('-createdAt'),
-      Application.countDocuments(filter),
-    ]);
-
-    // Calculate status distribution
-    const statusStats = await Application.aggregate([
-      { $match: { companyId: mongoose.Types.ObjectId(companyId) } },
-      { $group: { _id: '$status', count: { $sum: 1 } } },
-    ]);
-
-    return {
-      status: 'success',
-      data: {
-        applications,
-        stats: {
-          total,
-          byStatus: statusStats.reduce((acc, curr) => {
-            acc[curr._id] = curr.count;
-            return acc;
-          }, {}),
-        },
-        pagination: {
-          total,
-          page,
-          pages: Math.ceil(total / limit),
-          limit,
-        },
-      },
-    };
-  };
-
-  /**
-   * @desc    Delete an application
-   * @param   {string} id - Application ID
-   * @return  {Promise<void>}
-   * @memberof ApplicationService
-   */
-  exports.deleteApplication = async (id) => {
-    const application = await Application.findByIdAndDelete(id);
-    if (!application) throw new ApiError('Application not found', 404);
-  };
-
-  /**
-   * @desc    Schedule interview for an application
-   * @param   {string} id - Application ID
-   * @param   {Object} interviewData - Interview details
-   * @return  {Promise<Object>} Scheduled interview details
-   * @memberof ApplicationService
-   */
-  exports.scheduleInterview = async (
-    applicationId,
-    companyId,
-    interviewData
-  ) => {
-    const { scheduledAt, interviewType, location, result } = interviewData;
-
-    if (!interviewType || !scheduledAt) {
-      throw new ApiError('Interview type and date are required', 400);
-    }
-
-    // 1. Fetch application
-    const application = await Application.findById(applicationId);
-    if (!application) throw new ApiError('Application not found', 404);
-
-    // 2. Security check: ensure interviewer’s company matches application
-    if (String(application.companyId) !== String(companyId)) {
-      throw new ApiError(
-        'Not authorized to schedule interview for this application',
-        403
-      );
-    }
-
-    // Build attendees automatically
-    const attendees = [
-      {
-        companyId,
-        role: 'Interviewer',
-      },
-      {
-        candidateId: application.candidateId,
-        role: 'Candidate',
-      },
-    ];
-
-    console.log('DEBUG: application:', application);
-    console.log('DEBUG: companyId from token:', companyId);
+  if (application.candidateId.toString() !== candidateId.toString()) {
     console.log(
-      'DEBUG: candidateId from application:',
-      application.candidateId
+      `Candidate ${candidateId} attempted to withdraw application ${id} without permission`
     );
-    console.log('DEBUG: attendees before validation:', attendees);
+    throw new ApiError('Unauthorized', 403);
+  }
 
-    const interview = {
-      interviewType,
-      scheduledAt: new Date(scheduledAt),
-      template: getInterviewTemplate(interviewType),
-      result: result || 'pending',
-      location: location || 'To be determined',
+  application.status = 'withdrawn';
+  application.deletedAt = new Date();
+  application.version = (application.version || 0) + 1;
 
-      attendees: [
-        { companyId, role: 'Interviewer' }, // interviewer company
-        { candidateId: application.candidateId, role: 'Candidate' }, // actual candidate
-      ],
-    };
+  application.statusHistory.push({
+    status: 'withdrawn',
+    changedBy: candidateId,
+    notes: reason,
+  });
 
-    application.interviews.push(interview);
-    await application.save();
+  await application.save();
 
-    NotificationService.send(
-      application.candidateId,
-      `You have a ${interviewType} interview scheduled on ${new Date(scheduledAt).toLocaleString()}`
-    );
+  NotificationService.send(
+    application.companyId,
+    `Application withdrawn for job ${application.jobId}`
+  );
 
-    return {
-      status: 'success',
-      data: { interview },
-    };
+  return {
+    status: 'success',
+    message: 'Application withdrawn successfully',
+    data: {
+      applicationId: application._id,
+      jobId: application.jobId,
+      newStatus: application.status,
+    },
   };
+};
 
-  /**
-   * @desc    Update the result of a specific interview in an application
-   * @param   {string} applicationId
-   * @param   {string} interviewId
-   * @param   {string} result - New result ("passed", "failed", "no-show", etc.)
-   * @return  {Promise<Object>} Updated interview
-   */
-  exports.updateInterviewResult = async (
-    applicationId,
-    interviewId,
-    result,
-    companyId
-  ) => {
-    // 1. Fetch application
-    const application = await Application.findById(applicationId);
-    if (!application) throw new ApiError('Application not found', 404);
-
-    // 2. Security: ensure company owns this application
-    if (String(application.companyId) !== String(companyId)) {
-      throw new ApiError(
-        'Not authorized to update interview for this application',
-        403
-      );
-    }
-
-    // 3. Find the interview
-    const interview = application.interviews.id(interviewId);
-    if (!interview) throw new ApiError('Interview not found', 404);
-
-    // 4. Update result
-    interview.result = result; // 'pass', 'fail', or 'pending'
-    await application.save();
-
-    return {
-      status: 'success',
-      data: { interview },
-    };
-  };
-
-  /**
-   * @desc    Recalculate application score
-   * @param   {string} id - Application ID
-   * @return  {Promise<Object>} Updated score
-   * @memberof ApplicationService
-   */
-  exports.recalculateScore = async (id) => {
-    const application = await Application.findById(id).populate('candidateId');
-    if (!application) throw new ApiError('Application not found', 404);
-
-    const score = calculateApplicationScore({
-      resumeUrl: application.candidateId?.resumeUrl,
-      coverLetterLength: application.coverLetter?.length,
-      status: application.status,
-      interviewsCount: application.interviews?.length || 0,
+/**
+ * @desc    Get application by ID
+ * @param   {string} id - Application ID
+ * @return  {Promise<Object>} Application details
+ * @memberof ApplicationService
+ */
+exports.getApplicationById = async (id) => {
+  const application = await Application.findById(id)
+    .populate({
+      path: 'jobId',
+      select: 'title description',
+    })
+    .populate({
+      path: 'candidateId',
+      select: 'headline resumeUrl',
+      populate: {
+        path: 'userId',
+        select: 'name email',
+      },
     });
 
-    application.score = score;
-    await application.save();
+  if (!application) throw new ApiError('Application not found', 404);
 
-    return {
-      status: 'success',
-      data: { score },
-    };
+  return {
+    status: 'success',
+    data: { application },
+  };
+};
+
+/**
+ * @desc    Get applications by candidate ID
+ * @param   {string} candidateId - Candidate ID
+ * @param   {Object} [options] - Optional parameters
+ * @param   {string} [options.status] - Filter by status
+ * @param   {number} [options.page=1] - Page number
+ * @param   {number} [options.limit=10] - Items per page
+ * @return  {Promise<Object>} Paginated applications
+ * @memberof ApplicationService
+ */
+exports.getApplicationsByCandidate = async (
+  candidateId,
+  { status, page = 1, limit = 10 } = {}
+) => {
+  if (!mongoose.Types.ObjectId.isValid(candidateId)) {
+    throw new ApiError('Invalid candidate ID format', 400);
+  }
+
+  const candidate = await Candidate.findById(candidateId);
+  if (!candidate) throw new ApiError('Candidate not found', 404);
+
+  const filter = { candidateId };
+  if (status) filter.status = status;
+
+  const skip = (page - 1) * limit;
+
+  const [applications, total] = await Promise.all([
+    Application.find(filter)
+      .populate({
+        path: 'jobId',
+        select: 'title companyId',
+        populate: {
+          path: 'companyId',
+          select: 'name logo',
+        },
+      })
+      .skip(skip)
+      .limit(limit)
+      .sort('-createdAt'),
+    Application.countDocuments(filter),
+  ]);
+
+  return {
+    status: 'success',
+    results: applications.length,
+    data: applications,
+    pagination: {
+      total,
+      page,
+      pages: Math.ceil(total / limit),
+      limit,
+    },
+  };
+};
+
+/**
+ * @desc    Get applications by job ID
+ * @param   {string} jobId - Job ID
+ * @param   {Object} [options] - Optional parameters
+ * @param   {string} [options.status] - Filter by status
+ * @param   {number} [options.minScore] - Minimum application score
+ * @param   {number} [options.page=1] - Page number
+ * @param   {number} [options.limit=10] - Items per page
+ * @return  {Promise<Object>} Paginated applications
+ * @memberof ApplicationService
+ */
+exports.getApplicationsByJob = async (
+  jobId,
+  { status, minScore, page = 1, limit = 10 } = {}
+) => {
+  if (!mongoose.Types.ObjectId.isValid(jobId)) {
+    throw new ApiError('Invalid job ID format', 400);
+  }
+
+  const job = await Job.findById(jobId);
+  if (!job) throw new ApiError('Job not found', 404);
+
+  const filter = { jobId };
+  if (status) filter.status = status;
+  if (minScore) filter.score = { $gte: Number(minScore) };
+
+  const skip = (page - 1) * limit;
+
+  const [applications, total] = await Promise.all([
+    Application.find(filter)
+      .populate({
+        path: 'candidateId',
+        select: 'headline resumeUrl',
+        populate: {
+          path: 'userId',
+          select: 'name email',
+        },
+      })
+      .skip(skip)
+      .limit(limit)
+      .sort('-score'),
+    Application.countDocuments(filter),
+  ]);
+
+  return {
+    status: 'success',
+    results: applications.length,
+    data: applications,
+    pagination: {
+      total,
+      page,
+      pages: Math.ceil(total / limit),
+      limit,
+    },
+  };
+};
+
+/**
+ * @desc    Get all applications for a specific company
+ * @param   {string} companyId - Company ID
+ * @param   {Object} filters - Optional filters (status, jobId, search)
+ * @return  {Promise<Object>} List of applications with candidate & job info
+ * @memberof ApplicationService
+ */
+exports.getApplicationsByCompany = async (companyId, filters = {}) => {
+  const query = { companyId };
+
+  if (filters.status) query.status = filters.status;
+  if (filters.jobId) query.jobId = filters.jobId;
+  if (filters.search) {
+    query.$or = [{ coverLetter: { $regex: filters.search, $options: 'i' } }];
+  }
+
+  const applications = await Application.find(query)
+    .populate({
+      path: 'jobId',
+      select: 'title location',
+    })
+    .populate({
+      path: 'candidateId',
+      select: 'headline resumeUrl',
+      populate: {
+        path: 'userId',
+        select: 'name email',
+      },
+    })
+    .sort({ createdAt: -1 });
+
+  if (!applications.length) throw new ApiError('No applications found', 404);
+
+  return {
+    status: 'success',
+    results: applications.length,
+    data: { applications },
+  };
+};
+
+/**
+ * @desc    Get application dashboard for company
+ * @param   {string} companyId - Company ID
+ * @param   {Object} [options] - Optional parameters
+ * @param   {string} [options.status] - Filter by status
+ * @param   {number} [options.minScore] - Minimum application score
+ * @param   {number} [options.page=1] - Page number
+ * @param   {number} [options.limit=10] - Items per page
+ * @return  {Promise<Object>} Paginated applications with stats
+ * @memberof ApplicationService
+ */
+exports.getApplicationDashboard = async (
+  companyId,
+  { status, minScore, page = 1, limit = 10 } = {}
+) => {
+  if (!mongoose.Types.ObjectId.isValid(companyId)) {
+    throw new ApiError('Invalid company ID format', 400);
+  }
+
+  const filter = { companyId };
+  if (status) filter.status = status;
+  if (minScore) filter.score = { $gte: Number(minScore) };
+
+  const skip = (page - 1) * limit;
+
+  const [applications, total] = await Promise.all([
+    Application.find(filter)
+      .populate({
+        path: 'jobId',
+        select: 'title',
+      })
+      .populate({
+        path: 'candidateId',
+        select: 'headline',
+        populate: {
+          path: 'userId',
+          select: 'name avatar',
+        },
+      })
+      .skip(skip)
+      .limit(limit)
+      .sort('-createdAt'),
+    Application.countDocuments(filter),
+  ]);
+
+  // Calculate status distribution
+  const statusStats = await Application.aggregate([
+    { $match: { companyId: mongoose.Types.ObjectId(companyId) } },
+    { $group: { _id: '$status', count: { $sum: 1 } } },
+  ]);
+
+  return {
+    status: 'success',
+    data: {
+      applications,
+      stats: {
+        total,
+        byStatus: statusStats.reduce((acc, curr) => {
+          acc[curr._id] = curr.count;
+          return acc;
+        }, {}),
+      },
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit),
+        limit,
+      },
+    },
+  };
+};
+
+/**
+ * @desc    Delete an application
+ * @param   {string} id - Application ID
+ * @return  {Promise<void>}
+ * @memberof ApplicationService
+ */
+exports.deleteApplication = async (id) => {
+  const application = await Application.findByIdAndDelete(id);
+  if (!application) throw new ApiError('Application not found', 404);
+};
+
+/**
+ * @desc    Schedule interview for an application
+ * @param   {string} id - Application ID
+ * @param   {Object} interviewData - Interview details
+ * @return  {Promise<Object>} Scheduled interview details
+ * @memberof ApplicationService
+ */
+exports.scheduleInterview = async (applicationId, companyId, interviewData) => {
+  const { scheduledAt, interviewType, location, result } = interviewData;
+
+  if (!interviewType || !scheduledAt) {
+    throw new ApiError('Interview type and date are required', 400);
+  }
+
+  // 1. Fetch application
+  const application = await Application.findById(applicationId);
+  if (!application) throw new ApiError('Application not found', 404);
+
+  // 2. Security check: ensure interviewer’s company matches application
+  if (String(application.companyId) !== String(companyId)) {
+    throw new ApiError(
+      'Not authorized to schedule interview for this application',
+      403
+    );
+  }
+
+  // Build attendees automatically
+  const attendees = [
+    {
+      companyId,
+      role: 'Interviewer',
+    },
+    {
+      candidateId: application.candidateId,
+      role: 'Candidate',
+    },
+  ];
+
+  console.log('DEBUG: application:', application);
+  console.log('DEBUG: companyId from token:', companyId);
+  console.log('DEBUG: candidateId from application:', application.candidateId);
+  console.log('DEBUG: attendees before validation:', attendees);
+
+  const interview = {
+    interviewType,
+    scheduledAt: new Date(scheduledAt),
+    template: getInterviewTemplate(interviewType),
+    result: result || 'pending',
+    location: location || 'To be determined',
+
+    attendees: [
+      { companyId, role: 'Interviewer' }, // interviewer company
+      { candidateId: application.candidateId, role: 'Candidate' }, // actual candidate
+    ],
+  };
+
+  application.interviews.push(interview);
+  await application.save();
+
+  NotificationService.send(
+    application.candidateId,
+    `You have a ${interviewType} interview scheduled on ${new Date(scheduledAt).toLocaleString()}`
+  );
+
+  return {
+    status: 'success',
+    data: { interview },
+  };
+};
+
+/**
+ * @desc    Update the result of a specific interview in an application
+ * @param   {string} applicationId
+ * @param   {string} interviewId
+ * @param   {string} result - New result ("passed", "failed", "no-show", etc.)
+ * @return  {Promise<Object>} Updated interview
+ */
+exports.updateInterviewResult = async (
+  applicationId,
+  interviewId,
+  result,
+  companyId
+) => {
+  // 1. Fetch application
+  const application = await Application.findById(applicationId);
+  if (!application) throw new ApiError('Application not found', 404);
+
+  // 2. Security: ensure company owns this application
+  if (String(application.companyId) !== String(companyId)) {
+    throw new ApiError(
+      'Not authorized to update interview for this application',
+      403
+    );
+  }
+
+  // 3. Find the interview
+  const interview = application.interviews.id(interviewId);
+  if (!interview) throw new ApiError('Interview not found', 404);
+
+  // 4. Update result
+  interview.result = result; // 'pass', 'fail', or 'pending'
+  await application.save();
+
+  return {
+    status: 'success',
+    data: { interview },
+  };
+};
+
+/**
+ * @desc    Recalculate application score
+ * @param   {string} id - Application ID
+ * @return  {Promise<Object>} Updated score
+ * @memberof ApplicationService
+ */
+exports.recalculateScore = async (id) => {
+  const application = await Application.findById(id).populate('candidateId');
+  if (!application) throw new ApiError('Application not found', 404);
+
+  const score = calculateApplicationScore({
+    resumeUrl: application.candidateId?.resumeUrl,
+    coverLetterLength: application.coverLetter?.length,
+    status: application.status,
+    interviewsCount: application.interviews?.length || 0,
+  });
+
+  application.score = score;
+  await application.save();
+
+  return {
+    status: 'success',
+    data: { score },
   };
 };
