@@ -1,72 +1,38 @@
-const fs = require('fs').promises;
-const ApiError = require('../ApiError');
+// Backend/core/utils/parsers/pdfTextParser.js
+const fs = require('fs');
 
-let resumeParser;
+let pdfParse;
 try {
-  // Most packages export the parser object directly
-  resumeParser = require('resume-parser');
-  // sanity: ensure it has parseResume
-  if (!resumeParser?.parseResume) {
-    // shape mismatch – fall back to stub so your flow still works
-    resumeParser = { parseResume: async () => ({}) };
-  }
+  pdfParse = require('pdf-parse');
 } catch {
-  // package missing – stub so you still fall back to raw PDF text
-  resumeParser = { parseResume: async () => ({}) };
+  // graceful stub
+  pdfParse = async () => ({ text: '' });
 }
 
-/**
- * Extract text from a PDF file or buffer
- * @param {string|Buffer} filePathOrBuffer - Path to PDF or a Buffer
- * @returns {Promise<string>} extracted text
- */
-const extractText = asyncHandler(async (filePathOrBuffer) => {
-  let buffer;
-
-  // If input is already a Buffer
-  if (Buffer.isBuffer(filePathOrBuffer)) {
-    buffer = filePathOrBuffer;
-  } else {
-    // Read file from disk
-    try {
-      buffer = await fs.readFile(filePathOrBuffer);
-    } catch (err) {
-      throw new ApiError('Failed to read PDF file', 400);
-    }
-  }
-
+// Extract text from a PDF path or Buffer.
+// IMPORTANT: This should NEVER throw. Return '' on failure.
+const extractText = async (filePathOrBuffer) => {
   try {
+    let buffer;
+    if (Buffer.isBuffer(filePathOrBuffer)) {
+      buffer = filePathOrBuffer;
+    } else {
+      buffer = await fs.promises.readFile(filePathOrBuffer);
+    }
     const data = await pdfParse(buffer);
-    return data.text;
+    return data?.text || '';
   } catch (err) {
-    throw new ApiError('Failed to parse PDF', 500);
+    console.warn('[PDF] extractText failed:', err?.message || err);
+    return ''; // <-- don't throw; keep pipeline alive
   }
-});
+};
 
-/**
- * Clean extracted text (optional)
- * Removes blank lines and extra spaces
- */
-const cleanText = (rawText) => {
-  if (!rawText) return '';
-  return rawText
+// Clean extracted text (optional)
+const cleanText = (rawText) =>
+  String(rawText || '')
     .split('\n')
     .map((line) => line.trim())
     .filter(Boolean)
     .join('\n');
-};
-
-// ---------------------------
-// asyncHandler wrapper
-// ---------------------------
-function asyncHandler(fn) {
-  return async (...args) => {
-    try {
-      return await fn(...args);
-    } catch (err) {
-      throw err; // propagate to your global error handler
-    }
-  };
-}
 
 module.exports = { extractText, cleanText };

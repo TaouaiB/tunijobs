@@ -1,85 +1,49 @@
-const Application = require('../models/applicationModel');
-const {
-  extractText,
-  cleanText,
-} = require('../../../core/utils/parsers/pdfTextParser');
-const ApiError = require('../../../core/utils/ApiError');
-
 const path = require('path');
+const Application = require('../models/applicationModel');
+let Job; try { Job = require('../../job/models/jobModel'); } catch { Job = null; }
 
-// Robust import: always expose a callable parseResume
-let resumeParser;
-try {
-  resumeParser = require('resume-parser');
-  if (!resumeParser?.parseResume) {
-    resumeParser = { parseResume: async () => ({}) };
-  }
-} catch {
-  resumeParser = { parseResume: async () => ({}) };
-}
+const ApiError = require('../../../core/utils/ApiError');
+const { extractText, cleanText } = require('../../../core/utils/parsers/pdfTextParser');
+const { analyzeByText, mapN8nToParsedResume } = require('../../analysis/services/n8nClient');
 
-/**
- * Parse a document from an Application
- * @param {string} applicationId - ID of the application
- * @param {string|null} documentId - optional, specific document to parse
- * @returns {Promise<Object>} structured JSON of parsed resume
- */
-const parseApplicationDocument = async (applicationId, documentId = null) => {
-  // 1️⃣ Fetch the Application
+async function parseApplicationDocument(applicationId, documentId = null) {
+  // 1) Load application
   const application = await Application.findById(applicationId)
-    .populate('candidateId') // optional if you need candidate info
+    .select('jobId candidateId documents resumeUrl')
     .lean();
-
   if (!application) throw new ApiError('Application not found', 404);
 
-  // 2️⃣ Select the document
-  let doc;
+  // 2) Pick document
+  let doc = null;
   if (documentId) {
-    doc = application.documents.find((d) => d._id.toString() === documentId);
+    doc = application.documents?.find(d => d._id?.toString() === String(documentId));
     if (!doc) throw new ApiError('Document not found in application', 404);
   } else if (application.documents?.length) {
     doc = application.documents[application.documents.length - 1];
   } else if (application.resumeUrl) {
-    doc = { name: 'resume', url: application.resumeUrl };
+    doc = { url: application.resumeUrl, name: 'resume' };
   }
-  if (!doc || !doc.url)
-    throw new ApiError('No documents available in application', 400);
-  const filePath = path.join(process.cwd(), doc.url);
+  if (!doc?.url) throw new ApiError('No documents available in application', 400);
 
-  // 3️⃣ Try specialized resume-parser first
-  try {
-    return {
-      //application.service writes with strict:false
-      documentName: doc.name || doc.originalName || 'resume',
-      personal_info: {
-        name: parsed.name || application.candidateId?.name || '',
-        email: parsed.email || '',
-        phone: parsed.phone || '',
-        location: parsed.location || '',
-      },
-      experience: parsed.experience || [],
-      education: parsed.education || [],
-      skills: parsed.skills || [],
-      summary: parsed.summary || '',
-      parserUsed: 'resume-parser',
-      parserVersion: '1.0.0',
-    };
-  } catch (err) {
-    console.warn('Resume parser failed, falling back to raw PDF text:', err);
+  // 3) Extract resume text (never throws now)
+  const filePath = path.isAbsolute(doc.url) ? doc.url : path.join(process.cwd(), doc.url);
+  const resumeText = cleanText(await extractText(filePath)); // may be ''
 
-    // 4️⃣ Fallback to pdfTextParser
-    try {
-      const rawText = await extractText(filePath);
-      return {
-        applicationId,
-        candidateId: application.candidateId._id,
-        documentName: doc.name,
-        rawText: cleanText(rawText),
-      };
-    } catch (fallbackErr) {
-      throw new ApiError('Failed to parse document', 500);
-    }
+  // 4) Build JD (best effort)
+  let jobDescription = '';
+  if (application.jobId && Job) {
+    const job = await Job.findById(application.jobId)
+      .select('summary description requirements responsibilities')
+      .lean();
+    jobDescription = [job?.summary, job?.description, job?.requirements, job?.responsibilities]
+      .filter(Boolean).join('\n\n');
   }
-};
+
+  // 5) ALWAYS call n8n (even if resumeText === '')
+  const n8nJson = await analyzeByText(resumeText, jobDescription);
+
+  // 6) Map → metadata.parsedResume
+  return mapN8nToParsedResume(n8nJson);
+}
 
 module.exports = { parseApplicationDocument };
