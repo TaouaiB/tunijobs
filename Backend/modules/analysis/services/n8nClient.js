@@ -129,22 +129,85 @@ async function analyzeByText(resumeText, jobDescription) {
 }
 
 function mapN8nToParsedResume(n8n) {
-  const toArr = (v) =>
-    Array.isArray(v) ? v
+  // Always return an array of strings (coerces object items too)
+  const toStrArr = (v) =>
+    Array.isArray(v) ?
+      v
+        .map((x) =>
+          typeof x === 'string' ? x.trim()
+          : x && typeof x === 'object' ? Object.values(x).join(' ').trim()
+          : ''
+        )
+        .filter(Boolean)
     : v ?
       String(v)
         .split(',')
         .map((s) => s.trim())
         .filter(Boolean)
     : [];
+
+  const asStr = (v) => (typeof v === 'string' ? v.trim() : '');
+
   const score = Number(n8n?.fit_score);
+  const name = asStr(n8n?.name);
+  const email = asStr(n8n?.email);
+  const phone = asStr(n8n?.phone);
+
+  // Map to EXACT schema keys:
+  // experience[] -> { title, company, duration, description }
+  const mkExp = (it) => {
+    if (!it) return null;
+    if (typeof it === 'string')
+      return { title: '', company: '', duration: '', description: it.trim() };
+    if (typeof it === 'object') {
+      const title = asStr(it.title || it.role || it.position);
+      const company = asStr(it.company || it.employer);
+      const duration = asStr(it.duration || it.dates || it.period);
+      const description = asStr(it.description || it.summary || it.details);
+      const obj = {};
+      title && (obj.title = title);
+      company && (obj.company = company);
+      duration && (obj.duration = duration);
+      description && (obj.description = description);
+      return Object.keys(obj).length ? obj : null;
+    }
+    return null;
+  };
+
+  // education[] -> { degree, institution, year }
+  const mkEdu = (it) => {
+    if (!it) return null;
+    if (typeof it === 'string')
+      return { degree: it.trim(), institution: '', year: '' };
+    if (typeof it === 'object') {
+      const degree = asStr(it.degree || it.title);
+      const institution = asStr(it.institution || it.school || it.university);
+      const year = asStr(it.year || it.dates || it.period);
+      const obj = {};
+      degree && (obj.degree = degree);
+      institution && (obj.institution = institution);
+      year && (obj.year = year);
+      return Object.keys(obj).length ? obj : null;
+    }
+    return null;
+  };
+
+  const experience =
+    Array.isArray(n8n?.experience) ?
+      n8n.experience.map(mkExp).filter(Boolean)
+    : [];
+  const education =
+    Array.isArray(n8n?.education) ?
+      n8n.education.map(mkEdu).filter(Boolean)
+    : [];
+
   return {
-    name: '',
-    email: '',
-    phone: '',
-    skills: toArr(n8n?.key_strengths), // or use missing_skills if you prefer
-    experience: [],
-    education: [],
+    name,
+    email,
+    phone,
+    skills: toStrArr(n8n?.key_strengths), // [String]
+    experience, // {title, company, duration, description}
+    education, // {degree, institution, year}
     rawData: n8n || {},
     parsedAt: new Date(),
     parserVersion: 'n8n:gpt-oss-20b',
