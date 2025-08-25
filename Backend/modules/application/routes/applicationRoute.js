@@ -38,6 +38,11 @@ const {
 } = require('../validators/applicationValidator');
 const normalizeUploadFields = require('../../../core/middlewares/multer/normalizeUploads');
 const documentUploadHandler = require('../../../core/middlewares/multer/documentUploadHandler');
+const {
+  receiveAnalysisResults,
+  getAnalysisResults,
+  getAllAnalysisResults,
+} = require('../services/webhook.service');
 
 // =============================================
 //               PUBLIC ROUTES
@@ -101,6 +106,10 @@ router.post(
   },
   uploadDocument // uses req.uploadedFiles
 );
+
+router.post('/webhook/n8n-results', receiveAnalysisResults);
+router.get('/webhook/results', getAllAnalysisResults);
+
 
 router.delete(
   '/:id/remove-document',

@@ -10,30 +10,34 @@ const analysisResults = new Map();
  * @access  Public (n8n webhook)
  */
 exports.receiveAnalysisResults = asyncHandler(async (req, res) => {
-  const { applicationId, analysis } = req.body;
+  const body = req.body || {};
+  const analysis = body.analysis ?? body;
 
-  // Validate required fields
-  if (!applicationId) {
-    throw new ApiError('applicationId is required', 400);
-  }
-  
   if (!analysis) {
     throw new ApiError('analysis data is required', 400);
   }
 
-  console.log('📦 Received AI analysis for application:', applicationId);
-  
-  // Store in temporary memory
-  analysisResults.set(applicationId, {
+  // Prefer a stable ID if provided; otherwise generate one
+  const baseId =
+    body.resultId ||
+    body.applicationId ||
+    `ai-result-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+
+  const resultId = String(baseId).startsWith('ai-') ? baseId : `ai-${baseId}`;
+
+  analysisResults.set(resultId, {
     analysis,
-    receivedAt: new Date()
+    receivedAt: new Date(),
+    isTemporary: !body.applicationId,
   });
 
-  res.status(200).json({ 
-    success: true, 
-    message: 'Analysis received successfully',
-    applicationId,
-    receivedAt: new Date()
+  console.log('✅ Stored analysis result:', resultId);
+
+  // 🔴 Echo the payload back so you see the real content immediately
+  return res.status(200).json({
+    success: true,
+    resultId,
+    data: analysis, // ← this is the exact content n8n sent
   });
 });
 
@@ -43,22 +47,20 @@ exports.receiveAnalysisResults = asyncHandler(async (req, res) => {
  * @access  Public (for testing)
  */
 exports.getAnalysisResults = asyncHandler(async (req, res) => {
-  const { applicationId } = req.params;
+  let { resultId } = req.params;
 
-  if (!applicationId) {
-    throw new ApiError('applicationId is required', 400);
+  if (resultId === 'latest') {
+    const keys = Array.from(analysisResults.keys());
+    if (!keys.length) throw new ApiError('No analysis results found', 404);
+    resultId = keys[keys.length - 1];
   }
 
-  const result = analysisResults.get(applicationId);
-  
-  if (!result) {
-    throw new ApiError('No analysis results found for this application', 404);
-  }
+  if (!resultId) throw new ApiError('resultId is required', 400);
 
-  res.status(200).json({
-    success: true,
-    data: result
-  });
+  const result = analysisResults.get(resultId);
+  if (!result) throw new ApiError('No analysis results found', 404);
+
+  res.status(200).json({ success: true, resultId, data: result });
 });
 
 /**
@@ -66,17 +68,14 @@ exports.getAnalysisResults = asyncHandler(async (req, res) => {
  * @route   GET /api/v1/applications/webhook/results
  * @access  Public (for testing)
  */
-exports.getAllAnalysisResults = asyncHandler(async (req, res) => {
-  const results = Array.from(analysisResults.entries()).map(([applicationId, data]) => ({
-    applicationId,
-    ...data
-  }));
-
-  res.status(200).json({
-    success: true,
-    count: results.length,
-    data: results
-  });
+exports.getAllAnalysisResults = asyncHandler(async (_req, res) => {
+  const results = Array.from(analysisResults.entries()).map(
+    ([resultId, data]) => ({
+      resultId,
+      ...data,
+    })
+  );
+  res.status(200).json({ success: true, count: results.length, data: results });
 });
 
 /**
@@ -92,11 +91,12 @@ exports.clearAnalysisResults = asyncHandler(async (req, res) => {
   }
 
   const deleted = analysisResults.delete(applicationId);
-  
+
   res.status(200).json({
     success: true,
-    message: deleted ? 'Results cleared successfully' : 'No results found to clear',
-    applicationId
+    message:
+      deleted ? 'Results cleared successfully' : 'No results found to clear',
+    applicationId,
   });
 });
 
@@ -110,6 +110,6 @@ exports.healthCheck = asyncHandler(async (req, res) => {
     success: true,
     message: 'Webhook endpoint is working',
     timestamp: new Date(),
-    storedResults: analysisResults.size
+    storedResults: analysisResults.size,
   });
 });

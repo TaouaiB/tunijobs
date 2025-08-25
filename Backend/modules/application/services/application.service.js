@@ -97,7 +97,7 @@ exports.storeDocument = async (applicationId, files) => {
       await application.save();
     }
 
-    return application;
+    return { application };
   } catch (error) {
     if (error.code === 'FILE_UPLOAD_FAILED') {
       throw new ApiError('Document storage failed: ' + error.message, 502);

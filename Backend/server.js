@@ -10,9 +10,7 @@ const dbConnection = require('./core/config/database');
 const ApiError = require('./core/utils/ApiError');
 const ErrorHandler = require('./core/middlewares/errorMiddleware');
 
-const {
-  autoUnfeatureJobTask,
-} = require('./core/cron/autoUnfeatureJobs');
+const { autoUnfeatureJobTask } = require('./core/cron/autoUnfeatureJobs');
 
 const userRoute = require('./modules/user/routes/userRoute');
 const candidateRoute = require('./modules/candidate/routes/candidateRoute');

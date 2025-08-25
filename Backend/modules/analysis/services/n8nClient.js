@@ -89,7 +89,8 @@ async function analyzeByText(resumeText, jobDescription) {
     console.log('[N8N] status:', res.status);
 
     if (res.status >= 400) {
-      const body = await res.text();
+      const body =
+        typeof res.data === 'string' ? res.data : JSON.stringify(res.data);
       console.error('[N8N] error body:', body);
       throw new Error(`n8n request failed (${res.status})`);
     }
@@ -113,6 +114,7 @@ async function analyzeByText(resumeText, jobDescription) {
     console.error('[N8N] error body:', res.data);
     throw new Error(`n8n request failed (${res.status})`);
   }
+  
 
   const data = await res.json().catch(() => ({}));
   return normalizeProviderPayload(data);
