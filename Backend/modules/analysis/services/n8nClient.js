@@ -88,6 +88,15 @@ async function analyzeByText(resumeText, jobDescription) {
     });
     console.log('[N8N] status:', res.status);
 
+    // 👀 Helpful during MVP to inspect the raw shape coming back from n8n
+    try {
+      const preview =
+        typeof res.data === 'string' ?
+          res.data.slice(0, 400)
+        : JSON.stringify(res.data).slice(0, 400);
+      console.log('[N8N] raw preview:', preview);
+    } catch {}
+
     if (res.status >= 400) {
       const body =
         typeof res.data === 'string' ? res.data : JSON.stringify(res.data);
@@ -114,7 +123,6 @@ async function analyzeByText(resumeText, jobDescription) {
     console.error('[N8N] error body:', res.data);
     throw new Error(`n8n request failed (${res.status})`);
   }
-  
 
   const data = await res.json().catch(() => ({}));
   return normalizeProviderPayload(data);
