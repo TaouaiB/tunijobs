@@ -143,7 +143,6 @@ const applicationSchema = new mongoose.Schema(
     // 6. METADATA & ANALYTICS
     // ======================
     metadata: {
-      
       ipAddress: String,
       userAgent: String,
       applicationSource: String,
@@ -172,6 +171,18 @@ const applicationSchema = new mongoose.Schema(
         // Raw parsed data for reference
         rawData: mongoose.Schema.Types.Mixed,
         // Metadata about the parsing
+        parsedAt: Date,
+        parserVersion: String,
+        confidence: Number,
+      },
+
+      parsedCoverLetter: {
+        fit: String,
+        score: { type: Number, min: 0, max: 100 },
+        strengths: [String],
+        weaknesses: [String],
+        suggestions: [String],
+        rawData: mongoose.Schema.Types.Mixed,
         parsedAt: Date,
         parserVersion: String,
         confidence: Number,

@@ -6,7 +6,10 @@ const Application = require('../models/applicationModel');
 const Job = require('../../job/models/jobModel');
 const Candidate = require('../../candidate/models/candidateModel');
 const documentStorage = require('./documents/storage.service');
-const { parseApplicationDocument } = require('./resumeService');
+const {
+  parseApplicationDocument,
+  parseApplicationCoverLetter,
+} = require('./resumeService');
 
 // Mock services (replace with actual implementations)
 const NotificationService = {
@@ -105,6 +108,7 @@ exports.storeDocument = async (applicationId, files) => {
     throw error;
   }
 };
+
 
 /**
  * @desc    Remove all documents from an application

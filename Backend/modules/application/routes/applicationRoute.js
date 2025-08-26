@@ -22,6 +22,7 @@ const {
   getApplicationsByCompany,
   getApplicationResource,
   getMyApplication,
+  updateCoverLetter,
 } = require('../controllers/applicationController');
 
 const {
@@ -109,7 +110,6 @@ router.post(
 
 router.post('/webhook/n8n-results', receiveAnalysisResults);
 router.get('/webhook/results', getAllAnalysisResults);
-
 
 router.delete(
   '/:id/remove-document',

@@ -218,4 +218,23 @@ function mapN8nToParsedResume(n8n) {
   };
 }
 
-module.exports = { analyzeByText, mapN8nToParsedResume };
+// === Cover Letter analysis (n8n) ===
+const N8N_COVERLETTER_URL = process.env.N8N_COVERLETTER_URL;
+
+const cleanCLText = (text) =>
+  String(text || '')
+    .replace(/[\u{E000}-\u{F8FF}]/gu, '')
+    .replace(/[^\x20-\x7E\n\t]/g, '')
+    .replace(/\n/g, ', ')
+    .replace(/"/g, '\\"')
+    .replace(/\\/g, '\\\\')
+    .replace(/, , /g, ', ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 10000);
+
+
+module.exports = {
+  analyzeByText,
+  mapN8nToParsedResume,
+};

@@ -27,6 +27,7 @@ exports.uploadDocument = [
   }),
 ];
 
+
 /**
  * @desc    Remove all documents from an application
  * @route   PATCH /api/v1/applications/:id/remove-document
